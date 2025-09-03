@@ -58,4 +58,277 @@
       width:100%;
       padding:12px 14px;
       background:var(--hanwha);
-      color:#f
+      color:#fff;
+      border:none;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      font-size:16px;
+    }
+    button:hover{background:var(--hanwha-dark)}
+    .hint{color:var(--muted); font-size:13px; margin-top:.25rem}
+    .error{color:#d93025; font-size:14px; margin-top:.5rem}
+    .success{color:#137333; font-size:13px}
+    .container-narrow{max-width:760px}
+    .search-box{display:flex; gap:.5rem}
+    .search-box input{flex:1}
+    .results{margin-top:1rem}
+    .result-card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:16px;
+      box-shadow:0 2px 8px rgba(0,0,0,.04);
+      margin-bottom:12px;
+    }
+    .result-title{
+      font-size:18px;
+      font-weight:700;
+      color:#222;
+      margin-bottom:6px;
+    }
+    .result-sub{color:#444; margin:.25rem 0 .5rem 0}
+    .info-table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:.25rem;
+      font-size:14px;
+    }
+    .info-table th,.info-table td{
+      border:1px solid var(--border);
+      padding:8px;
+      text-align:center;
+      white-space:nowrap;
+    }
+    .restrictions{
+      margin-top:.5rem;
+      padding:.5rem .75rem;
+      background:#fafafa;
+      border:1px dashed var(--border);
+      border-radius:10px;
+      font-size:14px;
+      white-space:pre-line;
+    }
+    .meta{
+      margin-top:.5rem;
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <header>한화손보 동창원 SI 인수 가이드</header>
+
+  <!-- 로그인 화면 -->
+  <section id="loginScreen" class="screen">
+    <div class="card">
+      <h2>로그인</h2>
+      <div class="row">
+        <input id="empno" type="text" placeholder="사번 입력" autocomplete="username" />
+      </div>
+      <div class="row">
+        <input id="password" type="password" placeholder="비밀번호 입력" autocomplete="current-password" />
+        <div class="hint">사번과 비밀번호는 승인된 목록에 있어야 합니다.</div>
+      </div>
+      <button id="loginBtn">로그인</button>
+      <div id="loginMsg" class="error" role="alert" aria-live="polite"></div>
+      <div class="meta" id="empMeta"></div>
+    </div>
+  </section>
+
+  <!-- 검색 화면 -->
+  <section id="searchScreen" class="screen" style="display:none;">
+    <div class="card container-narrow">
+      <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
+      <div class="search-box">
+        <input id="searchInput" type="text" placeholder="예시: 용종, 골절, 당뇨 등" />
+        <button id="searchBtn" title="검색">검색</button>
+      </div>
+      <div class="results" id="results"></div>
+      <div class="meta" id="disMeta"></div>
+    </div>
+  </section>
+
+  <script>
+    // === ① GitHub Raw JSON 경로 (반드시 raw.githubusercontent.com + /main/ 경로를 사용) ===
+    const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
+    const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
+
+    // === ② 전역 상태 ===
+    let employees = []; // [{empno:'...', password:'...'}]
+    let diseases  = []; // [{name, acceptance, signature355, treatmentDays, surgery, recurrence, restrictions}]
+    let empLoadedAt = null;
+    let disLoadedAt = null;
+
+    // === ③ 유틸: JSON 안전 로더 (BOM 제거, {data:[...]} 및 배열 모두 지원) ===
+    async function loadJsonFlexible(url){
+      const res = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
+      if(!res.ok){
+        throw new Error("네트워크 오류: " + res.status + " " + res.statusText);
+      }
+      const text = await res.text();
+      const cleaned = text.replace(/^\uFEFF/, ""); // BOM 제거
+      let json = JSON.parse(cleaned);
+
+      // { data: [...] } 구조도 허용
+      if(json && typeof json === "object" && !Array.isArray(json) && Array.isArray(json.data)){
+        json = json.data;
+      }
+      // 최종적으로 배열만 허용
+      if(!Array.isArray(json)){
+        throw new Error("JSON 최상위가 배열이 아닙니다. 배열 또는 { data: [...] } 형태여야 합니다.");
+      }
+      return json;
+    }
+
+    // === ④ 데이터 로드 ===
+    async function loadAllData(){
+      try{
+        const [emp, dis] = await Promise.all([
+          loadJsonFlexible(EMP_URL),
+          loadJsonFlexible(DIS_URL)
+        ]);
+
+        // employees: 다양한 키/타입을 보정 (숫자 -> 문자열, code 키도 허용)
+        employees = emp
+          .map(e => ({
+            empno: String((e.empno ?? e.code ?? "")).trim(),
+            password: String((e.password ?? "")).trim()
+          }))
+          .filter(e => e.empno && e.password);
+
+        // diseases: 필드 보정 (키 오타/누락 방지)
+        diseases = dis.map(d => ({
+          name: String(d.name ?? d.ame ?? "").trim(),
+          acceptance: (d.acceptance ?? "").toString(),
+          signature355: (d.signature355 ?? "").toString(),
+          treatmentDays: (d.treatmentDays ?? "").toString(),
+          surgery: (d.surgery ?? "").toString(),
+          recurrence: (d.recurrence ?? "").toString(),
+          restrictions: (d.restrictions ?? "").toString()
+        })).filter(d => d.name);
+
+        empLoadedAt = new Date();
+        disLoadedAt = new Date();
+
+        // 로드 메타 표시(디버깅/안심용)
+        document.getElementById("empMeta").textContent =
+          `승인사번 ${employees.length.toLocaleString()}건 로드됨 • ${empLoadedAt.toLocaleString()}`;
+        document.getElementById("disMeta").textContent =
+          `질병데이터 ${diseases.length.toLocaleString()}건 로드됨 • ${disLoadedAt.toLocaleString()}`;
+
+        console.log("[EMP] 샘플", employees.slice(0,3));
+        console.log("[DIS] 샘플", diseases.slice(0,3));
+      }catch(err){
+        console.error("데이터 로드 실패:", err);
+        document.getElementById("loginMsg").textContent =
+          "데이터 로드에 실패했습니다. Raw URL 및 JSON 형식을 확인해주세요.";
+      }
+    }
+
+    // === ⑤ 로그인 ===
+    function login(){
+      const code = document.getElementById("empno").value.trim();
+      const pw   = document.getElementById("password").value.trim();
+      const msg  = document.getElementById("loginMsg");
+
+      if(!employees.length){
+        msg.textContent = "승인사번 데이터가 비어있습니다. employees.json을 확인하세요.";
+        return;
+      }
+      const ok = employees.some(u =>
+        u.empno === String(code) && u.password === String(pw)
+      );
+
+      if(ok){
+        msg.textContent = "";
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("searchScreen").style.display = "flex";
+        // 포커스 이동
+        setTimeout(()=> document.getElementById("searchInput").focus(), 50);
+      }else{
+        msg.textContent = "로그인 실패: 사번 또는 비밀번호가 올바르지 않습니다.";
+      }
+    }
+
+    // === ⑥ 검색 ===
+    // 정규화: 공백/특수문자 제거 + 소문자화
+    function normalize(str){
+      return String(str ?? "")
+        .toLowerCase()
+        .replace(/[\s·,\-\.]/g, ""); // 공백, 중점, 콤마, 하이픈, 점 제거
+    }
+    function search(){
+      const q = document.getElementById("searchInput").value.trim();
+      const out = document.getElementById("results");
+      out.innerHTML = "";
+
+      if(!q){
+        out.innerHTML = `<div class="hint">검색어를 입력하세요.</div>`;
+        return;
+      }
+
+      // 토큰화(공백/특수문자 기준) 후 정규화
+      const tokens = q.split(/[\s·,\-\.]+/)
+                      .filter(Boolean)
+                      .map(normalize);
+
+      // 모든 토큰을 포함하는 항목만
+      const matched = diseases.filter(d => {
+        const n = normalize(d.name);
+        return tokens.every(tk => n.includes(tk));
+      });
+
+      if(!matched.length){
+        out.innerHTML = `<div class="hint">검색 결과가 없습니다.</div>`;
+        return;
+      }
+
+      // 카드 렌더
+      matched.forEach(d => {
+        const card = document.createElement("div");
+        card.className = "result-card";
+        card.innerHTML = `
+          <div class="result-title">${d.name}</div>
+          <div class="result-sub">인수기준: ${d.acceptance || "-"}</div>
+          <div class="result-sub">시그니처355: ${d.signature355 || "-"}</div>
+          <table class="info-table">
+            <tr>
+              <th>치료일수</th><th>수술여부</th><th>재발여부</th>
+            </tr>
+            <tr>
+              <td>${d.treatmentDays || "-"}</td>
+              <td>${d.surgery || "-"}</td>
+              <td>${d.recurrence || "-"}</td>
+            </tr>
+          </table>
+          <div class="restrictions">제한사항: ${d.restrictions || "제한사항 없음"}</div>
+        `;
+        out.appendChild(card);
+      });
+    }
+
+    // === ⑦ 이벤트 바인딩 (엔터키 동작 포함) ===
+    window.addEventListener("DOMContentLoaded", () => {
+      // 데이터 로드
+      loadAllData();
+
+      // 로그인
+      document.getElementById("loginBtn").addEventListener("click", login);
+      document.getElementById("empno").addEventListener("keydown", e => {
+        if(e.key === "Enter"){ login(); }
+      });
+      document.getElementById("password").addEventListener("keydown", e => {
+        if(e.key === "Enter"){ login(); }
+      });
+
+      // 검색
+      document.getElementById("searchBtn").addEventListener("click", search);
+      document.getElementById("searchInput").addEventListener("keydown", e => {
+        if(e.key === "Enter"){ search(); }
+      });
+    });
+  </script>
+</body>
+</html>
