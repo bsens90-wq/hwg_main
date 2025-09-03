@@ -275,36 +275,31 @@
                           .filter(Boolean)
                           .map(normalize);
 
-      // 붙여진 검색어의 모든 분할 조합 생성 (1+3, 2+2, 3+1 등)
-      const allTokens = new Set(spaceTokens);
-      
-      // 각 공백 토큰에 대해 가능한 모든 분할 추가
-      spaceTokens.forEach(token => {
-        if(token.length >= 2) {
-          for(let i = 1; i < token.length; i++) {
-            const left = token.substring(0, i);
-            const right = token.substring(i);
-            if(left.length >= 1 && right.length >= 1) {
-              allTokens.add(left);
-              allTokens.add(right);
-            }
-          }
-        }
-      });
-
-      const tokenArray = Array.from(allTokens);
-
-      // 각 질병에 대해 검색
       const matched = diseases.filter(d => {
         const n = normalize(d.name);
         
-        // 원래 공백 토큰들이 모두 포함되는지 먼저 확인
+        // 원래 공백 토큰들이 모두 포함되는지 먼저 확인 (기본 검색)
         if(spaceTokens.every(tk => n.includes(tk))) {
           return true;
         }
         
-        // 분할된 토큰들로 AND 조합 검색 (모든 조합의 토큰들이 포함되어야 함)
-        return findTokenCombination(tokenArray, n, spaceTokens);
+        // 단일 토큰의 경우만 분할 검색 적용
+        if(spaceTokens.length === 1) {
+          const token = spaceTokens[0];
+          if(token.length >= 2) {
+            // 모든 가능한 분할 조합 확인
+            for(let i = 1; i < token.length; i++) {
+              const left = token.substring(0, i);
+              const right = token.substring(i);
+              // 두 부분이 모두 질병명에 포함되는지 확인 (AND 조건)
+              if(n.includes(left) && n.includes(right)) {
+                return true;
+              }
+            }
+          }
+        }
+        
+        return false;
       });
 
       if(!matched.length){
