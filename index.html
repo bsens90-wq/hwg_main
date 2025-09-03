@@ -1,184 +1,61 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>한화손보 동창원 SI 인수 가이드</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
-      margin: 0;
-      padding: 0;
+    :root{
+      --hanwha:#ff7f00;
+      --hanwha-dark:#e67100;
+      --bg:#f8f9fa;
+      --card:#ffffff;
+      --text:#333;
+      --muted:#777;
+      --border:#e6e6e6;
     }
-    .login-container, .app-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      max-width: 400px;
-      width: 100%;
-      margin-bottom: 10px;
+    header{
+      background:var(--hanwha);
+      color:#fff;
+      padding:1rem;
+      text-align:center;
+      font-weight:700;
     }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+    .screen{
+      min-height:calc(100vh - 64px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:2rem 1rem;
     }
-    button {
-      background-color: #ff8200; /* 한화 오렌지 */
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      width: 100%;
-      font-weight: bold;
+    .card{
+      width:100%;
+      max-width:520px;
+      background:var(--card);
+      border-radius:16px;
+      box-shadow:0 6px 18px rgba(0,0,0,.08);
+      padding:20px;
     }
-    button:hover {
-      background-color: #e67100;
+    h2{margin:0 0 .75rem 0}
+    .row{margin-bottom:.75rem}
+    input{
+      width:100%;
+      padding:12px 14px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      font-size:16px;
+      outline:none;
     }
-    .results {
-      margin-top: 20px;
-      width: 100%;
-      max-width: 800px;
-    }
-    .result-card {
-      background: white;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .result-title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: #333;
-    }
-    .restrictions {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #555;
-    }
-  </style>
-</head>
-<body>
-  <!-- 로그인 화면 -->
-  <div id="loginScreen" class="login-container">
-    <div class="card">
-      <h2>로그인</h2>
-      <input type="text" id="empno" placeholder="사번 입력">
-      <input type="password" id="password" placeholder="비밀번호 입력">
-      <button onclick="login()">로그인</button>
-      <p id="loginMessage" style="color:red;"></p>
-    </div>
-  </div>
-
-  <!-- 앱 화면 -->
-  <div id="appScreen" class="app-container" style="display:none; flex-direction:column;">
-    <div class="card">
-      <input type="text" id="searchInput" placeholder="예시: 용종, 골절, 당뇨 등">
-      <button onclick="searchDiseases()">검색</button>
-    </div>
-    <div class="results" id="results"></div>
-  </div>
-
-  <script>
-    // ✅ JSON 파일 주소 (refs/heads 제거한 Raw URL)
-    const employeesUrl = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
-    const diseasesUrl = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
-
-    let employees = [];
-    let diseases = [];
-
-    // JSON 데이터 불러오기
-    async function loadData() {
-      try {
-        const empRes = await fetch(employeesUrl);
-        employees = await empRes.json();
-
-        const disRes = await fetch(diseasesUrl);
-        diseases = await disRes.json();
-      } catch (err) {
-        console.error("데이터 불러오기 실패:", err);
-      }
-    }
-    loadData();
-
-    // 로그인 함수
-    function login() {
-      const empno = document.getElementById("empno").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const user = employees.find(emp => emp.empno === empno && emp.password === password);
-
-      if (user) {
-        document.getElementById("loginScreen").style.display = "none";
-        document.getElementById("appScreen").style.display = "flex";
-      } else {
-        document.getElementById("loginMessage").innerText = "로그인 실패: 사번 또는 비밀번호가 올바르지 않습니다.";
-      }
-    }
-
-    // 검색 함수
-    function searchDiseases() {
-      const query = document.getElementById("searchInput").value.trim();
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = "";
-
-      if (!query) {
-        resultsDiv.innerHTML = "<p>검색어를 입력하세요.</p>";
-        return;
-      }
-
-      // 단어 분리 후 모두 포함하는 데이터 찾기
-      const keywords = query.split(/[\s,·]/).filter(k => k.length > 0);
-      const matches = diseases.filter(d => 
-        keywords.every(k => d.name.includes(k))
-      );
-
-      if (matches.length === 0) {
-        resultsDiv.innerHTML = "<p>검색 결과가 없습니다.</p>";
-        return;
-      }
-
-      matches.forEach(d => {
-        const card = document.createElement("div");
-        card.className = "result-card";
-        card.innerHTML = `
-          <div class="result-title">${d.name}</div>
-          <div>인수기준: ${d.acceptance}</div>
-          <div>시그니처355: ${d.signature355 || "-"}</div>
-          <div>
-            치료일수 | 수술여부 | 재발여부 <br>
-            ${d.treatmentDays || "-"} | ${d.surgery || "-"} | ${d.recurrence || "-"}
-          </div>
-          <div class="restrictions">제한사항: ${d.restrictions || "-"}</div>
-        `;
-        resultsDiv.appendChild(card);
-      });
-    }
-
-    // ✅ Enter 키 이벤트 추가
-    document.getElementById("password").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        login();
-      }
-    });
-
-    document.getElementById("searchInput").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        searchDiseases();
-      }
-    });
-  </script>
-</body>
-</html>
+    input:focus{border-color:var(--hanwha)}
+    button{
+      width:100%;
+      padding:12px 14px;
+      background:var(--hanwha);
+      color:#f
