@@ -270,15 +270,41 @@
         return;
       }
 
-      // 토큰화(공백/특수문자 기준) 후 정규화
-      const tokens = q.split(/[\s·,\-\.]+/)
-                      .filter(Boolean)
-                      .map(normalize);
+      // 먼저 공백/특수문자로 분리된 토큰들 생성
+      const spaceTokens = q.split(/[\s·,\-\.]+/)
+                          .filter(Boolean)
+                          .map(normalize);
 
-      // 모든 토큰을 포함하는 항목만
+      // 붙여진 검색어의 모든 분할 조합 생성
+      const allTokens = new Set(spaceTokens);
+      
+      // 각 공백 토큰에 대해 가능한 모든 분할 추가
+      spaceTokens.forEach(token => {
+        if(token.length > 1) {
+          for(let i = 1; i < token.length; i++) {
+            const left = token.substring(0, i);
+            const right = token.substring(i);
+            if(left.length >= 1 && right.length >= 1) {
+              allTokens.add(left);
+              allTokens.add(right);
+            }
+          }
+        }
+      });
+
+      const tokenArray = Array.from(allTokens);
+
+      // 각 질병에 대해 최적의 토큰 조합 찾기
       const matched = diseases.filter(d => {
         const n = normalize(d.name);
-        return tokens.every(tk => n.includes(tk));
+        
+        // 원래 공백 토큰들이 모두 포함되는지 먼저 확인
+        if(spaceTokens.every(tk => n.includes(tk))) {
+          return true;
+        }
+        
+        // 분할된 토큰들로 조합 검색
+        return findBestTokenCombination(tokenArray, n, spaceTokens);
       });
 
       if(!matched.length){
@@ -308,6 +334,34 @@
         `;
         out.appendChild(card);
       });
+    }
+
+    // 최적의 토큰 조합을 찾는 함수
+    function findBestTokenCombination(tokens, targetName, originalTokens) {
+      // 원본 토큰 개수만큼의 조합을 찾기
+      const targetTokenCount = originalTokens.length;
+      
+      // 가능한 모든 토큰 조합 생성
+      function getCombinations(arr, count) {
+        if(count === 1) return arr.map(x => [x]);
+        const result = [];
+        for(let i = 0; i < arr.length; i++) {
+          const rest = getCombinations(arr.slice(i + 1), count - 1);
+          rest.forEach(combo => result.push([arr[i], ...combo]));
+        }
+        return result;
+      }
+      
+      // 목표 토큰 개수의 조합들 확인
+      const combinations = getCombinations(tokens, targetTokenCount);
+      
+      for(const combo of combinations) {
+        if(combo.every(token => targetName.includes(token))) {
+          return true;
+        }
+      }
+      
+      return false;
     }
 
     // === ⑦ 이벤트 바인딩 (엔터키 동작 포함) ===
