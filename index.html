@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>동창원 유병자 인수 가이드</title>
+<style>
+body {margin:0;font-family:'Segoe UI',sans-serif;background:#fff4e6;}
+.container {max-width:600px;margin:3rem auto;padding:2rem;background:white;border-radius:12px;box-shadow:0 10px 20px rgba(0,0,0,0.1);}
+h1{text-align:center;margin-bottom:2rem;color:#ff6600;}
+.form-group{margin-bottom:1.5rem;}
+label{display:block;margin-bottom:0.5rem;font-weight:600;color:#333;}
+input[type="text"], input[type="password"], input[type="file"]{width:100%;padding:10px;font-size:16px;border:2px solid #ddd;border-radius:6px;outline:none;transition:border-color 0.3s;}
+input:focus{border-color:#ff6600;}
+button{background:#ff6600;color:white;padding:10px 16px;border:none;border-radius:6px;font-size:16px;cursor:pointer;}
+button:hover{background:#e65c00;}
+.screen{display:none;}
+.screen.active{display:block;}
+.error{color:red;font-size:14px;margin-top:0.5rem;}
+.success{color:green;font-size:14px;margin-top:0.5rem;}
+.search-results{margin-top:2rem;}
+.disease-title{font-size:1.2rem;font-weight:bold;margin-bottom:0.5rem;color:#ff6600;}
+.acceptance-status{background:#fff7e6;padding:0.6rem;border-radius:5px;margin-bottom:1rem;border-left:4px solid #ff6600;}
+.restrictions{background:#ffe5e0;padding:0.6rem;border-radius:5px;margin-top:1rem;}
+.conditions-table{width:100%;border-collapse:collapse;margin-top:1rem;}
+.conditions-table th, .conditions-table td{border:1px solid #ccc;padding:0.5rem;text-align:center;}
+.conditions-table th{background:#f8f9fa;}
+.toggle-admin{position:fixed;bottom:20px;right:20px;background:#ffc107;color:#000;padding:0.6rem 1rem;font-size:14px;border:none;border-radius:6px;cursor:pointer;z-index:1000;}
+.data-status{background:#e8f4fd;padding:0.8rem;border-radius:6px;margin:1rem 0;font-size:14px;}
+.search-info{background:#e3f2fd;padding:0.8rem;border-radius:6px;margin-bottom:1rem;font-size:14px;}
+.loading{display:none;text-align:center;color:#666;}
+.sync-status{background:#d4edda;border:1px solid #c3e6cb;padding:0.6rem;border-radius:5px;margin:0.5rem 0;font-size:14px;}
+.sync-error{background:#f8d7da;border:1px solid #f5c6cb;color:#721c24;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 로그인 화면 -->
+  <div id="login-screen" class="screen active">
+    <h1>로그인</h1>
+    <div id="sync-status" class="sync-status">데이터 동기화 중...</div>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="login-empno">사번</label>
+        <input type="text" id="login-empno" required />
+      </div>
+      <div class="form-group">
+        <label for="login-password">비밀번호</label>
+        <input type="password" id="login-password" required />
+      </div>
+      <button type="submit">로그인</button>
+      <div id="login-error" class="error"></div>
+    </form>
+  </div>
+
+  <!-- 검색 화면 -->
+  <div id="main-screen" class="screen">
+    <h1>질병명 검색</h1>
+    <div class="search-info">
+      <strong>검색 가능한 질병:</strong> 총 <span id="total-diseases">0</span>개<br>
+      <strong>검색 방법:</strong> 부분 단어로도 검색 가능<br>
+      <strong>마지막 업데이트:</strong> <span id="last-update">확인중...</span>
+    </div>
+    <div class="form-group">
+      <label for="disease-search">검색어</label>
+      <input type="text" id="disease-search" placeholder="예: 용종, 골절, 염좌, 고혈압, 당뇨 등" />
+    </div>
+    <button type="button" onclick="searchDisease()">검색</button>
+    <button type="button" onclick="refreshData()" style="background:#28a745;margin-left:0.5rem;">데이터 새로고침</button>
+    <div class="loading" id="search-loading">검색 중...</div>
+    <div id="search-results" class="search-results"></div>
+  </div>
+
+  <!-- 관리자 화면 -->
+  <div id="admin-screen" class="screen">
+    <h1>관리자 모드</h1>
+    
+    <div class="data-status">
+      <strong>현재 데이터 상태:</strong><br>
+      승인사번: <span id="emp-count">0</span>개<br>
+      질병데이터: <span id="disease-count">0</span>개<br>
+      <strong>서버 연결:</strong> <span id="server-status">확인중...</span>
+    </div>
+    
+    <div class="form-group">
+      <label>승인 사번 CSV 업로드</label>
+      <input type="file" id="employee-csv" accept=".csv" />
+      <button onclick="uploadEmployeeData()" style="background:#007bff;margin-top:0.5rem;">서버에 업로드</button>
+      <button onclick="resetEmployeeData()" style="background:#dc3545;margin-top:0.5rem;">기본값 복원</button>
+      <div id="emp-upload-status" class="success"></div>
+    </div>
+    
+    <div class="form-group">
+      <label>질병 데이터 CSV 업로드</label>
+      <input type="file" id="disease-csv" accept=".csv" />
+      <button onclick="uploadDiseaseData()" style="background:#007bff;margin-top:0.5rem;">서버에 업로드</button>
+      <button onclick="resetDiseaseData()" style="background:#dc3545;margin-top:0.5rem;">기본값 복원</button>
+      <div id="disease-upload-status" class="success"></div>
+    </div>
+    
+    <div class="form-group">
+      <label>데이터 관리</label>
+      <button onclick="downloadAllData()" style="background:#28a745;">전체 데이터 다운로드</button>
+      <button onclick="refreshData()" style="background:#17a2b8;margin-left:0.5rem;">데이터 새로고침</button>
+    </div>
+    
+    <button onclick="showScreen('main-screen')">검색 화면으로</button>
+    <button onclick="showScreen('login-screen')" style="background:#6c757d;margin-left:0.5rem;">로그아웃</button>
+  </div>
+</div>
+
+<!-- 관리자 모드 버튼 -->
+<button class="toggle-admin" onclick="enterAdminMode()">관리자 모드</button>
+
+<script>
+const ADMIN_CODE = "admin1234";
+
+// GitHub Pages나 Netlify에서 JSON 파일을 호스팅하는 방식
+const DATA_BASE_URL = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '') + '/data/';
+
+// 기본 데이터
+const DEFAULT_EMPLOYEES = [
+  {empno: "8091768", password: "80917681234"},
+  {empno: "8091574", password: "80915741234"},
+  {empno: "3242523", password: "32425231234"},
+  {empno: "3399273", password: "33992731234"},
+  {empno: "3405117", password: "34051171234"},
+  {empno: "3405119", password: "34051191234"},
+  {empno: "3412873", password: "34128731234"},
+  {empno: "3453532", password: "34535321234"},
+  {empno: "3528363", password: "35283631234"},
+  {empno: "3242510", password: "32425101234"},
+  {empno: "3247885", password: "32478851234"},
+  {empno: "3249416", password: "32494161234"},
+  {empno: "3412775", password: "34127751234"},
+  {empno: "3421567", password: "34215671234"},
+  {empno: "3454020", password: "34540201234"},
+  {empno: "3476740", password: "34767401234"},
+  {empno: "3487219", password: "34872191234"},
+  {empno: "3501495", password: "35014951234"},
+  {empno: "3520045", password: "35200451234"},
+  {empno: "3520302", password: "35203021234"},
+  {empno: "3514398", password: "35143981234"},
+  {empno: "3517077", password: "35170771234"},
+  {empno: "3518285", password: "35182851234"},
+  {empno: "3521537", password: "35215371234"},
+  {empno: "3523001", password: "35230011234"},
+  {empno: "3530765", password: "35307651234"},
+  {empno: "3532609", password: "35326091234"},
+  {empno: "3535154", password: "35351541234"},
+  {empno: "3536262", password: "35362621234"},
+  {empno: "3537378", password: "35373781234"},
+  {empno: "3539586", password: "35395861234"},
+  {empno: "3542894", password: "35428941234"},
+  {empno: "3549522", password: "35495221234"},
+  {empno: "3550638", password: "35506381234"},
+  {empno: "3553138", password: "35531381234"},
+  {empno: "3555646", password: "35556461234"},
+  {empno: "3556754", password: "35567541234"},
+  {empno: "3559254", password: "35592541234"},
+  {empno: "3560370", password: "35603701234"},
+  {empno: "3564986", password: "35649861234"},
+  {empno: "3568486", password: "35684861234"},
+  {empno: "3571986", password: "35719861234"},
+  {empno: "3575486", password: "35754861234"},
+  {empno: "3578994", password: "35789941234"},
+  {empno: "3582494", password: "35824941234"},
+  {empno: "3585994", password: "35859941234"},
+  {empno: "3589494", password: "35894941234"},
+  {empno: "3592994", password: "35929941234"},
+  {empno: "3596494", password: "35964941234"},
+  {empno: "3599994", password: "35999941234"},
+  {empno: "3603494", password: "36034941234"},
+  {empno: "3606994", password: "36069941234"},
+  {empno: "3610494", password: "36104941234"},
+  {empno: "3613994", password: "36139941234"},
+  {empno: "3617494", password: "36174941234"},
+  {empno: "3620994", password: "36209941234"},
+  {empno: "3624494", password: "36244941234"}
+];
+
+const DEFAULT_DISEASES = [
+  {name: "감염성 및 기생충질환의 후유증", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "결핵(폐결핵제외)", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "광견병", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "기생충감염", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "말라리아", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "매독", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "발진티푸스", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "볼거리", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "수두", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "수족구병", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "이, 진드기", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "인체면역결핍바이러스병", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "임균감염", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "중추신경계감염", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "진균증", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "무관", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "쯔쯔가무시", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "칸디다증", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "폐결핵", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 6개월 후 인수", treatmentDays: "입/통원 30일이하", surgery: "무관", recurrence: "재발 無", restrictions: "제한 담보 없음"},
+  {name: "홍역", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "A형간염", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 6개월 후 인수", treatmentDays: "입/통원 30일이하", surgery: "수술 無", recurrence: "재발 無", restrictions: "제한 담보 없음"},
+  {name: "B형간염", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 6개월 후 인수", treatmentDays: "입원 30일이하", surgery: "수술 無", recurrence: "무관", restrictions: "간질환 관련 담보 인수불가"},
+  {name: "C형간염", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "바이러스성간염", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 6개월 후 인수", treatmentDays: "입원 30일이하", surgery: "수술 無", recurrence: "재발 無", restrictions: "간질환 관련 담보 인수불가"},
+  {name: "대장용종", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 有", recurrence: "재발 無", restrictions: "제한 담보 없음"},
+  {name: "위용종", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 有", recurrence: "재발 無", restrictions: "제한 담보 없음"},
+  {name: "대장·위용종", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 有", recurrence: "재발 無", restrictions: "제한 담보 없음"},
+  {name: "소장용종", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 有", recurrence: "재발 無", restrictions: "제한 담보 없음"},
+  {name: "용종", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 有", recurrence: "재발 無", restrictions: "제한 담보 없음"},
+  {name: "고혈압", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 3개월 후 인수", treatmentDays: "통원 지속치료", surgery: "수술 無", recurrence: "무관", restrictions: "심혈관계 관련 담보 인수불가"},
+  {name: "본태성고혈압", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 3개월 후 인수", treatmentDays: "통원 지속치료", surgery: "수술 無", recurrence: "무관", restrictions: "심혈관계 관련 담보 인수불가"},
+  {name: "당뇨병", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 3개월 후 인수", treatmentDays: "통원 지속치료", surgery: "수술 無", recurrence: "무관", restrictions: "당뇨병 관련 담보 인수불가"},
+  {name: "제1형당뇨병", acceptance: "인수불가", signature355: "인수불가", treatmentDays: "미운영", surgery: "", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "제2형당뇨병", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 3개월 후 인수", treatmentDays: "통원 지속치료", surgery: "수술 無", recurrence: "무관", restrictions: "당뇨병 관련 담보 인수불가"},
+  {name: "위염", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "무관", restrictions: "제한 담보 없음"},
+  {name: "급성위염", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "무관", restrictions: "제한 담보 없음"},
+  {name: "만성위염", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "무관", restrictions: "제한 담보 없음"},
+  {name: "위장염", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "무관", restrictions: "제한 담보 없음"},
+  {name: "골절", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 60일이하", surgery: "무관", recurrence: "무관", restrictions: "제한 담보 없음"},
+  {name: "단순골절", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 60일이하", surgery: "무관", recurrence: "무관", restrictions: "제한 담보 없음"},
+  {name: "복합골절", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 3개월 후 인수", treatmentDays: "입/통원 90일이하", surgery: "무관", recurrence: "무관", restrictions: "제한 담보 없음"},
+  {name: "압박골절", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 3개월 후 인수", treatmentDays: "입/통원 90일이하", surgery: "무관", recurrence: "무관", restrictions: "제한 담보 없음"},
+  {name: "염좌", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "발목염좌", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "손목염좌", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "허리염좌", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"},
+  {name: "목염좌", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 無", recurrence: "", restrictions: "제한 담보 없음"}
+];
+
+// 현재 데이터
+let approvedEmployees = [...DEFAULT_EMPLOYEES];
+let diseaseData = [...DEFAULT_DISEASES];
+let lastUpdateTime = new Date().toLocaleString('ko-KR');
+
+// 서버 연결 확인
+async function checkServerConnection() {
+  try {
+    const response = await fetch(DATA_BASE_URL + 'employees.json', {
+      method: 'HEAD',
+      mode: 'cors'
+    });
+    document.getElementById('server-status').textContent = response.ok ? '연결됨' : '연결 실패';
+    document.getElementById('server-status').style.color = response.ok ? 'green' : 'red';
+    return response.ok;
+  } catch (error) {
+    document.getElementById('server-status').textContent = '로컬 모드';
+    document.getElementById('server-status').style.color = 'orange';
+    return false;
+  }
+}
+
+// 서버에서 데이터 불러오기
+async function loadDataFromServer() {
+  const status = document.getElementById('sync-status');
+  try {
+    status.textContent = '서버에서 데이터를 불러오는 중...';
+    status.className = 'sync-status';
+    
+    // 승인 사번 불러오기
+    try {
+      const empResponse = await fetch(DATA_BASE_URL + 'employees.json');
+      if (empResponse.ok) {
+        const empData = await empResponse.json();
+        if (empData && empData.data && Array.isArray(empData.data)) {
+          approvedEmployees = empData.data;
+          lastUpdateTime = empData.lastUpdate || new Date().toLocaleString('ko-KR');
+        }
+      }
+    } catch (error) {
+      console.log('승인사번 데이터를 서버에서 불러올 수 없습니다. 기본값을 사용합니다.');
+    }
+
+    // 질병 데이터 불러오기
+    try {
+      const diseaseResponse = await fetch(DATA_BASE_URL + 'diseases.json');
+      if (diseaseResponse.ok) {
+        const diseaseDataResponse = await diseaseResponse.json();
+        if (diseaseDataResponse && diseaseDataResponse.data && Array.isArray(diseaseDataResponse.data)) {
+          diseaseData = diseaseDataResponse.data;
+          lastUpdateTime = diseaseDataResponse.lastUpdate || lastUpdateTime;
+        }
+      }
+    } catch (error) {
+      console.log('질병 데이터를 서버에서 불러올 수 없습니다. 기본값을 사용합니다.');
+    }
+
+    status.textContent = '데이터 동기화 완료';
+    status.className = 'sync-status';
+    
+  } catch (error) {
+    status.textContent = '서버 연결 실패 - 로컬 데이터 사용';
+    status.className = 'sync-status sync-error';
+  }
+  
+  updateAllCounts();
+}
+
+// 데이터 새로고침
+async function refreshData() {
+  await loadDataFromServer();
+  await checkServerConnection();
+}
+
+// 모든 카운트 업데이트
+function updateAllCounts() {
+  if (document.getElementById('emp-count')) {
+    document.getElementById('emp-count').textContent = approvedEmployees.length;
+  }
+  if (document.getElementById('disease-count')) {
+    document.getElementById('disease-count').textContent = diseaseData.length;
+  }
+  if (document.getElementById('total-diseases')) {
+    document.getElementById('total-diseases').textContent = diseaseData.length;
+  }
+  if (document.getElementById('last-update')) {
+    document.getElementById('last-update').textContent = lastUpdateTime;
+  }
+}
+
+// CSV 업로드 (관리자용)
+async function uploadEmployeeData() {
+  const fileInput = document.getElementById('employee-csv');
+  const statusDiv = document.getElementById('emp-upload-status');
+  
+  if (!fileInput.files[0]) {
+    alert('CSV 파일을 선택해주세요.');
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+  
+  reader.onload = async function(e) {
+    try {
+      statusDiv.textContent = '업로드 중...';
+      statusDiv.className = 'success';
+      
+      const csvData = parseCSV(e.target.result);
+      const newEmployees = csvData.map(row => ({
+        empno: row['empno'] || '',
+        password: row['password'] || ''
+      })).filter(emp => emp.empno && emp.password);
+
+      // 로컬 업데이트
+      approvedEmployees = newEmployees;
+      
+      // 서버 업로드 시뮬레이션 (실제로는 GitHub API나 Netlify Functions 사용)
+      const uploadData = {
+        data: newEmployees,
+        lastUpdate: new Date().toLocaleString('ko-KR')
+      };
+      
+      // GitHub API로 업로드하는 함수 (실제 구현 시 필요)
+      const success = await uploadToGitHub('employees.json', uploadData);
+      
+      if (success) {
+        statusDiv.textContent = `성공: ${newEmployees.length}개 사번이 서버에 업로드되었습니다.`;
+        lastUpdateTime = uploadData.lastUpdate;
+        updateAllCounts();
+      } else {
+        // 로컬에만 저장
+        localStorage.setItem('approvedEmployees', JSON.stringify(newEmployees));
+        statusDiv.textContent = `로컬 저장: ${newEmployees.length}개 사번이 저장되었습니다. (서버 업로드 실패)`;
+        statusDiv.className = 'success sync-error';
+      }
+      
+    } catch (error) {
+      statusDiv.textContent = '업로드 실패: CSV 파일 형식을 확인해주세요.';
+      statusDiv.className = 'error';
+    }
+  };
+  
+  reader.readAsText(file, 'UTF-8');
+}
+
+async function uploadDiseaseData() {
+  const fileInput = document.getElementById('disease-csv');
+  const statusDiv = document.getElementById('disease-upload-status');
+  
+  if (!fileInput.files[0]) {
+    alert('CSV 파일을 선택해주세요.');
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+  
+  reader.onload = async function(e) {
+    try {
+      statusDiv.textContent = '업로드 중...';
+      statusDiv.className = 'success';
+      
+      const csvData = parseCSV(e.target.result);
+      
+      // 로컬 업데이트
+      diseaseData = csvData;
+      
+      // 서버 업로드
+      const uploadData = {
+        data: csvData,
+        lastUpdate: new Date().toLocaleString('ko-KR')
+      };
+      
+      const success = await uploadToGitHub('diseases.json', uploadData);
+      
+      if (success) {
+        statusDiv.textContent = `성공: ${csvData.length}개 질병이 서버에 업로드되었습니다.`;
+        lastUpdateTime = uploadData.lastUpdate;
+        updateAllCounts();
+      } else {
+        localStorage.setItem('diseaseData', JSON.stringify(csvData));
+        statusDiv.textContent = `로컬 저장: ${csvData.length}개 질병이 저장되었습니다. (서버 업로드 실패)`;
+        statusDiv.className = 'success sync-error';
+      }
+      
+    } catch (error) {
+      statusDiv.textContent = '업로드 실패: CSV 파일 형식을 확인해주세요.';
+      statusDiv.className = 'error';
+    }
+  };
+  
+  reader.readAsText(file, 'UTF-8');
+}
+
+// GitHub에 업로드하는 함수 (실제 구현)
+async function uploadToGitHub(filename, data) {
+  try {
+    // 실제 프로덕션에서는 GitHub API 토큰과 리포지토리 정보 필요
+    // 여기서는 시뮬레이션만 합니다
+    console.log(`Uploading ${filename} to GitHub:`, data);
+    
+    // Netlify Functions나 GitHub API를 통한 실제 업로드 로직
+    // const response = await fetch('/.netlify/functions/upload-data', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ filename, data })
+    // });
+    // return response.ok;
+    
+    // 데모용으로 항상 false 반환 (로컬 저장만 됨)
+    return false;
+    
+  } catch (error) {
+    console.error('GitHub 업로드 오류:', error);
+    return false;
+  }
+}
+
+// 기본값 복원
+function resetEmployeeData() {
+  if (confirm('승인사번을 기본값으로 복원하시겠습니까?')) {
+    approvedEmployees = [...DEFAULT_EMPLOYEES];
+    localStorage.setItem('approvedEmployees', JSON.stringify(approvedEmployees));
+    updateAllCounts();
+    document.getElementById('emp-upload-status').textContent = '기본값으로 복원되었습니다.';
+  }
+}
+
+function resetDiseaseData() {
+  if (confirm('질병데이터를 기본값으로 복원하시겠습니까?')) {
+    diseaseData = [...DEFAULT_DISEASES];
+    localStorage.setItem('diseaseData', JSON.stringify(diseaseData));
+    updateAllCounts();
+    document.getElementById('disease-upload-status').textContent = '기본값으로 복원되었습니다.';
+  }
+}
+
+// 전체 데이터 다운로드
+function downloadAllData() {
+  const allData = {
+    employees: approvedEmployees,
+    diseases: diseaseData,
+    lastUpdate: lastUpdateTime
+  };
+  
+  const jsonContent = JSON.stringify(allData, null, 2);
+  const blob = new Blob([jsonContent], { type: 'application/json' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'insurance_data_backup.json');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// CSV 파서
+function parseCSV(content) {
+  const lines = content.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+  
+  return lines.slice(1).map(line => {
+    const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = values[i] || '');
+    return obj;
+  }).filter(obj => Object.values(obj).some(val => val !== ''));
+}
+
+// 로그인 처리
+document.getElementById('login-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const empno = document.getElementById('login-empno').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+  const user = approvedEmployees.find(u => u.empno === empno && u.password === password);
+  
+  if (user) {
+    showScreen('main-screen');
+    document.getElementById('login-error').textContent = '';
+  } else {
+    document.getElementById('login-error').textContent = '사번 또는 비밀번호가 올바르지 않습니다.';
+  }
+});
+
+// 화면 전환
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  updateAllCounts();
+}
+
+// 관리자 모드 접근
+function enterAdminMode() {
+  const code = prompt('관리자 코드를 입력하세요:');
+  if (code === ADMIN_CODE) {
+    showScreen('admin-screen');
+    checkServerConnection();
+  } else {
+    alert('잘못된 코드입니다.');
+  }
+}
+
+// 검색 함수
+function searchDisease() {
+  const input = document.getElementById('disease-search').value.trim();
+  const resultsDiv = document.getElementById('search-results');
+  const loadingDiv = document.getElementById('search-loading');
+  
+  resultsDiv.innerHTML = '';
+  
+  if (!input) {
+    resultsDiv.innerHTML = '<p>검색어를 입력해주세요.</p>';
+    return;
+  }
+
+  loadingDiv.style.display = 'block';
+  
+  // 검색 시뮬레이션 (실제로는 즉시 실행됨)
+  setTimeout(() => {
+    loadingDiv.style.display = 'none';
+    
+    const matchedDiseases = new Set();
+    const normalizedInput = input.replace(/[\s·,\-()]/g, '');
+    
+    // 완전 일치
+    diseaseData.forEach(disease => {
+      const normalizedName = disease.name.replace(/[\s·,\-()]/g, '');
+      if (normalizedName === normalizedInput) {
+        matchedDiseases.add(disease);
+      }
+    });
+    
+    // 부분 검색
+    for (let len = Math.min(2, normalizedInput.length); len <= normalizedInput.length; len++) {
+      const partialSearch = normalizedInput.substring(0, len);
+      
+      diseaseData.forEach(disease => {
+        const normalizedName = disease.name.replace(/[\s·,\-()]/g, '');
+        if (normalizedName.startsWith(partialSearch) || normalizedName.includes(partialSearch)) {
+          matchedDiseases.add(disease);
+        }
+      });
+    }
+    
+    // 역방향 검색
+    diseaseData.forEach(disease => {
+      const normalizedName = disease.name.replace(/[\s·,\-()]/g, '');
+      if (normalizedInput.includes(normalizedName)) {
+        matchedDiseases.add(disease);
+      }
+    });
+
+    const matched = Array.from(matchedDiseases);
+
+    if (matched.length === 0) {
+      resultsDiv.innerHTML = `<p>"${input}"에 대한 결과가 없습니다.</p>`;
+      return;
+    }
+
+    matched.forEach((disease, index) => {
+      resultsDiv.innerHTML += `
+        <div class="disease-title">${disease.name}</div>
+        <div class="acceptance-status">
+          <strong>인수 결과:</strong> ${disease.acceptance}<br>
+          <strong>시그니처355:</strong> ${disease.signature355}
+        </div>
+        <table class="conditions-table">
+          <tr><th>치료일수</th><th>수술여부</th><th>재발여부</th></tr>
+          <tr><td>${disease.treatmentDays || '정보없음'}</td><td>${disease.surgery || '정보없음'}</td><td>${disease.recurrence || '정보없음'}</td></tr>
+        </table>
+        <div class="restrictions"><strong>가입제한:</strong> ${disease.restrictions || '정보없음'}</div>
+        ${index < matched.length - 1 ? '<hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid #eee;">' : ''}
+      `;
+    });
+
+    if (matched.length > 1) {
+      resultsDiv.insertAdjacentHTML('afterbegin', 
+        `<div style="background:#e8f5e8; padding:0.5rem; border-radius:5px; margin-bottom:1rem; text-align:center;">
+          <strong>${matched.length}개의 검색 결과를 찾았습니다.</strong>
+        </div>`);
+    }
+  }, 300);
+}
+
+// 엔터키 검색
+document.getElementById('disease-search').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    searchDisease();
+  }
+});
+
+// 페이지 로드 시 초기화
+window.addEventListener('load', async function() {
+  await loadDataFromServer();
+  await checkServerConnection();
+});
+</script>
+</body>
+</html>
