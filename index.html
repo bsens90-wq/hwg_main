@@ -70,8 +70,9 @@
     .error{color:#d93025; font-size:14px; margin-top:.5rem}
     .success{color:#137333; font-size:13px}
     .container-narrow{max-width:760px}
-    .search-box{display:flex; gap:.5rem}
+    .search-box{display:flex; gap:.5rem; margin-bottom:.75rem}
     .search-box input{flex:1}
+    .search-box button{width:auto; flex-shrink:0}
     .results{margin-top:1rem}
     .result-card{
       background:#fff;
@@ -141,10 +142,10 @@
   <section id="searchScreen" class="screen" style="display:none;">
     <div class="card container-narrow">
       <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
-      <div class="search-box">
+      <div class="row">
         <input id="searchInput" type="text" placeholder="예시: 용종, 골절, 당뇨 등" />
-        <button id="searchBtn" title="검색">검색</button>
       </div>
+      <button id="searchBtn" title="검색">검색</button>
       <div class="results" id="results"></div>
       <div class="meta" id="disMeta"></div>
     </div>
