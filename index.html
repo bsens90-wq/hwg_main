@@ -515,7 +515,7 @@ function enterAdminMode() {
   }
 }
 
-// 검색 함수
+// 개선된 검색 함수
 function searchDisease() {
   const input = document.getElementById('disease-search').value.trim();
   const resultsDiv = document.getElementById('search-results');
@@ -533,45 +533,41 @@ function searchDisease() {
   setTimeout(() => {
     loadingDiv.style.display = 'none';
     
-    const matchedDiseases = new Set();
-    const normalizedInput = input.replace(/[\s·,\-()]/g, '');
+    console.log('검색어:', input);
+    console.log('전체 질병 데이터 개수:', diseaseData.length);
+    console.log('첫 번째 질병 데이터:', diseaseData[0]);
     
-    // 완전 일치
-    diseaseData.forEach(disease => {
-      const normalizedName = disease.name.replace(/[\s·,\-()]/g, '');
-      if (normalizedName === normalizedInput) {
-        matchedDiseases.add(disease);
-      }
+    // 간단한 검색: 대소문자 구분 없이 포함 검색
+    const searchLower = input.toLowerCase();
+    const matched = diseaseData.filter(disease => {
+      const nameMatch = disease.name && disease.name.toLowerCase().includes(searchLower);
+      console.log(`${disease.name} 검색 결과:`, nameMatch);
+      return nameMatch;
     });
     
-    // 부분 검색
-    for (let len = Math.min(2, normalizedInput.length); len <= normalizedInput.length; len++) {
-      const partialSearch = normalizedInput.substring(0, len);
-      
-      diseaseData.forEach(disease => {
-        const normalizedName = disease.name.replace(/[\s·,\-()]/g, '');
-        if (normalizedName.startsWith(partialSearch) || normalizedName.includes(partialSearch)) {
-          matchedDiseases.add(disease);
-        }
-      });
-    }
-    
-    // 역방향 검색
-    diseaseData.forEach(disease => {
-      const normalizedName = disease.name.replace(/[\s·,\-()]/g, '');
-      if (normalizedInput.includes(normalizedName)) {
-        matchedDiseases.add(disease);
-      }
-    });
-
-    const matched = Array.from(matchedDiseases);
+    console.log('매칭된 질병 수:', matched.length);
 
     if (matched.length === 0) {
-      resultsDiv.innerHTML = `<p>"${input}"에 대한 결과가 없습니다.</p>`;
+      resultsDiv.innerHTML = `
+        <div style="background:#fff3cd; padding:1rem; border-radius:5px; margin-bottom:1rem;">
+          <strong>"${input}"에 대한 결과가 없습니다.</strong><br><br>
+          <strong>검색 디버그 정보:</strong><br>
+          • 전체 데이터: ${diseaseData.length}개<br>
+          • 검색어: "${searchLower}"<br>
+          • 첫 번째 질병명: "${diseaseData[0]?.name || '없음'}"
+        </div>
+        <div style="background:#e3f2fd; padding:1rem; border-radius:5px;">
+          <strong>테스트해볼 검색어:</strong><br>
+          ${diseaseData.slice(0, 5).map(d => `• ${d.name}`).join('<br>')}
+        </div>
+      `;
       return;
     }
 
-    matched.forEach((disease, index) => {
+    // 결과가 너무 많으면 처음 10개만 표시
+    const displayMatched = matched.slice(0, 10);
+
+    displayMatched.forEach((disease, index) => {
       resultsDiv.innerHTML += `
         <div class="disease-title">${disease.name}</div>
         <div class="acceptance-status">
@@ -583,16 +579,20 @@ function searchDisease() {
           <tr><td>${disease.treatmentDays || '정보없음'}</td><td>${disease.surgery || '정보없음'}</td><td>${disease.recurrence || '정보없음'}</td></tr>
         </table>
         <div class="restrictions"><strong>가입제한:</strong> ${disease.restrictions || '정보없음'}</div>
-        ${index < matched.length - 1 ? '<hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid #eee;">' : ''}
+        ${index < displayMatched.length - 1 ? '<hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid #eee;">' : ''}
       `;
     });
 
-    if (matched.length > 1) {
-      resultsDiv.insertAdjacentHTML('afterbegin', 
-        `<div style="background:#e8f5e8; padding:0.5rem; border-radius:5px; margin-bottom:1rem; text-align:center;">
-          <strong>${matched.length}개의 검색 결과를 찾았습니다.</strong>
-        </div>`);
+    // 검색 결과 개수 표시
+    let resultSummary = `<div style="background:#e8f5e8; padding:0.5rem; border-radius:5px; margin-bottom:1rem; text-align:center;">`;
+    if (matched.length <= 10) {
+      resultSummary += `<strong>${matched.length}개의 검색 결과를 찾았습니다.</strong>`;
+    } else {
+      resultSummary += `<strong>총 ${matched.length}개 중 처음 10개를 표시합니다.</strong>`;
     }
+    resultSummary += `</div>`;
+    
+    resultsDiv.insertAdjacentHTML('afterbegin', resultSummary);
   }, 300);
 }
 
