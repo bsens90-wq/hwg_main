@@ -3,117 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <title>한화손보 동창원 SI 인수 가이드</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #f4f6f8;
-      color: #333;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
     }
-    header {
-      background-color: #ff7f00;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-    .container {
-      max-width: 700px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 0.8rem;
-      margin: 0.5rem 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
-    button {
-      width: 100%;
-      padding: 0.8rem;
-      background-color: #ff7f00;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #e76f00;
-    }
-    .hidden {
-      display: none;
-    }
-    .results {
-      margin-top: 1.5rem;
+    .login-container, .app-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
     .card {
-      background: #fff;
-      border: 1px solid #ddd;
+      background: white;
       border-radius: 12px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-    .card h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.2rem;
-      color: #ff7f00;
-    }
-    .card .section {
-      margin-top: 0.5rem;
-      font-size: 0.95rem;
-      line-height: 1.4rem;
-    }
-    .info-table {
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 400px;
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 0.5rem;
+      margin-bottom: 10px;
     }
-    .info-table th, .info-table td {
-      border: 1px solid #ddd;
-      padding: 0.5rem;
-      text-align: center;
-      font-size: 0.9rem;
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #ff8200; /* 한화 오렌지 */
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #e67100;
+    }
+    .results {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 800px;
+    }
+    .result-card {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .result-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
     }
     .restrictions {
-      margin-top: 0.5rem;
-      padding: 0.5rem;
-      background: #f9f9f9;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      white-space: pre-line;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
     }
   </style>
 </head>
 <body>
-  <header>한화손보 동창원 SI 인수 가이드</header>
-
   <!-- 로그인 화면 -->
-  <div class="container" id="loginScreen">
-    <h2 style="text-align:center;">로그인</h2>
-    <input type="text" id="loginCode" placeholder="사번 입력">
-    <input type="password" id="loginPassword" placeholder="비밀번호 입력">
-    <button onclick="login()">로그인</button>
-    <p id="loginMessage" style="color:red; text-align:center; margin-top:1rem;"></p>
+  <div id="loginScreen" class="login-container">
+    <div class="card">
+      <h2>로그인</h2>
+      <input type="text" id="empno" placeholder="사번 입력">
+      <input type="password" id="password" placeholder="비밀번호 입력">
+      <button onclick="login()">로그인</button>
+      <p id="loginMessage" style="color:red;"></p>
+    </div>
   </div>
 
-  <!-- 검색 화면 -->
-  <div class="container hidden" id="searchScreen">
-    <input type="text" id="searchInput" placeholder="예시: 용종, 골절, 당뇨 등">
-    <button onclick="search()">검색</button>
+  <!-- 앱 화면 -->
+  <div id="appScreen" class="app-container" style="display:none; flex-direction:column;">
+    <div class="card">
+      <input type="text" id="searchInput" placeholder="예시: 용종, 골절, 당뇨 등">
+      <button onclick="searchDiseases()">검색</button>
+    </div>
     <div class="results" id="results"></div>
   </div>
 
   <script>
-    // GitHub Raw 파일 경로 (본인 저장소 주소로 수정!)
+    // ✅ JSON 파일 주소 (refs/heads 제거한 Raw URL)
     const employeesUrl = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
     const diseasesUrl = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
 
@@ -123,41 +103,33 @@
     // JSON 데이터 불러오기
     async function loadData() {
       try {
-        const empRes = await fetch(employeesUrl + "?t=" + Date.now());
+        const empRes = await fetch(employeesUrl);
         employees = await empRes.json();
 
-        const disRes = await fetch(diseasesUrl + "?t=" + Date.now());
+        const disRes = await fetch(diseasesUrl);
         diseases = await disRes.json();
-
-        console.log("데이터 불러오기 완료");
       } catch (err) {
         console.error("데이터 불러오기 실패:", err);
       }
     }
+    loadData();
 
-    // 문자열 정규화 함수 (띄어쓰기, 특수문자 제거 / 소문자 변환)
-    function normalize(str) {
-      return str.replace(/[\s·,.-]/g, "").toLowerCase();
-    }
-
-    // 로그인 기능
+    // 로그인 함수
     function login() {
-      const code = document.getElementById("loginCode").value.trim();
-      const password = document.getElementById("loginPassword").value.trim();
-      const message = document.getElementById("loginMessage");
-
-      const user = employees.find(emp => emp.empno === code && emp.password === password);
+      const empno = document.getElementById("empno").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const user = employees.find(emp => emp.empno === empno && emp.password === password);
 
       if (user) {
-        document.getElementById("loginScreen").classList.add("hidden");
-        document.getElementById("searchScreen").classList.remove("hidden");
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("appScreen").style.display = "flex";
       } else {
-        message.textContent = "로그인 실패: 사번 또는 비밀번호가 올바르지 않습니다.";
+        document.getElementById("loginMessage").innerText = "로그인 실패: 사번 또는 비밀번호가 올바르지 않습니다.";
       }
     }
 
-    // 검색 기능
-    function search() {
+    // 검색 함수
+    function searchDiseases() {
       const query = document.getElementById("searchInput").value.trim();
       const resultsDiv = document.getElementById("results");
       resultsDiv.innerHTML = "";
@@ -167,50 +139,46 @@
         return;
       }
 
-      // 검색어 토큰화 후 정규화
-      const tokens = query.split(/[\s,·]+/).filter(t => t.length > 0).map(normalize);
+      // 단어 분리 후 모두 포함하는 데이터 찾기
+      const keywords = query.split(/[\s,·]/).filter(k => k.length > 0);
+      const matches = diseases.filter(d => 
+        keywords.every(k => d.name.includes(k))
+      );
 
-      const results = diseases.filter(item => {
-        const normalizedName = normalize(item.name);
-        return tokens.every(token => normalizedName.includes(token));
-      });
-
-      if (results.length === 0) {
+      if (matches.length === 0) {
         resultsDiv.innerHTML = "<p>검색 결과가 없습니다.</p>";
         return;
       }
 
-      results.forEach(item => {
+      matches.forEach(d => {
         const card = document.createElement("div");
-        card.classList.add("card");
-
+        card.className = "result-card";
         card.innerHTML = `
-          <h3>${item.name}</h3>
-          <div class="section">인수기준: ${item.acceptance}</div>
-          <div class="section">시그니처355: ${item.signature355 || "-"}</div>
-          <table class="info-table">
-            <tr>
-              <th>치료일수</th>
-              <th>수술여부</th>
-              <th>재발여부</th>
-            </tr>
-            <tr>
-              <td>${item.treatmentDays || "-"}</td>
-              <td>${item.surgery || "-"}</td>
-              <td>${item.recurrence || "-"}</td>
-            </tr>
-          </table>
-          <div class="restrictions">
-            제한사항: ${item.restrictions || "제한사항 없음"}
+          <div class="result-title">${d.name}</div>
+          <div>인수기준: ${d.acceptance}</div>
+          <div>시그니처355: ${d.signature355 || "-"}</div>
+          <div>
+            치료일수 | 수술여부 | 재발여부 <br>
+            ${d.treatmentDays || "-"} | ${d.surgery || "-"} | ${d.recurrence || "-"}
           </div>
+          <div class="restrictions">제한사항: ${d.restrictions || "-"}</div>
         `;
-
         resultsDiv.appendChild(card);
       });
     }
 
-    // 앱 실행 시 데이터 불러오기
-    loadData();
+    // ✅ Enter 키 이벤트 추가
+    document.getElementById("password").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        login();
+      }
+    });
+
+    document.getElementById("searchInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        searchDiseases();
+      }
+    });
   </script>
 </body>
 </html>
