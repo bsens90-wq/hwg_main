@@ -275,16 +275,16 @@
                           .filter(Boolean)
                           .map(normalize);
 
-      // 붙여진 검색어의 모든 분할 조합 생성
+      // 붙여진 검색어의 2글자씩 분할 조합 생성
       const allTokens = new Set(spaceTokens);
       
-      // 각 공백 토큰에 대해 가능한 모든 분할 추가
+      // 각 공백 토큰에 대해 2글자씩 분할 추가
       spaceTokens.forEach(token => {
-        if(token.length > 1) {
-          for(let i = 1; i < token.length; i++) {
+        if(token.length >= 4) { // 최소 4글자여야 2글자씩 분할 가능
+          for(let i = 2; i <= token.length - 2; i += 2) { // 2글자씩 증가
             const left = token.substring(0, i);
             const right = token.substring(i);
-            if(left.length >= 1 && right.length >= 1) {
+            if(left.length >= 2 && right.length >= 2) {
               allTokens.add(left);
               allTokens.add(right);
             }
@@ -336,8 +336,11 @@
       });
     }
 
-    // 최적의 토큰 조합을 찾는 함수
+    // 최적의 토큰 조합을 찾는 함수 (2글자 이상 토큰만)
     function findBestTokenCombination(tokens, targetName, originalTokens) {
+      // 2글자 이상 토큰만 필터링
+      const validTokens = tokens.filter(token => token.length >= 2);
+      
       // 원본 토큰 개수만큼의 조합을 찾기
       const targetTokenCount = originalTokens.length;
       
@@ -353,7 +356,7 @@
       }
       
       // 목표 토큰 개수의 조합들 확인
-      const combinations = getCombinations(tokens, targetTokenCount);
+      const combinations = getCombinations(validTokens, targetTokenCount);
       
       for(const combo of combinations) {
         if(combo.every(token => targetName.includes(token))) {
