@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>동창원 유병자 인수 가이드</title>
 <style>
 body {margin:0;font-family:'Segoe UI',sans-serif;background:#fff4e6;}
@@ -10,8 +10,8 @@ body {margin:0;font-family:'Segoe UI',sans-serif;background:#fff4e6;}
 h1{text-align:center;margin-bottom:2rem;color:#ff6600;}
 .form-group{margin-bottom:1.5rem;}
 label{display:block;margin-bottom:0.5rem;font-weight:600;color:#333;}
-input[type="text"], input[type="password"], input[type="file"]{width:100%;padding:10px;font-size:16px;border:2px solid #ddd;border-radius:6px;outline:none;transition:border-color 0.3s;}
-input:focus{border-color:#ff6600;}
+input[type="text"], input[type="password"], textarea{width:100%;padding:10px;font-size:16px;border:2px solid #ddd;border-radius:6px;outline:none;transition:border-color 0.3s;}
+input:focus, textarea:focus{border-color:#ff6600;}
 button{background:#ff6600;color:white;padding:10px 16px;border:none;border-radius:6px;font-size:16px;cursor:pointer;}
 button:hover{background:#e65c00;}
 .screen{display:none;}
@@ -28,30 +28,26 @@ button:hover{background:#e65c00;}
 .toggle-admin{position:fixed;bottom:20px;right:20px;background:#ffc107;color:#000;padding:0.6rem 1rem;font-size:14px;border:none;border-radius:6px;cursor:pointer;z-index:1000;}
 .data-status{background:#e8f4fd;padding:0.8rem;border-radius:6px;margin:1rem 0;font-size:14px;}
 .search-info{background:#e3f2fd;padding:0.8rem;border-radius:6px;margin-bottom:1rem;font-size:14px;}
-.loading{display:none;text-align:center;color:#666;}
-.sync-status{background:#d4edda;border:1px solid #c3e6cb;padding:0.6rem;border-radius:5px;margin:0.5rem 0;font-size:14px;}
-.sync-error{background:#f8d7da;border:1px solid #f5c6cb;color:#721c24;}
-.update-indicator{position:fixed;top:10px;right:10px;background:#28a745;color:white;padding:0.5rem;border-radius:5px;display:none;z-index:1001;}
+textarea{height:100px;font-family:monospace;font-size:14px;}
+.data-input{background:#f8f9fa;padding:1rem;border-radius:6px;margin:1rem 0;}
+.sample-data{background:#fff3cd;padding:1rem;border-radius:6px;font-size:12px;margin-top:0.5rem;}
 </style>
 </head>
 <body>
-
-<!-- 실시간 업데이트 알림 -->
-<div id="update-indicator" class="update-indicator">데이터 업데이트됨!</div>
 
 <div class="container">
   <!-- 로그인 화면 -->
   <div id="login-screen" class="screen active">
     <h1>로그인</h1>
-    <div id="sync-status" class="sync-status">서버 연결 중...</div>
+    <div class="data-status">✅ 시스템 준비 완료</div>
     <form id="login-form">
       <div class="form-group">
         <label for="login-empno">사번</label>
-        <input type="text" id="login-empno" required />
+        <input type="text" id="login-empno" required>
       </div>
       <div class="form-group">
         <label for="login-password">비밀번호</label>
-        <input type="password" id="login-password" required />
+        <input type="password" id="login-password" required>
       </div>
       <button type="submit">로그인</button>
       <div id="login-error" class="error"></div>
@@ -63,15 +59,13 @@ button:hover{background:#e65c00;}
     <h1>질병명 검색</h1>
     <div class="search-info">
       <strong>검색 가능한 질병:</strong> 총 <span id="total-diseases">0</span>개<br>
-      <strong>마지막 업데이트:</strong> <span id="last-update">확인중...</span><br>
-      <strong>서버 상태:</strong> <span id="server-connection" style="color:green;">연결됨</span>
+      <strong>마지막 업데이트:</strong> <span id="last-update">-</span>
     </div>
     <div class="form-group">
       <label for="disease-search">검색어</label>
-      <input type="text" id="disease-search" placeholder="예: 용종, 골절, 염좌, 고혈압, 당뇨 등" />
+      <input type="text" id="disease-search" placeholder="예: 용종, 골절, 염좌, 고혈압, 당뇨 등">
     </div>
     <button type="button" onclick="searchDisease()">검색</button>
-    <div class="loading" id="search-loading">검색 중...</div>
     <div id="search-results" class="search-results"></div>
   </div>
 
@@ -82,541 +76,4 @@ button:hover{background:#e65c00;}
     <div class="data-status">
       <strong>현재 데이터:</strong><br>
       승인사번: <span id="emp-count">0</span>개<br>
-      질병데이터: <span id="disease-count">0</span>개<br>
-      <strong>GitHub 연동:</strong> <span id="github-status">활성화됨</span>
-    </div>
-    
-    <div class="form-group">
-      <label>승인 사번 CSV 업로드 (모든 사용자에게 실시간 반영)</label>
-      <input type="file" id="employee-csv" accept=".csv" />
-      <button onclick="uploadEmployeeData()" style="background:#007bff;margin-top:0.5rem;">전체 업데이트</button>
-      <div id="emp-upload-status" class="success"></div>
-    </div>
-    
-    <div class="form-group">
-      <label>질병 데이터 CSV 업로드 (모든 사용자에게 실시간 반영)</label>
-      <input type="file" id="disease-csv" accept=".csv" />
-      <button onclick="uploadDiseaseData()" style="background:#007bff;margin-top:0.5rem;">전체 업데이트</button>
-      <div id="disease-upload-status" class="success"></div>
-    </div>
-    
-    <div class="form-group">
-      <button onclick="forceUpdateAllUsers()" style="background:#dc3545;font-weight:bold;">🚨 모든 사용자 강제 업데이트</button>
-      <div style="font-size:12px;color:#666;margin-top:0.5rem;">
-        모든 접속 중인 사용자의 데이터를 즉시 새로고침합니다.
-      </div>
-    </div>
-    
-    <button onclick="showScreen('main-screen')">검색 화면으로</button>
-    <button onclick="showScreen('login-screen')" style="background:#6c757d;margin-left:0.5rem;">로그아웃</button>
-  </div>
-</div>
-
-<button class="toggle-admin" onclick="enterAdminMode()">관리자 모드</button>
-
-<script>
-const ADMIN_CODE = "admin1234";
-
-// GitHub 저장소 정보 (실제 사용자의 정보로 자동 설정됨)
-const REPO_OWNER = 'bsens90-wq';
-const REPO_NAME = 'hwg';
-const GITHUB_API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents`;
-const RAW_BASE = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main`;
-
-// 실시간 동기화를 위한 폴링 간격 (30초마다 체크)
-const SYNC_INTERVAL = 30000;
-let syncTimer = null;
-let lastKnownHash = '';
-
-// 현재 데이터
-let approvedEmployees = [];
-let diseaseData = [];
-let lastUpdateTime = new Date().toLocaleString('ko-KR');
-
-// 초기 데이터 로드
-async function loadDataFromGitHub() {
-  const status = document.getElementById('sync-status');
-  const serverStatus = document.getElementById('server-connection');
-  
-  try {
-    status.textContent = '서버에서 최신 데이터 로드 중...';
-    status.className = 'sync-status';
-    
-    // 승인사번 데이터 로드
-    try {
-      const empResponse = await fetch(`${RAW_BASE}/data/employees.json?t=${Date.now()}`);
-      if (empResponse.ok) {
-        const empText = await empResponse.text();
-        if (empText.trim()) {
-          const empData = JSON.parse(empText);
-          if (empData.data && Array.isArray(empData.data)) {
-            approvedEmployees = empData.data;
-            lastUpdateTime = empData.lastUpdate || lastUpdateTime;
-          }
-        }
-      }
-    } catch (error) {
-      console.log('승인사번 로드 실패, 기본값 사용');
-      approvedEmployees = [
-        {empno: "8091768", password: "80917681234"},
-        {empno: "8091574", password: "80915741234"},
-        {empno: "3242523", password: "32425231234"}
-      ];
-    }
-
-    // 질병 데이터 로드
-    try {
-      const diseaseResponse = await fetch(`${RAW_BASE}/data/diseases.json?t=${Date.now()}`);
-      if (diseaseResponse.ok) {
-        const diseaseText = await diseaseResponse.text();
-        if (diseaseText.trim()) {
-          const diseaseDataResponse = JSON.parse(diseaseText);
-          if (diseaseDataResponse.data && Array.isArray(diseaseDataResponse.data)) {
-            diseaseData = diseaseDataResponse.data;
-            lastUpdateTime = diseaseDataResponse.lastUpdate || lastUpdateTime;
-          }
-        }
-      }
-    } catch (error) {
-      console.log('질병 데이터 로드 실패, 기본값 사용');
-      diseaseData = [
-        {name: "대장용종", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 有", recurrence: "재발 無", restrictions: "제한 담보 없음"},
-        {name: "위용종", acceptance: "조건충족시 인수", signature355: "조건충족시 경과 1개월 후 인수", treatmentDays: "입/통원 15일이하", surgery: "수술 有", recurrence: "재발 無", restrictions: "제한 담보 없음"}
-      ];
-    }
-
-    status.textContent = `데이터 로드 완료 (${approvedEmployees.length}개 사번, ${diseaseData.length}개 질병)`;
-    status.className = 'sync-status';
-    
-    if (serverStatus) {
-      serverStatus.textContent = '연결됨';
-      serverStatus.style.color = 'green';
-    }
-    
-  } catch (error) {
-    status.textContent = '서버 연결 실패 - 로컬 데이터 사용';
-    status.className = 'sync-status sync-error';
-    
-    if (serverStatus) {
-      serverStatus.textContent = '오프라인';
-      serverStatus.style.color = 'red';
-    }
-  }
-  
-  updateAllCounts();
-}
-
-// GitHub API를 통한 실제 파일 업데이트
-async function updateGitHubFile(filename, data, message) {
-  try {
-    const path = `data/${filename}`;
-    const content = JSON.stringify({
-      data: data,
-      lastUpdate: new Date().toLocaleString('ko-KR'),
-      totalCount: data.length
-    }, null, 2);
-    
-    // 기존 파일의 SHA 가져오기
-    let sha = null;
-    try {
-      const getResponse = await fetch(`${GITHUB_API_BASE}/${path}`);
-      if (getResponse.ok) {
-        const fileData = await getResponse.json();
-        sha = fileData.sha;
-      }
-    } catch (error) {
-      console.log('기존 파일 없음, 새로 생성');
-    }
-    
-    // GitHub API로 파일 업데이트
-    const updateData = {
-      message: message,
-      content: btoa(unescape(encodeURIComponent(content))),
-      branch: 'main'
-    };
-    
-    if (sha) {
-      updateData.sha = sha;
-    }
-    
-    // 실제 GitHub 업데이트는 인증 토큰이 필요하므로 
-    // 여기서는 로컬 시뮬레이션을 하되, 다른 사용자도 볼 수 있도록 처리
-    console.log(`GitHub 업데이트 시뮬레이션: ${filename}`, data);
-    
-    // 로컬 저장소에도 저장 (브라우저 간 공유를 위해)
-    localStorage.setItem(`shared_${filename.replace('.json', '')}`, JSON.stringify({
-      data: data,
-      lastUpdate: new Date().toLocaleString('ko-KR'),
-      timestamp: Date.now()
-    }));
-    
-    // 다른 탭/사용자에게 알림
-    broadcastUpdate(filename, data);
-    
-    return true;
-    
-  } catch (error) {
-    console.error('GitHub 업데이트 오류:', error);
-    return false;
-  }
-}
-
-// 다른 사용자/탭에게 업데이트 알림
-function broadcastUpdate(filename, data) {
-  // BroadcastChannel을 사용하여 같은 도메인의 다른 탭에 알림
-  if (typeof BroadcastChannel !== 'undefined') {
-    const channel = new BroadcastChannel('insurance_app_updates');
-    channel.postMessage({
-      type: 'data_update',
-      filename: filename,
-      data: data,
-      timestamp: Date.now()
-    });
-  }
-  
-  // LocalStorage 이벤트를 트리거하여 다른 탭에 알림
-  localStorage.setItem('last_update_trigger', Date.now().toString());
-}
-
-// 다른 탭에서의 업데이트 수신
-function setupUpdateListener() {
-  // BroadcastChannel 리스너
-  if (typeof BroadcastChannel !== 'undefined') {
-    const channel = new BroadcastChannel('insurance_app_updates');
-    channel.onmessage = function(event) {
-      if (event.data.type === 'data_update') {
-        handleRemoteUpdate(event.data);
-      }
-    };
-  }
-  
-  // LocalStorage 변경 감지
-  window.addEventListener('storage', function(e) {
-    if (e.key === 'last_update_trigger') {
-      loadSharedData();
-    }
-  });
-  
-  // 주기적 동기화 체크
-  syncTimer = setInterval(checkForUpdates, SYNC_INTERVAL);
-}
-
-// 원격 업데이트 처리
-function handleRemoteUpdate(updateData) {
-  const indicator = document.getElementById('update-indicator');
-  
-  if (updateData.filename === 'employees.json') {
-    approvedEmployees = updateData.data;
-  } else if (updateData.filename === 'diseases.json') {
-    diseaseData = updateData.data;
-  }
-  
-  updateAllCounts();
-  
-  // 업데이트 알림 표시
-  if (indicator) {
-    indicator.style.display = 'block';
-    setTimeout(() => {
-      indicator.style.display = 'none';
-    }, 3000);
-  }
-}
-
-// 공유 데이터 로드
-function loadSharedData() {
-  try {
-    const sharedEmployees = localStorage.getItem('shared_employees');
-    const sharedDiseases = localStorage.getItem('shared_diseases');
-    
-    if (sharedEmployees) {
-      const empData = JSON.parse(sharedEmployees);
-      approvedEmployees = empData.data;
-      lastUpdateTime = empData.lastUpdate;
-    }
-    
-    if (sharedDiseases) {
-      const diseaseDataResponse = JSON.parse(sharedDiseases);
-      diseaseData = diseaseDataResponse.data;
-      lastUpdateTime = diseaseDataResponse.lastUpdate;
-    }
-    
-    updateAllCounts();
-  } catch (error) {
-    console.error('공유 데이터 로드 실패:', error);
-  }
-}
-
-// 업데이트 체크
-async function checkForUpdates() {
-  await loadDataFromGitHub();
-}
-
-// 모든 카운트 업데이트
-function updateAllCounts() {
-  const elements = {
-    'emp-count': approvedEmployees.length,
-    'disease-count': diseaseData.length,
-    'total-diseases': diseaseData.length,
-    'last-update': lastUpdateTime
-  };
-  
-  Object.keys(elements).forEach(id => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.textContent = elements[id];
-    }
-  });
-  
-  // GitHub 상태 업데이트
-  const githubStatus = document.getElementById('github-status');
-  if (githubStatus) {
-    githubStatus.textContent = '활성화됨';
-    githubStatus.style.color = 'green';
-  }
-}
-
-// CSV 파서
-function parseCSV(content) {
-  const lines = content.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim().replace(/["\r]/g, ''));
-  
-  return lines.slice(1).map(line => {
-    const values = line.split(',').map(v => v.trim().replace(/["\r]/g, ''));
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = values[i] || '');
-    return obj;
-  }).filter(obj => Object.values(obj).some(val => val !== ''));
-}
-
-// 관리자 업로드 함수들
-async function uploadEmployeeData() {
-  const fileInput = document.getElementById('employee-csv');
-  const statusDiv = document.getElementById('emp-upload-status');
-  
-  if (!fileInput.files[0]) {
-    alert('CSV 파일을 선택해주세요.');
-    return;
-  }
-
-  const file = fileInput.files[0];
-  const reader = new FileReader();
-  
-  reader.onload = async function(e) {
-    try {
-      statusDiv.textContent = '모든 사용자에게 업데이트 중...';
-      statusDiv.className = 'success';
-      
-      const csvData = parseCSV(e.target.result);
-      const newEmployees = csvData.map(row => ({
-        empno: row['empno'] || '',
-        password: row['password'] || ''
-      })).filter(emp => emp.empno && emp.password);
-
-      // 실시간 업데이트
-      const success = await updateGitHubFile('employees.json', newEmployees, '관리자가 승인사번 업데이트');
-      
-      if (success) {
-        approvedEmployees = newEmployees;
-        lastUpdateTime = new Date().toLocaleString('ko-KR');
-        updateAllCounts();
-        statusDiv.textContent = `✅ 성공! ${newEmployees.length}개 사번이 모든 사용자에게 실시간 반영되었습니다.`;
-      } else {
-        statusDiv.textContent = '⚠️ 업로드 중 오류가 발생했습니다.';
-        statusDiv.className = 'error';
-      }
-      
-    } catch (error) {
-      statusDiv.textContent = '❌ CSV 파일 형식을 확인해주세요.';
-      statusDiv.className = 'error';
-    }
-  };
-  
-  reader.readAsText(file, 'UTF-8');
-}
-
-async function uploadDiseaseData() {
-  const fileInput = document.getElementById('disease-csv');
-  const statusDiv = document.getElementById('disease-upload-status');
-  
-  if (!fileInput.files[0]) {
-    alert('CSV 파일을 선택해주세요.');
-    return;
-  }
-
-  const file = fileInput.files[0];
-  const reader = new FileReader();
-  
-  reader.onload = async function(e) {
-    try {
-      statusDiv.textContent = '모든 사용자에게 업데이트 중...';
-      statusDiv.className = 'success';
-      
-      const csvData = parseCSV(e.target.result);
-      
-      // 실시간 업데이트
-      const success = await updateGitHubFile('diseases.json', csvData, '관리자가 질병 데이터 업데이트');
-      
-      if (success) {
-        diseaseData = csvData;
-        lastUpdateTime = new Date().toLocaleString('ko-KR');
-        updateAllCounts();
-        statusDiv.textContent = `✅ 성공! ${csvData.length}개 질병이 모든 사용자에게 실시간 반영되었습니다.`;
-      } else {
-        statusDiv.textContent = '⚠️ 업로드 중 오류가 발생했습니다.';
-        statusDiv.className = 'error';
-      }
-      
-    } catch (error) {
-      statusDiv.textContent = '❌ CSV 파일 형식을 확인해주세요.';
-      statusDiv.className = 'error';
-    }
-  };
-  
-  reader.readAsText(file, 'UTF-8');
-}
-
-// 강제 업데이트
-async function forceUpdateAllUsers() {
-  if (confirm('모든 접속 중인 사용자의 데이터를 강제로 새로고침하시겠습니까?')) {
-    broadcastUpdate('force_refresh', {});
-    alert('✅ 모든 사용자에게 새로고침 신호를 전송했습니다!');
-  }
-}
-
-// 로그인 처리
-document.getElementById('login-form').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const empno = document.getElementById('login-empno').value.trim();
-  const password = document.getElementById('login-password').value.trim();
-  const user = approvedEmployees.find(u => u.empno === empno && u.password === password);
-  
-  if (user) {
-    showScreen('main-screen');
-    document.getElementById('login-error').textContent = '';
-  } else {
-    document.getElementById('login-error').textContent = '사번 또는 비밀번호가 올바르지 않습니다.';
-  }
-});
-
-// 화면 전환
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  updateAllCounts();
-}
-
-// 관리자 모드
-function enterAdminMode() {
-  const code = prompt('관리자 코드를 입력하세요:');
-  if (code === ADMIN_CODE) {
-    showScreen('admin-screen');
-  } else {
-    alert('잘못된 코드입니다.');
-  }
-}
-
-// 개선된 검색 함수
-function searchDisease() {
-  const input = document.getElementById('disease-search').value.trim();
-  const resultsDiv = document.getElementById('search-results');
-  const loadingDiv = document.getElementById('search-loading');
-  
-  resultsDiv.innerHTML = '';
-  
-  if (!input) {
-    resultsDiv.innerHTML = '<p>검색어를 입력해주세요.</p>';
-    return;
-  }
-
-  loadingDiv.style.display = 'block';
-  
-  setTimeout(() => {
-    loadingDiv.style.display = 'none';
-    
-    console.log('검색어:', input);
-    console.log('전체 질병 데이터 개수:', diseaseData.length);
-    console.log('첫 번째 질병 데이터:', diseaseData[0]);
-    
-    // 간단한 검색: 대소문자 구분 없이 포함 검색
-    const searchLower = input.toLowerCase();
-    const matched = diseaseData.filter(disease => {
-      const nameMatch = disease.name && disease.name.toLowerCase().includes(searchLower);
-      console.log(`${disease.name} 검색 결과:`, nameMatch);
-      return nameMatch;
-    });
-    
-    console.log('매칭된 질병 수:', matched.length);
-
-    if (matched.length === 0) {
-      resultsDiv.innerHTML = `
-        <div style="background:#fff3cd; padding:1rem; border-radius:5px; margin-bottom:1rem;">
-          <strong>"${input}"에 대한 결과가 없습니다.</strong><br><br>
-          <strong>검색 디버그 정보:</strong><br>
-          • 전체 데이터: ${diseaseData.length}개<br>
-          • 검색어: "${searchLower}"<br>
-          • 첫 번째 질병명: "${diseaseData[0]?.name || '없음'}"
-        </div>
-        <div style="background:#e3f2fd; padding:1rem; border-radius:5px;">
-          <strong>테스트해볼 검색어:</strong><br>
-          ${diseaseData.slice(0, 5).map(d => `• ${d.name}`).join('<br>')}
-        </div>
-      `;
-      return;
-    }
-
-    // 결과가 너무 많으면 처음 10개만 표시
-    const displayMatched = matched.slice(0, 10);
-
-    displayMatched.forEach((disease, index) => {
-      resultsDiv.innerHTML += `
-        <div class="disease-title">${disease.name}</div>
-        <div class="acceptance-status">
-          <strong>인수 결과:</strong> ${disease.acceptance}<br>
-          <strong>시그니처355:</strong> ${disease.signature355}
-        </div>
-        <table class="conditions-table">
-          <tr><th>치료일수</th><th>수술여부</th><th>재발여부</th></tr>
-          <tr><td>${disease.treatmentDays || '정보없음'}</td><td>${disease.surgery || '정보없음'}</td><td>${disease.recurrence || '정보없음'}</td></tr>
-        </table>
-        <div class="restrictions"><strong>가입제한:</strong> ${disease.restrictions || '정보없음'}</div>
-        ${index < displayMatched.length - 1 ? '<hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid #eee;">' : ''}
-      `;
-    });
-
-    // 검색 결과 개수 표시
-    let resultSummary = `<div style="background:#e8f5e8; padding:0.5rem; border-radius:5px; margin-bottom:1rem; text-align:center;">`;
-    if (matched.length <= 10) {
-      resultSummary += `<strong>${matched.length}개의 검색 결과를 찾았습니다.</strong>`;
-    } else {
-      resultSummary += `<strong>총 ${matched.length}개 중 처음 10개를 표시합니다.</strong>`;
-    }
-    resultSummary += `</div>`;
-    
-    resultsDiv.insertAdjacentHTML('afterbegin', resultSummary);
-  }, 300);
-}
-
-// 엔터키 검색
-document.getElementById('disease-search').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    searchDisease();
-  }
-});
-
-// 페이지 로드 시 초기화
-window.addEventListener('load', async function() {
-  await loadDataFromGitHub();
-  setupUpdateListener();
-  loadSharedData();
-});
-
-// 페이지 종료 시 정리
-window.addEventListener('beforeunload', function() {
-  if (syncTimer) {
-    clearInterval(syncTimer);
-  }
-});
-</script>
-</body>
-</html>
+      질
