@@ -275,16 +275,16 @@
                           .filter(Boolean)
                           .map(normalize);
 
-      // 붙여진 검색어의 2글자씩 분할 조합 생성
+      // 붙여진 검색어의 모든 분할 조합 생성 (1+3, 2+2, 3+1 등)
       const allTokens = new Set(spaceTokens);
       
-      // 각 공백 토큰에 대해 2글자씩 분할 추가
+      // 각 공백 토큰에 대해 가능한 모든 분할 추가
       spaceTokens.forEach(token => {
-        if(token.length >= 4) { // 최소 4글자여야 2글자씩 분할 가능
-          for(let i = 2; i <= token.length - 2; i += 2) { // 2글자씩 증가
+        if(token.length >= 2) {
+          for(let i = 1; i < token.length; i++) {
             const left = token.substring(0, i);
             const right = token.substring(i);
-            if(left.length >= 2 && right.length >= 2) {
+            if(left.length >= 1 && right.length >= 1) {
               allTokens.add(left);
               allTokens.add(right);
             }
@@ -294,7 +294,7 @@
 
       const tokenArray = Array.from(allTokens);
 
-      // 각 질병에 대해 최적의 토큰 조합 찾기
+      // 각 질병에 대해 검색
       const matched = diseases.filter(d => {
         const n = normalize(d.name);
         
@@ -303,8 +303,8 @@
           return true;
         }
         
-        // 분할된 토큰들로 조합 검색
-        return findBestTokenCombination(tokenArray, n, spaceTokens);
+        // 분할된 토큰들로 AND 조합 검색 (모든 조합의 토큰들이 포함되어야 함)
+        return findTokenCombination(tokenArray, n, spaceTokens);
       });
 
       if(!matched.length){
@@ -336,12 +336,8 @@
       });
     }
 
-    // 최적의 토큰 조합을 찾는 함수 (2글자 이상 토큰만)
-    function findBestTokenCombination(tokens, targetName, originalTokens) {
-      // 2글자 이상 토큰만 필터링
-      const validTokens = tokens.filter(token => token.length >= 2);
-      
-      // 원본 토큰 개수만큼의 조합을 찾기
+    // AND 조건으로 토큰 조합을 찾는 함수
+    function findTokenCombination(tokens, targetName, originalTokens) {
       const targetTokenCount = originalTokens.length;
       
       // 가능한 모든 토큰 조합 생성
@@ -355,8 +351,8 @@
         return result;
       }
       
-      // 목표 토큰 개수의 조합들 확인
-      const combinations = getCombinations(validTokens, targetTokenCount);
+      // 목표 토큰 개수의 조합들 확인 - 모든 토큰이 포함되어야 함 (AND 조건)
+      const combinations = getCombinations(tokens, targetTokenCount);
       
       for(const combo of combinations) {
         if(combo.every(token => targetName.includes(token))) {
