@@ -186,11 +186,11 @@
   <div class="card">
     <h2>로그인</h2>
     <div class="row">
-      <input id="empno" type="text" placeholder="사번 입력" autocomplete="username" />
+      <input id="empno" type="text" placeholder="코드 입력" autocomplete="username" />
     </div>
     <div class="row">
       <input id="password" type="password" placeholder="비밀번호 입력" autocomplete="current-password" />
-      <div class="hint">사번과 비밀번호는 승인된 목록에 있어야 합니다.</div>
+      <div class="hint">코드는 사전 승인된 기관에 부여됩니다.</div>
     </div>
     <button id="loginBtn">로그인</button>
     <button id="installBtn" class="secondary">홈화면에 추가</button>
@@ -351,7 +351,7 @@ function login(){
     document.getElementById("searchInput").focus();
     msg.textContent = "";
   }else{
-    msg.textContent = "사번 또는 비밀번호가 올바르지 않습니다.";
+    msg.textContent = "코드 또는 비밀번호가 올바르지 않습니다.";
   }
 }
 
@@ -464,7 +464,7 @@ function loadLogs() {
  
   results.innerHTML = userLogs.map(log => `
     <div class="log-card">
-      <div class="log-header">사번: ${log.empno} - ${log.action === 'login' ? '로그인' : '검색'}</div>
+      <div class="log-header">코드: ${log.empno} - ${log.action === 'login' ? '로그인' : '검색'}</div>
       <div class="log-time">${log.date}</div>
       ${log.details ? `<div class="log-search">검색어: "${log.details}"</div>` : ''}
     </div>
