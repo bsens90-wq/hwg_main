@@ -483,7 +483,7 @@ async function saveLogToGitHub(empno, action, details = '') {
     showDebug(`로컬 저장 완료: ${action} by ${empno}`);
 
     // GitHub에 로그 저장
-    if (GITHUB_CONFIG.token && GITHUB_CONFIG.token !== 'YOUR_GITHUB_TOKEN') {
+    if (GITHUB_CONFIG.token && GITHUB_CONFIG.token !== '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') {
       showDebug(`GitHub 저장 시도: ${action} by ${empno}`);
       await appendLogToGitHub(log);
       showDebug(`GitHub 저장 완료: ${action} by ${empno}`);
