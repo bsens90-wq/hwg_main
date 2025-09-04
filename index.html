@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>동창원 인수가이드</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi64+Z7LC97JuQIOyduOyImOqwgOydtOuTnCIsInNob3J0X25hbWUiOiLrj5nssL3sm5Ag7J247IiY6rCA7J2064OcIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwidGhlbWVfY29sb3IiOiIjZmY3ZjAwIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmOGY5ZmEiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTWpRd0lpQm9aV2xuYUhROUlqSTBNQ0lnZG1sbGQwSnZlRDBpTUNBd0lESTBNQ0F5TkRBaUlHWnBiR3c5SWlObVpqZG1NREFpSUhodGJHNXpQU0pvZEhSd09pOHZkM2QzTG5jekxtOXlaaTh5TURBd0wzTjJaeUkrUEdOcGNtTnNaU0JqZUQwaU1USTBJaUJqZVQwaU1USTBJaUJ5UFNJeE1ERWlJR1pwYkd3OUlpTm1aalk0TURBMU9VNGlMejRBUEhCaGRHZ2daRDBpVFRFME9TQXRNRGxDTGpBeFNIazNOem93TlFGc05qZ3VPRGd1TURNMUxqQXhObDBpSUdacGJHdzlJaU5tWmpkbU1EQWlMejQ4TDNOMlp6ND0iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0K" />
   <style>
     :root{
       --hanwha:#ff7f00;
@@ -16,167 +15,36 @@
       --border:#e6e6e6;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: Arial, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
-    .screen{
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      padding:2rem 1rem;
-    }
-    .app-title{
-      font-size:24px;
-      font-weight:700;
-      color:var(--hanwha);
-      margin-bottom:2rem;
-      text-align:center;
-    }
-    .card{
-      width:100%;
-      max-width:520px;
-      background:var(--card);
-      border-radius:16px;
-      box-shadow:0 6px 18px rgba(0,0,0,.08);
-      padding:20px;
-    }
+    body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text);}
+    .screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;}
+    .app-title{font-size:24px;font-weight:700;color:var(--hanwha);margin-bottom:2rem;text-align:center;}
+    .card{width:100%;max-width:520px;background:var(--card);border-radius:16px;box-shadow:0 6px 18px rgba(0,0,0,.08);padding:20px;}
     h2{margin:0 0 .75rem 0}
     .row{margin-bottom:.75rem}
-    input{
-      width:100%;
-      padding:12px 14px;
-      border:1px solid var(--border);
-      border-radius:10px;
-      font-size:16px;
-      outline:none;
-    }
+    input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:16px;outline:none;}
     input:focus{border-color:var(--hanwha)}
-    button{
-      width:100%;
-      padding:12px 14px;
-      background:var(--hanwha);
-      color:#fff;
-      border:none;
-      border-radius:10px;
-      font-weight:700;
-      cursor:pointer;
-      font-size:16px;
-      margin-bottom:8px;
-    }
+    button{width:100%;padding:12px 14px;background:var(--hanwha);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:16px;margin-bottom:8px;}
     button:hover{background:var(--hanwha-dark)}
-    button.secondary{
-      background:#6c757d;
-      margin-bottom:0;
-    }
+    button.secondary{background:#6c757d;margin-bottom:0;}
     button.secondary:hover{background:#545b62}
     .hint{color:var(--muted); font-size:13px; margin-top:.25rem}
     .error{color:#d93025; font-size:14px; margin-top:.5rem}
     .success{color:#137333; font-size:13px}
     .container-narrow{max-width:760px}
     .results{margin-top:1rem}
-    .result-card{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:16px;
-      box-shadow:0 2px 8px rgba(0,0,0,.04);
-      margin-bottom:12px;
-    }
-    .result-title{
-      font-size:18px;
-      font-weight:700;
-      color:#222;
-      margin-bottom:6px;
-    }
+    .result-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:12px;}
+    .result-title{font-size:18px;font-weight:700;color:#222;margin-bottom:6px;}
     .result-sub{color:#444; margin:.25rem 0 .5rem 0}
-    .info-table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:.25rem;
-      font-size:14px;
-    }
-    .info-table th,.info-table td{
-      border:1px solid var(--border);
-      padding:8px;
-      text-align:center;
-      white-space:nowrap;
-    }
-    .restrictions{
-      margin-top:.5rem;
-      padding:.5rem .75rem;
-      background:#fafafa;
-      border:1px dashed var(--border);
-      border-radius:10px;
-      font-size:14px;
-      white-space:pre-line;
-    }
-    .meta{
-      margin-top:.5rem;
-      font-size:12px;
-      color:var(--muted);
-      text-align:center;
-    }
-    .install-prompt{
-      position:fixed;
-      bottom:20px;
-      left:50%;
-      transform:translateX(-50%);
-      background:var(--hanwha);
-      color:white;
-      padding:12px 20px;
-      border-radius:25px;
-      box-shadow:0 4px 12px rgba(0,0,0,.15);
-      display:none;
-      z-index:1000;
-      cursor:pointer;
-      font-weight:700;
-    }
-    .admin-btn{
-      position:fixed;
-      bottom:10px;
-      right:10px;
-      width:40px;
-      height:40px;
-      background:rgba(108,117,125,0.8);
-      border-radius:50%;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:white;
-      font-size:12px;
-      font-weight:700;
-      border:none;
-    }
-    .log-card{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:12px;
-      margin-bottom:8px;
-      font-size:14px;
-    }
-    .log-header{
-      font-weight:700;
-      color:var(--hanwha);
-      margin-bottom:4px;
-    }
-    .log-time{
-      color:var(--muted);
-      font-size:12px;
-    }
-    .log-search{
-      background:#f0f8ff;
-      padding:4px 8px;
-      border-radius:5px;
-      margin-top:4px;
-      font-family:monospace;
-    }
+    .info-table{width:100%;border-collapse:collapse;margin-top:.25rem;font-size:14px;}
+    .info-table th,.info-table td{border:1px solid var(--border);padding:8px;text-align:center;white-space:nowrap;}
+    .restrictions{margin-top:.5rem;padding:.5rem .75rem;background:#fafafa;border:1px dashed var(--border);border-radius:10px;font-size:14px;white-space:pre-line;}
+    .meta{margin-top:.5rem;font-size:12px;color:var(--muted);text-align:center;}
+    .install-prompt{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--hanwha);color:white;padding:12px 20px;border-radius:25px;box-shadow:0 4px 12px rgba(0,0,0,.15);display:none;z-index:1000;cursor:pointer;font-weight:700;}
+    .admin-btn{position:fixed;bottom:10px;right:10px;width:40px;height:40px;background:rgba(108,117,125,0.8);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;border:none;}
+    .log-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;font-size:14px;}
+    .log-header{font-weight:700;color:var(--hanwha);margin-bottom:4px;}
+    .log-time{color:var(--muted);font-size:12px;}
+    .log-search{background:#f0f8ff;padding:4px 8px;border-radius:5px;margin-top:4px;font-family:monospace;}
   </style>
 </head>
 <body>
@@ -189,13 +57,11 @@
         <input id="empno" type="text" placeholder="사번 입력" autocomplete="username" />
       </div>
       <div class="row">
-        <input id="password" type="password" placeholder="비밀번호 입력" autocomplete="current-password" />
-        <div class="hint">사번과 비밀번호는 승인된 목록에 있어야 합니다.</div>
+        <input id="authCode" type="password" placeholder="인증번호 입력" autocomplete="current-password" />
+        <div class="hint">관리자가 발급한 인증번호를 입력하세요.</div>
       </div>
       <button id="loginBtn">로그인</button>
-      <button id="installBtn" class="secondary">홈화면에 추가</button>
       <div id="loginMsg" class="error" role="alert" aria-live="polite"></div>
-      <div class="meta" id="empMeta"></div>
     </div>
   </section>
 
@@ -209,7 +75,6 @@
       </div>
       <button id="searchBtn" title="검색">검색</button>
       <div class="results" id="results"></div>
-      <div class="meta" id="disMeta"></div>
     </div>
   </section>
 
@@ -222,196 +87,77 @@
         <input id="adminPassword" type="password" placeholder="관리자 비밀번호를 입력하세요." />
       </div>
       <button id="loadLogsBtn">로그 불러오기</button>
-      <button id="backToSearchBtn" class="secondary">검색화면으로 돌아가기</button>
+      <button id="resetAuthBtn" class="secondary">사용자 인증 초기화</button>
       <div id="adminMsg" class="error"></div>
       <div class="meta" id="logStats"></div>
       <div id="logResults" class="results"></div>
     </div>
   </section>
 
-  <!-- PWA 설치 프롬프트 -->
-  <div id="installPrompt" class="install-prompt">홈화면에 추가하기</div>
-
-  <!-- 관리자 버튼 -->
-  <button id="adminBtn" class="admin-btn" title="관리자">Admin</button>
-
 <script>
-// 전역 변수
-let employees = [];
-let diseases = [];
+// 샘플 데이터 (실제 서버에서는 fetch로 불러오기)
+let employees = [
+  { empno: "1001", authCode: "1111" },
+  { empno: "1002", authCode: "2222" }
+];
+let diseases = [
+  { name:"대장 용종", acceptance:"가능", signature355:"-", treatmentDays:"7", surgery:"없음", recurrence:"가능", restrictions:"없음" }
+];
 let currentUser = null;
-let userLogs = [];
 
-// PWA 설치 관련
-let deferredPrompt;
+// 토큰 기반 자동 로그인
+const tokenKey = 'authToken';
+function setToken(empno){ localStorage.setItem(tokenKey, empno); }
+function getToken(){ return localStorage.getItem(tokenKey); }
+function clearToken(empno){ localStorage.removeItem(tokenKey); if(currentUser===empno) currentUser=null; }
 
-// 데이터 URL
-const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
-const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
-
-// 로그 기록 함수
-function saveLog(empno, action, details = '') {
-  const log = {
-    empno: empno,
-    action: action,
-    details: details,
-    timestamp: new Date().toISOString(),
-    date: new Date().toLocaleString('ko-KR')
-  };
-  
-  const logs = JSON.parse(localStorage.getItem('userLogs') || '[]');
-  logs.push(log);
-  
-  // 최대 500개만 보관
-  if(logs.length > 500) {
-    logs.splice(0, logs.length - 500);
-  }
-  
-  localStorage.setItem('userLogs', JSON.stringify(logs));
-  console.log('로그 저장:', log);
-}
-
-// PWA 설치 이벤트
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('installPrompt').style.display = 'block';
-});
-
-// JSON 로더
-async function loadJsonFlexible(url){
-  const res = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
-  if(!res.ok) throw new Error("네트워크 오류: " + res.status);
-  
-  const text = await res.text();
-  const cleaned = text.replace(/^\uFEFF/, "");
-  let json = JSON.parse(cleaned);
-
-  if(json && typeof json === "object" && !Array.isArray(json) && Array.isArray(json.data)){
-    json = json.data;
-  }
-  if(!Array.isArray(json)) throw new Error("JSON이 배열이 아닙니다.");
-  
-  return json;
-}
-
-// 데이터 로드
-async function loadAllData(){
-  try{
-    const [emp, dis] = await Promise.all([
-      loadJsonFlexible(EMP_URL),
-      loadJsonFlexible(DIS_URL)
-    ]);
-
-    employees = emp.map(e => ({
-      empno: String(e.empno || e.code || "").trim(),
-      password: String(e.password || "").trim()
-    })).filter(e => e.empno && e.password);
-
-    diseases = dis.map(d => ({
-      name: String(d.name || "").trim(),
-      acceptance: String(d.acceptance || ""),
-      signature355: String(d.signature355 || ""),
-      treatmentDays: String(d.treatmentDays || ""),
-      surgery: String(d.surgery || ""),
-      recurrence: String(d.recurrence || ""),
-      restrictions: String(d.restrictions || "")
-    })).filter(d => d.name);
-
-    document.getElementById("empMeta").textContent = 
-      `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건`;
-
-  }catch(err){
-    console.error("데이터 로드 실패:", err);
-    document.getElementById("loginMsg").textContent = "데이터 로드 실패";
-  }
-}
-
-// 로그인
+// 로그인 처리
 function login(){
   const empno = document.getElementById("empno").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const authCode = document.getElementById("authCode").value.trim();
   const msg = document.getElementById("loginMsg");
 
-  if(!employees.length){
-    msg.textContent = "데이터가 로드되지 않았습니다.";
-    return;
-  }
-
-  const user = employees.find(u => u.empno === empno && u.password === password);
-  
+  const user = employees.find(u => u.empno===empno && u.authCode===authCode);
   if(user){
     currentUser = empno;
-    saveLog(empno, 'login');
-    
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("searchScreen").style.display = "flex";
-    document.getElementById("searchInput").focus();
-    msg.textContent = "";
+    setToken(empno);
+    showSearchScreen();
+    msg.textContent="";
+    saveLog(empno,'login');
   }else{
-    msg.textContent = "사번 또는 비밀번호가 올바르지 않습니다.";
+    msg.textContent="사번 또는 인증번호가 올바르지 않습니다.";
   }
 }
 
-// 검색 정규화
-function normalize(str){
-  return String(str || "").toLowerCase().replace(/[\s·,\-\.]/g, "");
+// 자동 로그인
+document.addEventListener('DOMContentLoaded', () => {
+  const token = getToken();
+  if(token){
+    currentUser = token;
+    showSearchScreen();
+    saveLog(token,'auto-login');
+  }
+});
+
+// 화면 전환
+function showSearchScreen(){
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("searchScreen").style.display="flex";
+  document.getElementById("searchInput").focus();
 }
 
 // 검색
+function normalize(str){ return String(str||"").toLowerCase().replace(/[\s·,\-\.]/g,""); }
 function search(){
+  if(!currentUser) return;
   const query = document.getElementById("searchInput").value.trim();
   const results = document.getElementById("results");
-  
-  if(!query){
-    results.innerHTML = '<div class="hint">검색어를 입력하세요.</div>';
-    return;
-  }
-
-  // 검색 로그 저장
-  if(currentUser) {
-    saveLog(currentUser, 'search', query);
-  }
-
+  if(!query){ results.innerHTML='<div class="hint">검색어를 입력하세요.</div>'; return; }
+  saveLog(currentUser,'search',query);
   const tokens = query.split(/[\s·,\-\.]+/).filter(Boolean).map(normalize);
-  
-  const matched = diseases.filter(d => {
-    const name = normalize(d.name);
-    
-    // 기본 검색 (공백으로 분리된 토큰들이 모두 포함)
-    if(tokens.every(token => name.includes(token))) {
-      return true;
-    }
-    
-    // 단일 토큰 분할 검색 (3글자 이상, 2글자씩 조합, 순서 고려)
-    if(tokens.length === 1) {
-      const token = tokens[0];
-      if(token.length >= 3) {
-        for(let i = 2; i <= token.length - 2; i++) {
-          const left = token.substring(0, i);
-          const right = token.substring(i);
-          
-          if(left.length >= 2 && right.length >= 2) {
-            const leftPos = name.indexOf(left);
-            const rightPos = name.indexOf(right);
-            
-            if(leftPos >= 0 && rightPos >= 0 && leftPos < rightPos) {
-              return true;
-            }
-          }
-        }
-      }
-    }
-    
-    return false;
-  });
-
-  if(!matched.length){
-    results.innerHTML = '<div class="hint">검색 결과가 없습니다.</div>';
-    return;
-  }
-
-  results.innerHTML = matched.map(d => `
+  const matched = diseases.filter(d => tokens.every(t=>normalize(d.name).includes(t)));
+  if(!matched.length){ results.innerHTML='<div class="hint">검색 결과가 없습니다.</div>'; return; }
+  results.innerHTML = matched.map(d=>`
     <div class="result-card">
       <div class="result-title">${d.name}</div>
       <div class="result-sub">인수기준: ${d.acceptance || "-"}</div>
@@ -419,9 +165,9 @@ function search(){
       <table class="info-table">
         <tr><th>치료일수</th><th>수술여부</th><th>재발여부</th></tr>
         <tr>
-          <td>${d.treatmentDays || "-"}</td>
-          <td>${d.surgery || "-"}</td>
-          <td>${d.recurrence || "-"}</td>
+          <td>${d.treatmentDays||"-"}</td>
+          <td>${d.surgery||"-"}</td>
+          <td>${d.recurrence||"-"}</td>
         </tr>
       </table>
       <div class="restrictions">제한사항: ${d.restrictions || "없음"}</div>
@@ -429,102 +175,35 @@ function search(){
   `).join('');
 }
 
-// 관리자 로그 불러오기
-function loadLogs() {
-  const password = document.getElementById("adminPassword").value.trim();
-  const msg = document.getElementById("adminMsg");
-  
-  if(password !== "admin123") {
-    msg.textContent = "관리자 비밀번호가 올바르지 않습니다.";
-    return;
-  }
-  
-  msg.textContent = "";
-  userLogs = JSON.parse(localStorage.getItem('userLogs') || '[]');
-  userLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  
-  const stats = document.getElementById("logStats");
-  const results = document.getElementById("logResults");
-  
-  // 통계
-  const totalLogs = userLogs.length;
-  const uniqueUsers = new Set(userLogs.map(l => l.empno)).size;
-  const loginCount = userLogs.filter(l => l.action === 'login').length;
-  const searchCount = userLogs.filter(l => l.action === 'search').length;
-  
-  stats.textContent = `전체 ${totalLogs}개 | 사용자 ${uniqueUsers}명 | 로그인 ${loginCount}회 | 검색 ${searchCount}회`;
-  
-  // 로그 목록
-  if(userLogs.length === 0) {
-    results.innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
-    return;
-  }
-  
-  results.innerHTML = userLogs.map(log => `
-    <div class="log-card">
-      <div class="log-header">사번: ${log.empno} - ${log.action === 'login' ? '로그인' : '검색'}</div>
-      <div class="log-time">${log.date}</div>
-      ${log.details ? `<div class="log-search">검색어: "${log.details}"</div>` : ''}
-    </div>
-  `).join('');
+// 로그 기록 (실제 서버 연동 필요)
+function saveLog(empno, action, details=''){
+  const log = { empno, action, details, timestamp:new Date().toISOString(), date:new Date().toLocaleString('ko-KR') };
+  console.log('로그 저장 (서버 전송 필요):', log);
+  // 예: fetch('/log',{method:'POST',body:JSON.stringify(log)});
 }
 
-// 이벤트 리스너
-document.addEventListener('DOMContentLoaded', () => {
-  loadAllData();
-  
-  // 로그인
-  document.getElementById('loginBtn').addEventListener('click', login);
-  document.getElementById('empno').addEventListener('keydown', e => {
-    if(e.key === 'Enter') login();
-  });
-  document.getElementById('password').addEventListener('keydown', e => {
-    if(e.key === 'Enter') login();
-  });
-  
-  // 검색
-  document.getElementById('searchBtn').addEventListener('click', search);
-  document.getElementById('searchInput').addEventListener('keydown', e => {
-    if(e.key === 'Enter') search();
-  });
-  
-  // 관리자
-  document.getElementById('adminBtn').addEventListener('click', () => {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('searchScreen').style.display = 'none';
-    document.getElementById('adminScreen').style.display = 'flex';
-  });
-  
-  document.getElementById('loadLogsBtn').addEventListener('click', loadLogs);
-  document.getElementById('adminPassword').addEventListener('keydown', e => {
-    if(e.key === 'Enter') loadLogs();
-  });
-  
-  document.getElementById('backToSearchBtn').addEventListener('click', () => {
-    document.getElementById('adminScreen').style.display = 'none';
-    if(currentUser) {
-      document.getElementById('searchScreen').style.display = 'flex';
-    } else {
-      document.getElementById('loginScreen').style.display = 'flex';
-    }
-  });
-  
-  // PWA 설치
-  document.getElementById('installBtn').addEventListener('click', async () => {
-    if(deferredPrompt) {
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-    } else {
-      alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
-    }
-  });
-  
-  document.getElementById('installPrompt').addEventListener('click', () => {
-    document.getElementById('installBtn').click();
-  });
+// 관리자 화면 (샘플)
+document.getElementById('adminBtn')?.addEventListener('click',()=>{
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('searchScreen').style.display='none';
+  document.getElementById('adminScreen').style.display='flex';
 });
-</script>
 
+// 관리자 초기화
+document.getElementById('resetAuthBtn')?.addEventListener('click',()=>{
+  const empno = prompt("초기화할 사번 입력:");
+  if(empno) clearToken(empno);
+  alert(empno+' 인증이 초기화되었습니다.');
+});
+
+// 검색 버튼 이벤트
+document.getElementById('searchBtn')?.addEventListener('click',search);
+document.getElementById('searchInput')?.addEventListener('keydown',e=>{if(e.key==='Enter') search();});
+
+// 로그인 버튼 이벤트
+document.getElementById('loginBtn')?.addEventListener('click',login);
+document.getElementById('empno')?.addEventListener('keydown',e=>{if(e.key==='Enter') login();});
+document.getElementById('authCode')?.addEventListener('keydown',e=>{if(e.key==='Enter') login();});
+</script>
 </body>
 </html>
