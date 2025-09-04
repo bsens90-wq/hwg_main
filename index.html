@@ -431,6 +431,12 @@ window.addEventListener("DOMContentLoaded", () => {
     if(e.key === "Enter"){ search(); }
   });
 
+  // 관리자 접근 버튼 이벤트
+  const adminAccess = document.getElementById("adminAccess");
+  if(adminAccess) {
+    adminAccess.addEventListener("click", showAdminScreen);
+  }
+
   // 관리자 로그 관련 - 요소 존재 확인 후 이벤트 바인딩
   const loadLogsBtn = document.getElementById("loadLogsBtn");
   if(loadLogsBtn) {
