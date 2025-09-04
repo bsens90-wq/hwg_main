@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>유병자 인수가이드</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi64+Z7LC97JuQIOyduOyImOqwgOydtOuTnCIsInNob3J0X25hbWUiOiLrj5nssL3sm5Ag7J247IiY6rCA7J2064OcIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwidGhlbWVfY29sb3IiOiIjZmY3ZjAwIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmOGY5ZmEiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTWpRd0lpQm9aV2xuYUhROUlqSTBNQ0lnZG1sbGQwSnZlRDBpTUNBd0lESTBNQ0F5TkRBaUlHWnBiR3c5SWlObVpqZG1NREFpSUhodGJHNXpQU0pvZEhSd09pOHZkM2QzTG5jekxtOXlaaTh5TURBd0wzTjJaeUkrUEdOcGNtTnNaU0JqZUQwaU1USTBJaUJqZVQwaU1USTBJaUJ5UFNJeE1ERWlJR1pwYkd3OUlpTm1aalk0TURBMU9VNGlMejRBUEhCaGRHZ2daRDBpVFRFME9TQXRNRGxDTGpBeFNIazNOem93TlFGc05qZ3VPRGd1TURNMUxqQXhObDBpSUdacGJHdzlJaU5tWmpkbU1EQWlMejQ4TDNOMlp6ND0iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0K" />
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi7ZWc7ZmU7Jqw67O07JuQIOycoOuzteyekSDsnbTsiJjqsIDsnbTrk5wiLCJzaG9ydF9uYW1lIjoi7ZWc7ZmU7Jqw67O07JuQIOycoOuzteyekyIsInN0YXJ0X3VybCI6Ii4vaW5kZXguaHRtbCIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwidGhlbWVfY29sb3IiOiIjZmY3ZjAwIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmOGY5ZmEiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yV3lCM2FXUjBhRDBpTWpRd0lpQm9aV2xuYUhROUlqSTBNQ0lnZG1sbGQwSnZlRDBpTUNBd0lESTBNQ0F5TkRBaUlHWnBiR3c5SWlObVpqZG1NREFpSUhodGJHNXpQU0pvZEhSd09pOHZkM2QzTG5jekxtOXlaaTh5TURBd0wzTjJaeUkrUEdOcGNtTnNaU0JqZUQwaU1USTBJaUJqZVQwaU1USTBJaUJ5UFNJeE1ERWlJR1pwYkd3OUlpTm1aalk0REFBMU9VNGlMejRBUEhCaGRHZ2daRDBpVFRFME9TQXRNRGxDTGpBeFNIazNOem93TlFGc05qZ3VPRGd1TURNMUxqQXhObDBpSUdacGJHdzlJaU5tWmpkbU1EQWlMejQ4TDNOMlp6ND0iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0=" />
   <style>
     :root{
       --hanwha:#ff7f00;
@@ -79,9 +79,15 @@
       margin-top:8px;
     }
     button.reset:hover{background:#c82333}
+    button.debug{
+      background:#17a2b8;
+      margin-bottom:8px;
+    }
+    button.debug:hover{background:#138496}
     .hint{color:var(--muted); font-size:13px; margin-top:.25rem}
     .error{color:#d93025; font-size:14px; margin-top:.5rem}
     .success{color:#137333; font-size:13px}
+    .debug{color:#17a2b8; font-size:12px; margin-top:.5rem; background:#f8f9fa; padding:8px; border-radius:5px; font-family:monospace; white-space:pre-wrap; max-height:200px; overflow-y:auto;}
     .container-narrow{max-width:760px}
     .results{margin-top:1rem}
     .result-card{
@@ -236,6 +242,7 @@
     <button id="searchBtn" title="검색">검색</button>
     <div class="results" id="results"></div>
     <div class="meta" id="disMeta"></div>
+    <div class="debug" id="debugInfo" style="display:none;"></div>
     <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
   </div>
 </section>
@@ -249,9 +256,11 @@
         <input id="adminPassword" type="password" placeholder="관리자 비밀번호를 입력하세요." />
       </div>
       <button id="loadLogsBtn">로그 불러오기</button>
+      <button id="testGitHubBtn" class="debug">GitHub 연결 테스트</button>
       <button id="resetLoginBtn" class="reset">모든 사용자 로그인 초기화</button>
       <button id="backToSearchBtn" class="secondary">검색화면으로 돌아가기</button>
       <div id="adminMsg" class="error"></div>
+      <div class="debug" id="githubDebug"></div>
       <div class="meta" id="logStats"></div>
       <div id="logResults" class="results"></div>
     </div>
@@ -277,14 +286,166 @@ let deferredPrompt;
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
 
-// GitHub 로그 설정 (실제 사용시 GitHub Personal Access Token과 리포지토리 설정 필요)
+// GitHub 로그 설정
 const GITHUB_CONFIG = {
   owner: 'bsens90-wq',
   repo: 'hwg_main',
   path: 'logs/user_logs.json',
-  token: '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', // 실제 사용시 GitHub Personal Access Token 필요
+  token: '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',
   branch: 'main'
 };
+
+// 디버그 정보 표시
+function showDebug(message, isError = false) {
+  const debugElement = document.getElementById('debugInfo');
+  const githubDebugElement = document.getElementById('githubDebug');
+  
+  const timestamp = new Date().toLocaleTimeString();
+  const debugMsg = `[${timestamp}] ${message}\n`;
+  
+  if (debugElement) {
+    debugElement.style.display = 'block';
+    debugElement.textContent += debugMsg;
+    debugElement.scrollTop = debugElement.scrollHeight;
+  }
+  if (githubDebugElement) {
+    githubDebugElement.textContent += debugMsg;
+    githubDebugElement.scrollTop = githubDebugElement.scrollHeight;
+  }
+  
+  console.log(isError ? 'ERROR:' : 'DEBUG:', message);
+}
+
+// GitHub 연결 테스트
+async function testGitHubConnection() {
+  const msg = document.getElementById("adminMsg");
+  const password = document.getElementById("adminPassword").value.trim();
+  
+  if(password !== "admin123") {
+    msg.textContent = "관리자 비밀번호가 올바르지 않습니다.";
+    return;
+  }
+  
+  msg.textContent = "";
+  showDebug("=== GitHub 연결 테스트 시작 ===");
+
+  try {
+    // 1. 기본 GitHub API 응답 테스트
+    showDebug("1. GitHub API 기본 연결 테스트...");
+    const basicResponse = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    showDebug(`기본 API 응답: ${basicResponse.status} ${basicResponse.statusText}`);
+    
+    if (basicResponse.ok) {
+      const userData = await basicResponse.json();
+      showDebug(`인증된 사용자: ${userData.login}`);
+    }
+
+    // 2. 리포지토리 접근 테스트
+    showDebug("2. 리포지토리 접근 테스트...");
+    const repoUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`;
+    showDebug(`리포지토리 URL: ${repoUrl}`);
+    
+    const repoResponse = await fetch(repoUrl, {
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    showDebug(`리포지토리 응답: ${repoResponse.status} ${repoResponse.statusText}`);
+
+    if (!repoResponse.ok) {
+      const errorText = await repoResponse.text();
+      showDebug(`리포지토리 오류 내용: ${errorText}`, true);
+      throw new Error(`리포지토리 접근 실패: ${repoResponse.status}`);
+    }
+
+    const repoData = await repoResponse.json();
+    showDebug(`리포지토리명: ${repoData.name}, 공개여부: ${repoData.private ? 'Private' : 'Public'}`);
+
+    // 3. 파일 접근 테스트
+    showDebug("3. 로그 파일 접근 테스트...");
+    const fileUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+    showDebug(`파일 URL: ${fileUrl}`);
+    
+    const fileResponse = await fetch(fileUrl, {
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    showDebug(`파일 접근 응답: ${fileResponse.status} ${fileResponse.statusText}`);
+
+    if (fileResponse.ok) {
+      const fileData = await fileResponse.json();
+      showDebug(`파일 존재함: ${GITHUB_CONFIG.path}`);
+      showDebug(`파일 크기: ${fileData.size} bytes, SHA: ${fileData.sha}`);
+      
+      try {
+        const content = atob(fileData.content);
+        const logs = JSON.parse(content);
+        showDebug(`현재 로그 개수: ${logs.length}개`);
+        
+        if (logs.length > 0) {
+          const lastLog = logs[logs.length - 1];
+          showDebug(`최근 로그: ${lastLog.date} - ${lastLog.empno} - ${lastLog.action}`);
+        }
+      } catch (parseError) {
+        showDebug(`파일 파싱 오류: ${parseError.message}`, true);
+      }
+      
+    } else if (fileResponse.status === 404) {
+      showDebug("파일이 존재하지 않음. 첫 로그 저장 시 자동 생성됩니다.");
+      
+      // 4. 파일 생성 테스트
+      showDebug("4. 파일 생성 테스트...");
+      const testLog = [{
+        empno: "TEST",
+        action: "test_connection",
+        details: "GitHub 연결 테스트",
+        timestamp: new Date().toISOString(),
+        date: new Date().toLocaleString('ko-KR')
+      }];
+      
+      const createResponse = await fetch(fileUrl, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${GITHUB_CONFIG.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: 'GitHub 연결 테스트 - 로그 파일 생성',
+          content: btoa(JSON.stringify(testLog, null, 2)),
+          branch: GITHUB_CONFIG.branch
+        })
+      });
+      
+      if (createResponse.ok) {
+        showDebug("테스트 파일 생성 성공!");
+      } else {
+        const createErrorText = await createResponse.text();
+        showDebug(`파일 생성 실패: ${createResponse.status} - ${createErrorText}`, true);
+      }
+      
+    } else {
+      const errorText = await fileResponse.text();
+      showDebug(`파일 접근 오류: ${fileResponse.status} - ${errorText}`, true);
+    }
+
+    showDebug("=== GitHub 연결 테스트 완료 ===");
+    msg.innerHTML = '<span class="success">GitHub 연결 테스트 완료! 디버그 정보를 확인하세요.</span>';
+
+  } catch (error) {
+    showDebug(`GitHub 연결 테스트 실패: ${error.message}`, true);
+    msg.textContent = `GitHub 연결 실패: ${error.message}`;
+  }
+}
 
 // 자동 로그인 체크
 function checkAutoLogin() {
@@ -295,11 +456,11 @@ function checkAutoLogin() {
     document.getElementById("searchScreen").style.display = "flex";
     document.getElementById("userInfo").textContent = `로그인: ${currentUser}`;
     document.getElementById("searchInput").focus();
-    console.log('자동 로그인:', currentUser);
+    showDebug(`자동 로그인: ${currentUser}`);
   }
 }
 
-// GitHub 로그 저장 함수
+// GitHub 로그 저장 함수 (디버깅 추가)
 async function saveLogToGitHub(empno, action, details = '') {
   const log = {
     empno: empno,
@@ -307,8 +468,8 @@ async function saveLogToGitHub(empno, action, details = '') {
     details: details,
     timestamp: new Date().toISOString(),
     date: new Date().toLocaleString('ko-KR'),
-    userAgent: navigator.userAgent,
-    ip: 'client-side' // 클라이언트 사이드에서는 실제 IP를 얻기 어려움
+    userAgent: navigator.userAgent.substring(0, 100),
+    ip: 'client-side'
   };
 
   try {
@@ -319,24 +480,29 @@ async function saveLogToGitHub(empno, action, details = '') {
       logs.splice(0, logs.length - 500);
     }
     localStorage.setItem('userLogs', JSON.stringify(logs));
+    showDebug(`로컬 저장 완료: ${action} by ${empno}`);
 
-    // GitHub에 로그 저장 (실제 환경에서는 서버를 통해 처리하는 것을 권장)
-    if (GITHUB_CONFIG.token !== 'YOUR_GITHUB_TOKEN') {
+    // GitHub에 로그 저장
+    if (GITHUB_CONFIG.token && GITHUB_CONFIG.token !== 'YOUR_GITHUB_TOKEN') {
+      showDebug(`GitHub 저장 시도: ${action} by ${empno}`);
       await appendLogToGitHub(log);
+      showDebug(`GitHub 저장 완료: ${action} by ${empno}`);
+    } else {
+      showDebug('GitHub 토큰이 설정되지 않음 - 로컬 저장만 사용');
     }
     
-    console.log('로그 저장 완료:', log);
   } catch (error) {
-    console.error('GitHub 로그 저장 실패:', error);
-    // GitHub 저장이 실패해도 로컬 저장은 유지
+    showDebug(`GitHub 로그 저장 실패: ${error.message}`, true);
   }
 }
 
-// GitHub API를 통한 로그 추가 (실제 구현시 서버 사이드에서 처리 권장)
+// GitHub API를 통한 로그 추가 (디버깅 강화)
 async function appendLogToGitHub(newLog) {
   try {
+    const fileUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+    
     // 현재 파일 내용 가져오기
-    const getResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+    const getResponse = await fetch(fileUrl, {
       headers: {
         'Authorization': `token ${GITHUB_CONFIG.token}`,
         'Accept': 'application/vnd.github.v3+json'
@@ -351,6 +517,11 @@ async function appendLogToGitHub(newLog) {
       sha = data.sha;
       const content = atob(data.content);
       existingLogs = JSON.parse(content);
+      showDebug(`기존 로그 ${existingLogs.length}개 발견`);
+    } else if (getResponse.status === 404) {
+      showDebug("파일이 존재하지 않음. 새로 생성합니다.");
+    } else {
+      throw new Error(`파일 가져오기 실패: ${getResponse.status}`);
     }
 
     // 새 로그 추가
@@ -364,26 +535,34 @@ async function appendLogToGitHub(newLog) {
     const newContent = btoa(JSON.stringify(existingLogs, null, 2));
 
     // GitHub에 업데이트
-    const updateResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+    const updatePayload = {
+      message: `Add log: ${newLog.action} by ${newLog.empno}`,
+      content: newContent,
+      branch: GITHUB_CONFIG.branch
+    };
+    
+    if (sha) {
+      updatePayload.sha = sha;
+    }
+
+    const updateResponse = await fetch(fileUrl, {
       method: 'PUT',
       headers: {
         'Authorization': `token ${GITHUB_CONFIG.token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        message: `Add log: ${newLog.action} by ${newLog.empno}`,
-        content: newContent,
-        sha: sha,
-        branch: GITHUB_CONFIG.branch
-      })
+      body: JSON.stringify(updatePayload)
     });
 
     if (!updateResponse.ok) {
-      throw new Error(`GitHub API 오류: ${updateResponse.status}`);
+      const errorText = await updateResponse.text();
+      throw new Error(`GitHub 업데이트 실패: ${updateResponse.status} - ${errorText}`);
     }
 
+    showDebug(`GitHub 업데이트 성공: 총 ${existingLogs.length}개 로그`);
+
   } catch (error) {
-    console.error('GitHub 로그 저장 오류:', error);
+    showDebug(`GitHub 로그 저장 오류: ${error.message}`, true);
     throw error;
   }
 }
@@ -406,7 +585,7 @@ async function loadLogsFromGitHub() {
     const content = atob(data.content);
     return JSON.parse(content);
   } catch (error) {
-    console.error('GitHub 로그 불러오기 실패:', error);
+    showDebug(`GitHub 로그 불러오기 실패: ${error.message}`, true);
     // GitHub에서 불러오기 실패시 로컬 로그 반환
     return JSON.parse(localStorage.getItem('userLogs') || '[]');
   }
@@ -618,6 +797,8 @@ async function loadLogs() {
   loadBtn.disabled = true;
 
   try {
+    showDebug("관리자 로그 불러오기 시작...");
+    
     // GitHub에서 로그 불러오기
     userLogs = await loadLogsFromGitHub();
     userLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -632,6 +813,7 @@ async function loadLogs() {
     const searchCount = userLogs.filter(l => l.action === 'search').length;
    
     stats.textContent = `전체 ${totalLogs}개 | 사용자 ${uniqueUsers}명 | 로그인 ${loginCount}회 | 검색 ${searchCount}회`;
+    showDebug(`로그 통계: 총 ${totalLogs}개, 사용자 ${uniqueUsers}명`);
    
     // 로그 목록
     if(userLogs.length === 0) {
@@ -645,7 +827,10 @@ async function loadLogs() {
         </div>
       `).join('');
     }
+    
+    showDebug("로그 불러오기 완료");
   } catch (error) {
+    showDebug(`로그 불러오기 실패: ${error.message}`, true);
     msg.textContent = "로그 불러오기 실패: " + error.message;
   } finally {
     loadBtn.innerHTML = '로그 불러오기';
@@ -686,6 +871,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('adminPassword').addEventListener('keydown', e => {
     if(e.key === 'Enter') loadLogs();
   });
+
+  // GitHub 테스트 버튼
+  document.getElementById('testGitHubBtn').addEventListener('click', testGitHubConnection);
 
   // 로그인 상태 초기화 버튼
   document.getElementById('resetLoginBtn').addEventListener('click', resetAllLogins);
