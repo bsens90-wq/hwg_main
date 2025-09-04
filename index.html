@@ -291,7 +291,7 @@ const GITHUB_CONFIG = {
   owner: 'bsens90-wq',
   repo: 'patient-guide-logs', // 실제 생성한 리포지토리명으로 수정
   path: 'logs/user_logs.json',
-  token: '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', // 실제 토큰으로 교체하세요
+  token: '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', // 실제 토큰으로 교체하세요
   branch: 'main'
 };
 
@@ -333,7 +333,7 @@ async function testGitHubConnection() {
   showDebug(`토큰 길이: ${GITHUB_CONFIG.token ? GITHUB_CONFIG.token.length : '없음'}`);
   showDebug(`토큰 시작: ${GITHUB_CONFIG.token ? GITHUB_CONFIG.token.substring(0, 10) + '...' : '없음'}`);
   
-  if (!GITHUB_CONFIG.token || GITHUB_CONFIG.token === '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') {
+  if (!GITHUB_CONFIG.token || GITHUB_CONFIG.token === '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') {
     showDebug("GitHub 토큰이 설정되지 않았습니다. 코드에서 토큰을 설정해주세요.", true);
     msg.textContent = "토큰이 설정되지 않았습니다. 코드를 수정해주세요.";
     return;
