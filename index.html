@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>동창원 인수가이드</title>
+  <title>유병자 인수가이드</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi64+Z7LC97JuQIOyduOyImOqwgOydtOuTnCIsInNob3J0X25hbWUiOiLrj5nssL3sm5Ag7J247IiY6rCA7J2064OcIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwidGhlbWVfY29sb3IiOiIjZmY3ZjAwIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmOGY5ZmEiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTWpRd0lpQm9aV2xuYUhROUlqSTBNQ0lnZG1sbGQwSnZlRDBpTUNBd0lESTBNQ0F5TkRBaUlHWnBiR3c5SWlObVpqZG1NREFpSUhodGJHNXpQU0pvZEhSd09pOHZkM2QzTG5jekxtOXlaaTh5TURBd0wzTjJaeUkrUEdOcGNtTnNaU0JqZUQwaU1USTBJaUJqZVQwaU1USTBJaUJ5UFNJeE1ERWlJR1pwYkd3OUlpTm1aalk0TURBMU9VNGlMejRBUEhCaGRHZ2daRDBpVFRFME9TQXRNRGxDTGpBeFNIazNOem93TlFGc05qZ3VPRGd1TURNMUxqQXhObDBpSUdacGJHdzlJaU5tWmpkbU1EQWlMejQ4TDNOMlp6ND0iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0K" />
   <style>
@@ -180,38 +180,40 @@
   </style>
 </head>
 <body>
-  <!-- 로그인 화면 -->
-  <section id="loginScreen" class="screen">
-    <div class="app-title">한화손보 동창원 SI 인수 가이드</div>
-    <div class="card">
-      <h2>로그인</h2>
-      <div class="row">
-        <input id="empno" type="text" placeholder="사번 입력" autocomplete="username" />
-      </div>
-      <div class="row">
-        <input id="password" type="password" placeholder="비밀번호 입력" autocomplete="current-password" />
-        <div class="hint">사번과 비밀번호는 승인된 목록에 있어야 합니다.</div>
-      </div>
-      <button id="loginBtn">로그인</button>
-      <button id="installBtn" class="secondary">홈화면에 추가</button>
-      <div id="loginMsg" class="error" role="alert" aria-live="polite"></div>
-      <div class="meta" id="empMeta"></div>
+ <!-- 로그인 화면 -->
+<section id="loginScreen" class="screen">
+  <div class="app-title">한화손보 유병자 인수 가이드</div>
+  <div class="card">
+    <h2>로그인</h2>
+    <div class="row">
+      <input id="empno" type="text" placeholder="사번 입력" autocomplete="username" />
     </div>
-  </section>
+    <div class="row">
+      <input id="password" type="password" placeholder="비밀번호 입력" autocomplete="current-password" />
+      <div class="hint">사번과 비밀번호는 승인된 목록에 있어야 합니다.</div>
+    </div>
+    <button id="loginBtn">로그인</button>
+    <button id="installBtn" class="secondary">홈화면에 추가</button>
+    <div id="loginMsg" class="error" role="alert" aria-live="polite"></div>
+    <div class="meta" id="empMeta"></div>
+    <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+  </div>
+</section>
 
-  <!-- 검색 화면 -->
-  <section id="searchScreen" class="screen" style="display:none;">
-    <div class="app-title">한화손보 동창원 SI 인수 가이드</div>
-    <div class="card container-narrow">
-      <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
-      <div class="row">
-        <input id="searchInput" type="text" placeholder="예시: 용종, 골절, 당뇨 등" />
-      </div>
-      <button id="searchBtn" title="검색">검색</button>
-      <div class="results" id="results"></div>
-      <div class="meta" id="disMeta"></div>
+<!-- 검색 화면 -->
+<section id="searchScreen" class="screen" style="display:none;">
+  <div class="app-title">한화손보 유병자 인수 가이드</div>
+  <div class="card container-narrow">
+    <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
+    <div class="row">
+      <input id="searchInput" type="text" placeholder="예시: 용종, 골절, 당뇨 등" />
     </div>
-  </section>
+    <button id="searchBtn" title="검색">검색</button>
+    <div class="results" id="results"></div>
+    <div class="meta" id="disMeta"></div>
+    <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+  </div>
+</section>
 
   <!-- 관리자 로그 화면 -->
   <section id="adminScreen" class="screen" style="display:none;">
