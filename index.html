@@ -333,9 +333,9 @@ async function testGitHubConnection() {
   showDebug(`토큰 길이: ${GITHUB_CONFIG.token ? GITHUB_CONFIG.token.length : '없음'}`);
   showDebug(`토큰 시작: ${GITHUB_CONFIG.token ? GITHUB_CONFIG.token.substring(0, 10) + '...' : '없음'}`);
   
-  if (!GITHUB_CONFIG.token || GITHUB_CONFIG.token === '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') {
-    showDebug("GitHub 토큰이 설정되지 않았습니다. 코드에서 토큰을 설정해주세요.", true);
-    msg.textContent = "토큰이 설정되지 않았습니다. 코드를 수정해주세요.";
+if (!GITHUB_CONFIG.token) {
+    showDebug("GitHub 토큰이 설정되지 않았습니다.", true);
+    msg.textContent = "토큰이 설정되지 않았습니다.";
     return;
   }
 
