@@ -175,6 +175,12 @@
   <!-- PWA 설치 프롬프트 -->
   <div id="installPrompt" class="install-prompt">홈화면에 추가하기</div>
 
+  <!-- PWA 설치 프롬프트 -->
+  <div id="installPrompt" class="install-prompt">홈화면에 추가하기</div>
+
+  <!-- 관리자 접근 버튼 -->
+  <div id="adminAccess" style="position:fixed; bottom:10px; right:10px; width:40px; height:40px; background:rgba(108,117,125,0.8); border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight:700;" onclick="showAdminScreen()" title="관리자">Admin</div>
+
 <script>
 // PWA 설치 관련
 let deferredPrompt;
@@ -425,15 +431,33 @@ window.addEventListener("DOMContentLoaded", () => {
     if(e.key === "Enter"){ search(); }
   });
 
-  // 관리자 로그 관련
-  document.getElementById("loadLogsBtn").addEventListener("click", loadLogs);
-  document.getElementById("filterBtn").addEventListener("click", filterLogs);
-  document.getElementById("clearFilterBtn").addEventListener("click", clearFilter);
-  document.getElementById("backToSearchBtn").addEventListener("click", backToSearch);
+  // 관리자 로그 관련 - 요소 존재 확인 후 이벤트 바인딩
+  const loadLogsBtn = document.getElementById("loadLogsBtn");
+  if(loadLogsBtn) {
+    loadLogsBtn.addEventListener("click", loadLogs);
+  }
   
-  document.getElementById("adminPassword").addEventListener("keydown", e => {
-    if(e.key === "Enter"){ loadLogs(); }
-  });
+  const filterBtn = document.getElementById("filterBtn");
+  if(filterBtn) {
+    filterBtn.addEventListener("click", filterLogs);
+  }
+  
+  const clearFilterBtn = document.getElementById("clearFilterBtn");
+  if(clearFilterBtn) {
+    clearFilterBtn.addEventListener("click", clearFilter);
+  }
+  
+  const backToSearchBtn = document.getElementById("backToSearchBtn");
+  if(backToSearchBtn) {
+    backToSearchBtn.addEventListener("click", backToSearch);
+  }
+  
+  const adminPassword = document.getElementById("adminPassword");
+  if(adminPassword) {
+    adminPassword.addEventListener("keydown", e => {
+      if(e.key === "Enter"){ loadLogs(); }
+    });
+  }
 });
 </script>
 
