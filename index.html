@@ -473,39 +473,28 @@ function checkAutoLogin() {
   }
 }
 
-// GitHub 로그 저장 함수 (디버깅 추가)
+// GitHub 로그 저장 함수 (Netlify Functions 사용)
 async function saveLogToGitHub(empno, action, details = '') {
-  const log = {
-    empno: empno,
-    action: action,
-    details: details,
-    timestamp: new Date().toISOString(),
-    date: new Date().toLocaleString('ko-KR'),
-    userAgent: navigator.userAgent.substring(0, 100),
-    ip: 'client-side'
-  };
-
   try {
-    // 로컬에도 저장 (기존 로직 유지)
-    const logs = JSON.parse(localStorage.getItem('userLogs') || '[]');
-    logs.push(log);
-    if(logs.length > 500) {
-      logs.splice(0, logs.length - 500);
-    }
-    localStorage.setItem('userLogs', JSON.stringify(logs));
-    showDebug(`로컬 저장 완료: ${action} by ${empno}`);
+    const response = await fetch('/.netlify/functions/github-log', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        empno,
+        action,
+        details
+      })
+    });
 
-    // GitHub에 로그 저장
-    if (GITHUB_CONFIG.token && GITHUB_CONFIG.token !== 'YOUR_NEW_TOKEN_HERE' && GITHUB_CONFIG.token !== null) {
-      showDebug(`GitHub 저장 시도: ${action} by ${empno}`);
-      await appendLogToGitHub(log);
-      showDebug(`GitHub 저장 완료: ${action} by ${empno}`);
-    } else {
-      showDebug('GitHub 로그 저장 비활성화됨 - 로컬 저장만 사용');
+    if (!response.ok) {
+      throw new Error('서버 오류');
     }
-    
+
+    showDebug(`중앙 로그 저장 완료: ${action} by ${empno}`);
   } catch (error) {
-    showDebug(`GitHub 로그 저장 실패: ${error.message}`, true);
+    showDebug(`중앙 로그 저장 실패: ${error.message}`, true);
   }
 }
 
