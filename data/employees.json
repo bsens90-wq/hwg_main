@@ -5,8 +5,8 @@
   },
 
  {
-    "empno": 부산지점,
-    "password": 1111@
+    "empno": "부산지점",
+    "password": 1111
   },
 
    {
@@ -249,4 +249,5 @@
     "password": "alska"
   }
 ]
+
 
