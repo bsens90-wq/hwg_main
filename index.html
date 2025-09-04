@@ -74,6 +74,11 @@
       margin-bottom:0;
     }
     button.secondary:hover{background:#545b62}
+    button.reset{
+      background:#dc3545;
+      margin-top:8px;
+    }
+    button.reset:hover{background:#c82333}
     .hint{color:var(--muted); font-size:13px; margin-top:.25rem}
     .error{color:#d93025; font-size:14px; margin-top:.5rem}
     .success{color:#137333; font-size:13px}
@@ -177,6 +182,25 @@
       margin-top:4px;
       font-family:monospace;
     }
+    .user-info{
+      position:fixed;
+      top:10px;
+      right:10px;
+      background:rgba(255,127,0,0.1);
+      padding:8px 12px;
+      border-radius:20px;
+      font-size:12px;
+      color:var(--hanwha);
+      font-weight:600;
+    }
+    .loading{
+      display:inline-block;
+      animation:spin 1s linear infinite;
+    }
+    @keyframes spin{
+      0%{transform:rotate(0deg);}
+      100%{transform:rotate(360deg);}
+    }
   </style>
 </head>
 <body>
@@ -202,6 +226,7 @@
 
 <!-- 검색 화면 -->
 <section id="searchScreen" class="screen" style="display:none;">
+  <div class="user-info" id="userInfo"></div>
   <div class="app-title">한화손보 유병자 인수 가이드</div>
   <div class="card container-narrow">
     <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
@@ -224,6 +249,7 @@
         <input id="adminPassword" type="password" placeholder="관리자 비밀번호를 입력하세요." />
       </div>
       <button id="loadLogsBtn">로그 불러오기</button>
+      <button id="resetLoginBtn" class="reset">모든 사용자 로그인 초기화</button>
       <button id="backToSearchBtn" class="secondary">검색화면으로 돌아가기</button>
       <div id="adminMsg" class="error"></div>
       <div class="meta" id="logStats"></div>
@@ -251,26 +277,144 @@ let deferredPrompt;
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
 
-// 로그 기록 함수
-function saveLog(empno, action, details = '') {
+// GitHub 로그 설정 (실제 사용시 GitHub Personal Access Token과 리포지토리 설정 필요)
+const GITHUB_CONFIG = {
+  owner: 'bsens90-wq',
+  repo: 'hwg_main',
+  path: 'logs/user_logs.json',
+  token: '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', // 실제 사용시 GitHub Personal Access Token 필요
+  branch: 'main'
+};
+
+// 자동 로그인 체크
+function checkAutoLogin() {
+  const savedUser = localStorage.getItem('hwg_current_user');
+  if (savedUser) {
+    currentUser = savedUser;
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("searchScreen").style.display = "flex";
+    document.getElementById("userInfo").textContent = `로그인: ${currentUser}`;
+    document.getElementById("searchInput").focus();
+    console.log('자동 로그인:', currentUser);
+  }
+}
+
+// GitHub 로그 저장 함수
+async function saveLogToGitHub(empno, action, details = '') {
   const log = {
     empno: empno,
     action: action,
     details: details,
     timestamp: new Date().toISOString(),
-    date: new Date().toLocaleString('ko-KR')
+    date: new Date().toLocaleString('ko-KR'),
+    userAgent: navigator.userAgent,
+    ip: 'client-side' // 클라이언트 사이드에서는 실제 IP를 얻기 어려움
   };
- 
-  const logs = JSON.parse(localStorage.getItem('userLogs') || '[]');
-  logs.push(log);
- 
-  // 최대 500개만 보관
-  if(logs.length > 500) {
-    logs.splice(0, logs.length - 500);
+
+  try {
+    // 로컬에도 저장 (기존 로직 유지)
+    const logs = JSON.parse(localStorage.getItem('userLogs') || '[]');
+    logs.push(log);
+    if(logs.length > 500) {
+      logs.splice(0, logs.length - 500);
+    }
+    localStorage.setItem('userLogs', JSON.stringify(logs));
+
+    // GitHub에 로그 저장 (실제 환경에서는 서버를 통해 처리하는 것을 권장)
+    if (GITHUB_CONFIG.token !== 'YOUR_GITHUB_TOKEN') {
+      await appendLogToGitHub(log);
+    }
+    
+    console.log('로그 저장 완료:', log);
+  } catch (error) {
+    console.error('GitHub 로그 저장 실패:', error);
+    // GitHub 저장이 실패해도 로컬 저장은 유지
   }
- 
-  localStorage.setItem('userLogs', JSON.stringify(logs));
-  console.log('로그 저장:', log);
+}
+
+// GitHub API를 통한 로그 추가 (실제 구현시 서버 사이드에서 처리 권장)
+async function appendLogToGitHub(newLog) {
+  try {
+    // 현재 파일 내용 가져오기
+    const getResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    let existingLogs = [];
+    let sha = null;
+
+    if (getResponse.ok) {
+      const data = await getResponse.json();
+      sha = data.sha;
+      const content = atob(data.content);
+      existingLogs = JSON.parse(content);
+    }
+
+    // 새 로그 추가
+    existingLogs.push(newLog);
+    
+    // 최대 1000개 로그만 유지
+    if (existingLogs.length > 1000) {
+      existingLogs = existingLogs.slice(-1000);
+    }
+
+    const newContent = btoa(JSON.stringify(existingLogs, null, 2));
+
+    // GitHub에 업데이트
+    const updateResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `Add log: ${newLog.action} by ${newLog.empno}`,
+        content: newContent,
+        sha: sha,
+        branch: GITHUB_CONFIG.branch
+      })
+    });
+
+    if (!updateResponse.ok) {
+      throw new Error(`GitHub API 오류: ${updateResponse.status}`);
+    }
+
+  } catch (error) {
+    console.error('GitHub 로그 저장 오류:', error);
+    throw error;
+  }
+}
+
+// GitHub에서 로그 불러오기
+async function loadLogsFromGitHub() {
+  try {
+    const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub API 오류: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = atob(data.content);
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('GitHub 로그 불러오기 실패:', error);
+    // GitHub에서 불러오기 실패시 로컬 로그 반환
+    return JSON.parse(localStorage.getItem('userLogs') || '[]');
+  }
+}
+
+// 로그 기록 함수 (기존 로직 유지하면서 GitHub 연동 추가)
+function saveLog(empno, action, details = '') {
+  saveLogToGitHub(empno, action, details);
 }
 
 // PWA 설치 이벤트
@@ -344,10 +488,15 @@ function login(){
  
   if(user){
     currentUser = empno;
+    
+    // 로그인 상태 저장 (자동 로그인용)
+    localStorage.setItem('hwg_current_user', empno);
+    
     saveLog(empno, 'login');
    
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("searchScreen").style.display = "flex";
+    document.getElementById("userInfo").textContent = `로그인: ${empno}`;
     document.getElementById("searchInput").focus();
     msg.textContent = "";
   }else{
@@ -357,7 +506,7 @@ function login(){
 
 // 검색 정규화
 function normalize(str){
-  return String(str || "").toLowerCase().replace(/[\s·,\-\.]/g, "");
+  return String(str || "").toLowerCase().replace(/[\sÂ·,\-\.]/g, "");
 }
 
 // 검색
@@ -375,7 +524,7 @@ function search(){
     saveLog(currentUser, 'search', query);
   }
 
-  const tokens = query.split(/[\s·,\-\.]+/).filter(Boolean).map(normalize);
+  const tokens = query.split(/[\sÂ·,\-\.]+/).filter(Boolean).map(normalize);
  
   const matched = diseases.filter(d => {
     const name = normalize(d.name);
@@ -431,10 +580,33 @@ function search(){
   `).join('');
 }
 
-// 관리자 로그 불러오기
-function loadLogs() {
+// 관리자 로그인 초기화
+function resetAllLogins() {
   const password = document.getElementById("adminPassword").value.trim();
   const msg = document.getElementById("adminMsg");
+  
+  if(password !== "admin123") {
+    msg.textContent = "관리자 비밀번호가 올바르지 않습니다.";
+    return;
+  }
+
+  // 모든 사용자의 로그인 상태 초기화
+  localStorage.removeItem('hwg_current_user');
+  
+  // 현재 사용자도 로그아웃
+  currentUser = null;
+  
+  msg.innerHTML = '<span class="success">모든 사용자의 로그인 상태가 초기화되었습니다.</span>';
+  
+  // 초기화 로그 기록
+  saveLogToGitHub('ADMIN', 'reset_all_logins', 'All user login states reset');
+}
+
+// 관리자 로그 불러오기 (GitHub 연동)
+async function loadLogs() {
+  const password = document.getElementById("adminPassword").value.trim();
+  const msg = document.getElementById("adminMsg");
+  const loadBtn = document.getElementById("loadLogsBtn");
  
   if(password !== "admin123") {
     msg.textContent = "관리자 비밀번호가 올바르지 않습니다.";
@@ -442,38 +614,51 @@ function loadLogs() {
   }
  
   msg.textContent = "";
-  userLogs = JSON.parse(localStorage.getItem('userLogs') || '[]');
-  userLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
- 
-  const stats = document.getElementById("logStats");
-  const results = document.getElementById("logResults");
- 
-  // 통계
-  const totalLogs = userLogs.length;
-  const uniqueUsers = new Set(userLogs.map(l => l.empno)).size;
-  const loginCount = userLogs.filter(l => l.action === 'login').length;
-  const searchCount = userLogs.filter(l => l.action === 'search').length;
- 
-  stats.textContent = `전체 ${totalLogs}개 | 사용자 ${uniqueUsers}명 | 로그인 ${loginCount}회 | 검색 ${searchCount}회`;
- 
-  // 로그 목록
-  if(userLogs.length === 0) {
-    results.innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
-    return;
+  loadBtn.innerHTML = '<span class="loading">⟳</span> 로그 불러오는 중...';
+  loadBtn.disabled = true;
+
+  try {
+    // GitHub에서 로그 불러오기
+    userLogs = await loadLogsFromGitHub();
+    userLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+   
+    const stats = document.getElementById("logStats");
+    const results = document.getElementById("logResults");
+   
+    // 통계
+    const totalLogs = userLogs.length;
+    const uniqueUsers = new Set(userLogs.map(l => l.empno)).size;
+    const loginCount = userLogs.filter(l => l.action === 'login').length;
+    const searchCount = userLogs.filter(l => l.action === 'search').length;
+   
+    stats.textContent = `전체 ${totalLogs}개 | 사용자 ${uniqueUsers}명 | 로그인 ${loginCount}회 | 검색 ${searchCount}회`;
+   
+    // 로그 목록
+    if(userLogs.length === 0) {
+      results.innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
+    } else {
+      results.innerHTML = userLogs.map(log => `
+        <div class="log-card">
+          <div class="log-header">코드: ${log.empno} - ${log.action === 'login' ? '로그인' : log.action === 'search' ? '검색' : log.action}</div>
+          <div class="log-time">${log.date}</div>
+          ${log.details ? `<div class="log-search">검색어: "${log.details}"</div>` : ''}
+        </div>
+      `).join('');
+    }
+  } catch (error) {
+    msg.textContent = "로그 불러오기 실패: " + error.message;
+  } finally {
+    loadBtn.innerHTML = '로그 불러오기';
+    loadBtn.disabled = false;
   }
- 
-  results.innerHTML = userLogs.map(log => `
-    <div class="log-card">
-      <div class="log-header">코드: ${log.empno} - ${log.action === 'login' ? '로그인' : '검색'}</div>
-      <div class="log-time">${log.date}</div>
-      ${log.details ? `<div class="log-search">검색어: "${log.details}"</div>` : ''}
-    </div>
-  `).join('');
 }
 
 // 이벤트 리스너
 document.addEventListener('DOMContentLoaded', () => {
-  loadAllData();
+  // 데이터 로드 및 자동 로그인 체크
+  Promise.all([loadAllData()]).then(() => {
+    checkAutoLogin();
+  });
  
   // 로그인
   document.getElementById('loginBtn').addEventListener('click', login);
@@ -501,6 +686,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('adminPassword').addEventListener('keydown', e => {
     if(e.key === 'Enter') loadLogs();
   });
+
+  // 로그인 상태 초기화 버튼
+  document.getElementById('resetLoginBtn').addEventListener('click', resetAllLogins);
  
   document.getElementById('backToSearchBtn').addEventListener('click', () => {
     document.getElementById('adminScreen').style.display = 'none';
