@@ -410,6 +410,7 @@ function search(){
 window.addEventListener("DOMContentLoaded", () => {
   loadAllData();
 
+  // 로그인 관련
   document.getElementById("loginBtn").addEventListener("click", login);
   document.getElementById("empno").addEventListener("keydown", e => {
     if(e.key === "Enter"){ login(); }
@@ -418,9 +419,20 @@ window.addEventListener("DOMContentLoaded", () => {
     if(e.key === "Enter"){ login(); }
   });
 
+  // 검색 관련
   document.getElementById("searchBtn").addEventListener("click", search);
   document.getElementById("searchInput").addEventListener("keydown", e => {
     if(e.key === "Enter"){ search(); }
+  });
+
+  // 관리자 로그 관련
+  document.getElementById("loadLogsBtn").addEventListener("click", loadLogs);
+  document.getElementById("filterBtn").addEventListener("click", filterLogs);
+  document.getElementById("clearFilterBtn").addEventListener("click", clearFilter);
+  document.getElementById("backToSearchBtn").addEventListener("click", backToSearch);
+  
+  document.getElementById("adminPassword").addEventListener("keydown", e => {
+    if(e.key === "Enter"){ loadLogs(); }
   });
 });
 </script>
