@@ -2,8 +2,9 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>한화손보 동창원 SI 인수 가이드</title>
+  <title>동창원 인수가이드</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi64+Z7LC97JuQIOyduOyImOqwgOydtOuTnCIsInNob3J0X25hbWUiOiLrj5nssL3sm5Ag7J247IiY6rCA7J2064OcIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwidGhlbWVfY29sb3IiOiIjZmY3ZjAwIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmOGY5ZmEiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTWpRd0lpQm9aV2xuYUhROUlqSTBNQ0lnZG1sbGQwSnZlRDBpTUNBd0lESTBNQ0F5TkRBaUlHWnBiR3c5SWlObVpqZG1NREFpSUhodGJHNXpQU0pvZEhSd09pOHZkM2QzTG5jekxtOXlaaTh5TURBd0wzTjJaeUkrUEdOcGNtTnNaU0JqZUQwaU1USTBJaUJqZVQwaU1USTBJaUJ5UFNJeE1ERWlJR1pwYkd3OUlpTm1aalk0TURBMU9VNGlMejRBUEhCaGRHZ2daRDBpVFRFME9TQXRNRGxDTGpBeFNIazNOem93TlFGc05qZ3VPRGd1TURNMUxqQXhObDBpSUdacGJHdzlJaU5tWmpkbU1EQWlMejQ4TDNOMlp6ND0iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0K" />
   <style>
     :root{
       --hanwha:#ff7f00;
@@ -21,19 +22,20 @@
       background:var(--bg);
       color:var(--text);
     }
-    header{
-      background:var(--hanwha);
-      color:#fff;
-      padding:1rem;
-      text-align:center;
-      font-weight:700;
-    }
     .screen{
-      min-height:calc(100vh - 64px);
+      min-height:100vh;
       display:flex;
+      flex-direction:column;
       align-items:center;
       justify-content:center;
       padding:2rem 1rem;
+    }
+    .app-title{
+      font-size:24px;
+      font-weight:700;
+      color:var(--hanwha);
+      margin-bottom:2rem;
+      text-align:center;
     }
     .card{
       width:100%;
@@ -64,15 +66,18 @@
       font-weight:700;
       cursor:pointer;
       font-size:16px;
+      margin-bottom:8px;
     }
     button:hover{background:var(--hanwha-dark)}
+    button.secondary{
+      background:#6c757d;
+      margin-bottom:0;
+    }
+    button.secondary:hover{background:#545b62}
     .hint{color:var(--muted); font-size:13px; margin-top:.25rem}
     .error{color:#d93025; font-size:14px; margin-top:.5rem}
     .success{color:#137333; font-size:13px}
     .container-narrow{max-width:760px}
-    .search-box{display:flex; gap:.5rem; margin-bottom:.75rem}
-    .search-box input{flex:1}
-    .search-box button{width:auto; flex-shrink:0}
     .results{margin-top:1rem}
     .result-card{
       background:#fff;
@@ -116,13 +121,27 @@
       color:var(--muted);
       text-align:center;
     }
+    .install-prompt{
+      position:fixed;
+      bottom:20px;
+      left:50%;
+      transform:translateX(-50%);
+      background:var(--hanwha);
+      color:white;
+      padding:12px 20px;
+      border-radius:25px;
+      box-shadow:0 4px 12px rgba(0,0,0,.15);
+      display:none;
+      z-index:1000;
+      cursor:pointer;
+      font-weight:700;
+    }
   </style>
 </head>
 <body>
-  <header>한화손보 동창원 SI 인수 가이드</header>
-
   <!-- 로그인 화면 -->
   <section id="loginScreen" class="screen">
+    <div class="app-title">한화손보 동창원 SI 인수 가이드</div>
     <div class="card">
       <h2>로그인</h2>
       <div class="row">
@@ -133,6 +152,7 @@
         <div class="hint">사번과 비밀번호는 승인된 목록에 있어야 합니다.</div>
       </div>
       <button id="loginBtn">로그인</button>
+      <button id="installBtn" class="secondary">홈화면에 추가</button>
       <div id="loginMsg" class="error" role="alert" aria-live="polite"></div>
       <div class="meta" id="empMeta"></div>
     </div>
@@ -140,6 +160,7 @@
 
   <!-- 검색 화면 -->
   <section id="searchScreen" class="screen" style="display:none;">
+    <div class="app-title">한화손보 동창원 SI 인수 가이드</div>
     <div class="card container-narrow">
       <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
       <div class="row">
@@ -151,233 +172,258 @@
     </div>
   </section>
 
-  <script>
-    // === ① GitHub Raw JSON 경로 (반드시 raw.githubusercontent.com + /main/ 경로를 사용) ===
-    const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
-    const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
+  <!-- PWA 설치 프롬프트 -->
+  <div id="installPrompt" class="install-prompt">홈화면에 추가하기</div>
 
-    // === ② 전역 상태 ===
-    let employees = []; // [{empno:'...', password:'...'}]
-    let diseases  = []; // [{name, acceptance, signature355, treatmentDays, surgery, recurrence, restrictions}]
-    let empLoadedAt = null;
-    let disLoadedAt = null;
+<script>
+// PWA 설치 관련
+let deferredPrompt;
+const installBtn = document.getElementById('installBtn');
+const installPrompt = document.getElementById('installPrompt');
 
-    // === ③ 유틸: JSON 안전 로더 (BOM 제거, {data:[...]} 및 배열 모두 지원) ===
-    async function loadJsonFlexible(url){
-      const res = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
-      if(!res.ok){
-        throw new Error("네트워크 오류: " + res.status + " " + res.statusText);
-      }
-      const text = await res.text();
-      const cleaned = text.replace(/^\uFEFF/, ""); // BOM 제거
-      let json = JSON.parse(cleaned);
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installPrompt.style.display = 'block';
+});
 
-      // { data: [...] } 구조도 허용
-      if(json && typeof json === "object" && !Array.isArray(json) && Array.isArray(json.data)){
-        json = json.data;
-      }
-      // 최종적으로 배열만 허용
-      if(!Array.isArray(json)){
-        throw new Error("JSON 최상위가 배열이 아닙니다. 배열 또는 { data: [...] } 형태여야 합니다.");
-      }
-      return json;
+installBtn.addEventListener('click', async () => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isIOS = /iphone|ipad|ipod/.test(userAgent);
+  const isSamsung = /samsungbrowser/.test(userAgent);
+  const isKakao = /kakaotalk/.test(userAgent);
+  const isChrome = /chrome/.test(userAgent) && !/edg/.test(userAgent);
+  const isSafari = /safari/.test(userAgent) && !isChrome;
+
+  if (deferredPrompt && isChrome) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('PWA 설치됨');
     }
-
-    // === ④ 데이터 로드 ===
-    async function loadAllData(){
-      try{
-        const [emp, dis] = await Promise.all([
-          loadJsonFlexible(EMP_URL),
-          loadJsonFlexible(DIS_URL)
-        ]);
-
-        // employees: 다양한 키/타입을 보정 (숫자 -> 문자열, code 키도 허용)
-        employees = emp
-          .map(e => ({
-            empno: String((e.empno ?? e.code ?? "")).trim(),
-            password: String((e.password ?? "")).trim()
-          }))
-          .filter(e => e.empno && e.password);
-
-        // diseases: 필드 보정 (키 오타/누락 방지)
-        diseases = dis.map(d => ({
-          name: String(d.name ?? d.ame ?? "").trim(),
-          acceptance: (d.acceptance ?? "").toString(),
-          signature355: (d.signature355 ?? "").toString(),
-          treatmentDays: (d.treatmentDays ?? "").toString(),
-          surgery: (d.surgery ?? "").toString(),
-          recurrence: (d.recurrence ?? "").toString(),
-          restrictions: (d.restrictions ?? "").toString()
-        })).filter(d => d.name);
-
-        empLoadedAt = new Date();
-        disLoadedAt = new Date();
-
-        // 로드 메타 표시(디버깅/안심용)
-        document.getElementById("empMeta").textContent =
-          `승인사번 ${employees.length.toLocaleString()}건 로드됨 • ${empLoadedAt.toLocaleString()}`;
-        document.getElementById("disMeta").textContent =
-          `질병데이터 ${diseases.length.toLocaleString()}건 로드됨 • ${disLoadedAt.toLocaleString()}`;
-
-        console.log("[EMP] 샘플", employees.slice(0,3));
-        console.log("[DIS] 샘플", diseases.slice(0,3));
-      }catch(err){
-        console.error("데이터 로드 실패:", err);
-        document.getElementById("loginMsg").textContent =
-          "데이터 로드에 실패했습니다. Raw URL 및 JSON 형식을 확인해주세요.";
+    deferredPrompt = null;
+    installPrompt.style.display = 'none';
+  } else {
+    let message = '';
+    
+    if (isIOS) {
+      if (isSafari) {
+        message = 'Safari에서:\n1. 하단 공유 버튼(□↑) 터치\n2. "홈 화면에 추가" 선택\n3. "추가" 버튼 터치';
+      } else {
+        message = '홈화면 추가를 위해 Safari 브라우저를 사용해주세요.\n\n현재 브라우저에서는 지원되지 않습니다.';
       }
+    } else if (isSamsung) {
+      message = '삼성 인터넷에서:\n1. 하단 메뉴 버튼(≡) 터치\n2. "앱에 추가" 또는 "홈화면에 추가" 선택';
+    } else if (isKakao) {
+      message = '카카오톡 브라우저에서:\n1. 우상단 ⋯ 메뉴 터치\n2. "다른 브라우저로 열기" 선택\n3. Chrome 또는 Samsung Internet에서 다시 접속';
+    } else {
+      message = '홈화면 추가 방법:\n\n• Chrome: 자동 설치 가능\n• Samsung Internet: 메뉴 > 앱에 추가\n• Safari (iOS): 공유 > 홈 화면에 추가\n\n현재 브라우저에서 지원하지 않는 경우\nChrome이나 Samsung Internet을 사용해주세요.';
     }
+    
+    alert(message);
+  }
+});
 
-    // === ⑤ 로그인 ===
-    function login(){
-      const code = document.getElementById("empno").value.trim();
-      const pw   = document.getElementById("password").value.trim();
-      const msg  = document.getElementById("loginMsg");
+installPrompt.addEventListener('click', () => {
+  installBtn.click();
+});
 
-      if(!employees.length){
-        msg.textContent = "승인사번 데이터가 비어있습니다. employees.json을 확인하세요.";
-        return;
-      }
-      const ok = employees.some(u =>
-        u.empno === String(code) && u.password === String(pw)
-      );
+window.addEventListener('appinstalled', () => {
+  installPrompt.style.display = 'none';
+  console.log('PWA 설치 완료');
+});
 
-      if(ok){
-        msg.textContent = "";
-        document.getElementById("loginScreen").style.display = "none";
-        document.getElementById("searchScreen").style.display = "flex";
-        // 포커스 이동
-        setTimeout(()=> document.getElementById("searchInput").focus(), 50);
-      }else{
-        msg.textContent = "로그인 실패: 사번 또는 비밀번호가 올바르지 않습니다.";
-      }
+// 데이터 URL
+const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
+const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
+
+// 전역 변수
+let employees = [];
+let diseases = [];
+let empLoadedAt = null;
+let disLoadedAt = null;
+
+// JSON 로더
+async function loadJsonFlexible(url){
+  const res = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
+  if(!res.ok){
+    throw new Error("네트워크 오류: " + res.status + " " + res.statusText);
+  }
+  const text = await res.text();
+  const cleaned = text.replace(/^\uFEFF/, "");
+  let json = JSON.parse(cleaned);
+
+  if(json && typeof json === "object" && !Array.isArray(json) && Array.isArray(json.data)){
+    json = json.data;
+  }
+  if(!Array.isArray(json)){
+    throw new Error("JSON 최상위가 배열이 아닙니다.");
+  }
+  return json;
+}
+
+// 데이터 로드
+async function loadAllData(){
+  try{
+    const [emp, dis] = await Promise.all([
+      loadJsonFlexible(EMP_URL),
+      loadJsonFlexible(DIS_URL)
+    ]);
+
+    employees = emp
+      .map(e => ({
+        empno: String((e.empno ?? e.code ?? "")).trim(),
+        password: String((e.password ?? "")).trim()
+      }))
+      .filter(e => e.empno && e.password);
+
+    diseases = dis.map(d => ({
+      name: String(d.name ?? d.ame ?? "").trim(),
+      acceptance: (d.acceptance ?? "").toString(),
+      signature355: (d.signature355 ?? "").toString(),
+      treatmentDays: (d.treatmentDays ?? "").toString(),
+      surgery: (d.surgery ?? "").toString(),
+      recurrence: (d.recurrence ?? "").toString(),
+      restrictions: (d.restrictions ?? "").toString()
+    })).filter(d => d.name);
+
+    empLoadedAt = new Date();
+    disLoadedAt = new Date();
+
+    document.getElementById("empMeta").textContent =
+      `승인사번 ${employees.length.toLocaleString()}건 로드됨 • ${empLoadedAt.toLocaleString()}`;
+    document.getElementById("disMeta").textContent =
+      `질병데이터 ${diseases.length.toLocaleString()}건 로드됨 • ${disLoadedAt.toLocaleString()}`;
+
+  }catch(err){
+    console.error("데이터 로드 실패:", err);
+    document.getElementById("loginMsg").textContent =
+      "데이터 로드에 실패했습니다.";
+  }
+}
+
+// 로그인
+function login(){
+  const code = document.getElementById("empno").value.trim();
+  const pw = document.getElementById("password").value.trim();
+  const msg = document.getElementById("loginMsg");
+
+  if(!employees.length){
+    msg.textContent = "승인사번 데이터가 비어있습니다.";
+    return;
+  }
+  
+  const ok = employees.some(u =>
+    u.empno === String(code) && u.password === String(pw)
+  );
+
+  if(ok){
+    msg.textContent = "";
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("searchScreen").style.display = "flex";
+    setTimeout(() => document.getElementById("searchInput").focus(), 50);
+  }else{
+    msg.textContent = "로그인 실패: 사번 또는 비밀번호가 올바르지 않습니다.";
+  }
+}
+
+// 검색 정규화
+function normalize(str){
+  return String(str ?? "")
+    .toLowerCase()
+    .replace(/[\s·,\-\.]/g, "");
+}
+
+// 검색
+function search(){
+  const q = document.getElementById("searchInput").value.trim();
+  const out = document.getElementById("results");
+  out.innerHTML = "";
+
+  if(!q){
+    out.innerHTML = '<div class="hint">검색어를 입력하세요.</div>';
+    return;
+  }
+
+  const spaceTokens = q.split(/[\s·,\-\.]+/)
+                      .filter(Boolean)
+                      .map(normalize);
+
+  const matched = diseases.filter(d => {
+    const n = normalize(d.name);
+    
+    if(spaceTokens.every(tk => n.includes(tk))) {
+      return true;
     }
-
-    // === ⑥ 검색 ===
-    // 정규화: 공백/특수문자 제거 + 소문자화
-    function normalize(str){
-      return String(str ?? "")
-        .toLowerCase()
-        .replace(/[\s·,\-\.]/g, ""); // 공백, 중점, 콤마, 하이픈, 점 제거
-    }
-    function search(){
-      const q = document.getElementById("searchInput").value.trim();
-      const out = document.getElementById("results");
-      out.innerHTML = "";
-
-      if(!q){
-        out.innerHTML = `<div class="hint">검색어를 입력하세요.</div>`;
-        return;
-      }
-
-      // 먼저 공백/특수문자로 분리된 토큰들 생성
-      const spaceTokens = q.split(/[\s·,\-\.]+/)
-                          .filter(Boolean)
-                          .map(normalize);
-
-      const matched = diseases.filter(d => {
-        const n = normalize(d.name);
-        
-        // 원래 공백 토큰들이 모두 포함되는지 먼저 확인 (기본 검색)
-        if(spaceTokens.every(tk => n.includes(tk))) {
-          return true;
-        }
-        
-        // 단일 토큰의 경우만 분할 검색 적용
-        if(spaceTokens.length === 1) {
-          const token = spaceTokens[0];
-          if(token.length >= 2) {
-            // 모든 가능한 분할 조합 확인
-            for(let i = 1; i < token.length; i++) {
-              const left = token.substring(0, i);
-              const right = token.substring(i);
-              // 두 부분이 모두 질병명에 포함되는지 확인 (AND 조건)
-              if(n.includes(left) && n.includes(right)) {
-                return true;
-              }
+    
+    if(spaceTokens.length === 1) {
+      const token = spaceTokens[0];
+      if(token.length >= 3) {
+        for(let i = 2; i <= token.length - 2; i++) {
+          const left = token.substring(0, i);
+          const right = token.substring(i);
+          
+          if(left.length >= 2 && right.length >= 2) {
+            const leftIndex = n.indexOf(left);
+            const rightIndex = n.indexOf(right);
+            
+            if(leftIndex >= 0 && rightIndex >= 0 && leftIndex < rightIndex) {
+              return true;
             }
           }
         }
-        
-        return false;
-      });
-
-      if(!matched.length){
-        out.innerHTML = `<div class="hint">검색 결과가 없습니다.</div>`;
-        return;
       }
-
-      // 카드 렌더
-      matched.forEach(d => {
-        const card = document.createElement("div");
-        card.className = "result-card";
-        card.innerHTML = `
-          <div class="result-title">${d.name}</div>
-          <div class="result-sub">인수기준: ${d.acceptance || "-"}</div>
-          <div class="result-sub">시그니처355: ${d.signature355 || "-"}</div>
-          <table class="info-table">
-            <tr>
-              <th>치료일수</th><th>수술여부</th><th>재발여부</th>
-            </tr>
-            <tr>
-              <td>${d.treatmentDays || "-"}</td>
-              <td>${d.surgery || "-"}</td>
-              <td>${d.recurrence || "-"}</td>
-            </tr>
-          </table>
-          <div class="restrictions">제한사항: ${d.restrictions || "제한사항 없음"}</div>
-        `;
-        out.appendChild(card);
-      });
     }
+    
+    return false;
+  });
 
-    // AND 조건으로 토큰 조합을 찾는 함수
-    function findTokenCombination(tokens, targetName, originalTokens) {
-      const targetTokenCount = originalTokens.length;
-      
-      // 가능한 모든 토큰 조합 생성
-      function getCombinations(arr, count) {
-        if(count === 1) return arr.map(x => [x]);
-        const result = [];
-        for(let i = 0; i < arr.length; i++) {
-          const rest = getCombinations(arr.slice(i + 1), count - 1);
-          rest.forEach(combo => result.push([arr[i], ...combo]));
-        }
-        return result;
-      }
-      
-      // 목표 토큰 개수의 조합들 확인 - 모든 토큰이 포함되어야 함 (AND 조건)
-      const combinations = getCombinations(tokens, targetTokenCount);
-      
-      for(const combo of combinations) {
-        if(combo.every(token => targetName.includes(token))) {
-          return true;
-        }
-      }
-      
-      return false;
-    }
+  if(!matched.length){
+    out.innerHTML = '<div class="hint">검색 결과가 없습니다.</div>';
+    return;
+  }
 
-    // === ⑦ 이벤트 바인딩 (엔터키 동작 포함) ===
-    window.addEventListener("DOMContentLoaded", () => {
-      // 데이터 로드
-      loadAllData();
+  matched.forEach(d => {
+    const card = document.createElement("div");
+    card.className = "result-card";
+    card.innerHTML = `
+      <div class="result-title">${d.name}</div>
+      <div class="result-sub">인수기준: ${d.acceptance || "-"}</div>
+      <div class="result-sub">시그니처355: ${d.signature355 || "-"}</div>
+      <table class="info-table">
+        <tr>
+          <th>치료일수</th><th>수술여부</th><th>재발여부</th>
+        </tr>
+        <tr>
+          <td>${d.treatmentDays || "-"}</td>
+          <td>${d.surgery || "-"}</td>
+          <td>${d.recurrence || "-"}</td>
+        </tr>
+      </table>
+      <div class="restrictions">제한사항: ${d.restrictions || "제한사항 없음"}</div>
+    `;
+    out.appendChild(card);
+  });
+}
 
-      // 로그인
-      document.getElementById("loginBtn").addEventListener("click", login);
-      document.getElementById("empno").addEventListener("keydown", e => {
-        if(e.key === "Enter"){ login(); }
-      });
-      document.getElementById("password").addEventListener("keydown", e => {
-        if(e.key === "Enter"){ login(); }
-      });
+// 이벤트 바인딩
+window.addEventListener("DOMContentLoaded", () => {
+  loadAllData();
 
-      // 검색
-      document.getElementById("searchBtn").addEventListener("click", search);
-      document.getElementById("searchInput").addEventListener("keydown", e => {
-        if(e.key === "Enter"){ search(); }
-      });
-    });
-  </script>
+  document.getElementById("loginBtn").addEventListener("click", login);
+  document.getElementById("empno").addEventListener("keydown", e => {
+    if(e.key === "Enter"){ login(); }
+  });
+  document.getElementById("password").addEventListener("keydown", e => {
+    if(e.key === "Enter"){ login(); }
+  });
+
+  document.getElementById("searchBtn").addEventListener("click", search);
+  document.getElementById("searchInput").addEventListener("keydown", e => {
+    if(e.key === "Enter"){ search(); }
+  });
+});
+</script>
+
 </body>
 </html>
