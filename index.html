@@ -29,7 +29,7 @@
     button.secondary:hover{background:#545b62}
     .hint{color:var(--muted); font-size:13px; margin-top:.25rem}
     .error{color:#d93025; font-size:14px; margin-top:.5rem}
-    .success{color:#137333; font-size:13px}
+    .success{color:#137333; font-size:13px; margin-top:.5rem}
     .container-narrow{max-width:760px}
     .results{margin-top:1rem}
     .result-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:12px;}
@@ -39,12 +39,7 @@
     .info-table th,.info-table td{border:1px solid var(--border);padding:8px;text-align:center;white-space:nowrap;}
     .restrictions{margin-top:.5rem;padding:.5rem .75rem;background:#fafafa;border:1px dashed var(--border);border-radius:10px;font-size:14px;white-space:pre-line;}
     .meta{margin-top:.5rem;font-size:12px;color:var(--muted);text-align:center;}
-    .install-prompt{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--hanwha);color:white;padding:12px 20px;border-radius:25px;box-shadow:0 4px 12px rgba(0,0,0,.15);display:none;z-index:1000;cursor:pointer;font-weight:700;}
     .admin-btn{position:fixed;bottom:10px;right:10px;width:40px;height:40px;background:rgba(108,117,125,0.8);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;border:none;}
-    .log-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;font-size:14px;}
-    .log-header{font-weight:700;color:var(--hanwha);margin-bottom:4px;}
-    .log-time{color:var(--muted);font-size:12px;}
-    .log-search{background:#f0f8ff;padding:4px 8px;border-radius:5px;margin-top:4px;font-family:monospace;}
   </style>
 </head>
 <body>
@@ -78,24 +73,31 @@
     </div>
   </section>
 
-  <!-- 관리자 로그 화면 -->
+  <!-- 관리자 화면 -->
   <section id="adminScreen" class="screen" style="display:none;">
     <div class="app-title">관리자 로그 조회</div>
     <div class="card container-narrow">
-      <h2>사용자 활동 로그</h2>
+      <h2>사용자 관리</h2>
       <div class="row">
-        <input id="adminPassword" type="password" placeholder="관리자 비밀번호를 입력하세요." />
+        <input id="targetEmpno" type="text" placeholder="사번 입력" />
       </div>
-      <button id="loadLogsBtn">로그 불러오기</button>
-      <button id="resetAuthBtn" class="secondary">사용자 인증 초기화</button>
-      <div id="adminMsg" class="error"></div>
-      <div class="meta" id="logStats"></div>
-      <div id="logResults" class="results"></div>
+      <div class="row">
+        <input id="newAuthCode" type="text" placeholder="새 인증번호 입력" />
+      </div>
+      <button id="updateAuthBtn">인증번호 변경</button>
+      <div id="adminMsg" class="success"></div>
+      <hr />
+      <h2>인증 초기화</h2>
+      <div class="row">
+        <input id="resetEmpno" type="text" placeholder="초기화할 사번 입력" />
+      </div>
+      <button id="resetAuthBtn" class="secondary">초기화</button>
     </div>
   </section>
 
+  <button class="admin-btn" id="adminBtn">관</button>
+
 <script>
-// 샘플 데이터 (실제 서버에서는 fetch로 불러오기)
 let employees = [
   { empno: "1001", authCode: "1111" },
   { empno: "1002", authCode: "2222" }
@@ -105,13 +107,11 @@ let diseases = [
 ];
 let currentUser = null;
 
-// 토큰 기반 자동 로그인
 const tokenKey = 'authToken';
 function setToken(empno){ localStorage.setItem(tokenKey, empno); }
 function getToken(){ return localStorage.getItem(tokenKey); }
 function clearToken(empno){ localStorage.removeItem(tokenKey); if(currentUser===empno) currentUser=null; }
 
-// 로그인 처리
 function login(){
   const empno = document.getElementById("empno").value.trim();
   const authCode = document.getElementById("authCode").value.trim();
@@ -129,7 +129,6 @@ function login(){
   }
 }
 
-// 자동 로그인
 document.addEventListener('DOMContentLoaded', () => {
   const token = getToken();
   if(token){
@@ -139,14 +138,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 화면 전환
 function showSearchScreen(){
   document.getElementById("loginScreen").style.display="none";
   document.getElementById("searchScreen").style.display="flex";
+  document.getElementById("adminScreen").style.display="none";
   document.getElementById("searchInput").focus();
 }
 
-// 검색
+function showAdminScreen(){
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("searchScreen").style.display="none";
+  document.getElementById("adminScreen").style.display="flex";
+}
+
 function normalize(str){ return String(str||"").toLowerCase().replace(/[\s·,\-\.]/g,""); }
 function search(){
   if(!currentUser) return;
@@ -175,35 +179,45 @@ function search(){
   `).join('');
 }
 
-// 로그 기록 (실제 서버 연동 필요)
 function saveLog(empno, action, details=''){
   const log = { empno, action, details, timestamp:new Date().toISOString(), date:new Date().toLocaleString('ko-KR') };
   console.log('로그 저장 (서버 전송 필요):', log);
-  // 예: fetch('/log',{method:'POST',body:JSON.stringify(log)});
 }
 
-// 관리자 화면 (샘플)
-document.getElementById('adminBtn')?.addEventListener('click',()=>{
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('searchScreen').style.display='none';
-  document.getElementById('adminScreen').style.display='flex';
+// 관리자 버튼 → 화면 전환
+document.getElementById('adminBtn').addEventListener('click',showAdminScreen);
+
+// 인증번호 변경
+document.getElementById('updateAuthBtn').addEventListener('click',()=>{
+  const empno = document.getElementById('targetEmpno').value.trim();
+  const newCode = document.getElementById('newAuthCode').value.trim();
+  const msg = document.getElementById('adminMsg');
+  if(!empno || !newCode){ msg.textContent="사번과 새 인증번호를 입력하세요."; msg.className="error"; return; }
+  const user = employees.find(u=>u.empno===empno);
+  if(user){
+    user.authCode = newCode;
+    msg.textContent = empno+" 사번의 인증번호가 '"+newCode+"'로 변경되었습니다.";
+    msg.className="success";
+  }else{
+    msg.textContent="해당 사번이 존재하지 않습니다.";
+    msg.className="error";
+  }
 });
 
-// 관리자 초기화
-document.getElementById('resetAuthBtn')?.addEventListener('click',()=>{
-  const empno = prompt("초기화할 사번 입력:");
-  if(empno) clearToken(empno);
+// 인증 초기화
+document.getElementById('resetAuthBtn').addEventListener('click',()=>{
+  const empno = document.getElementById('resetEmpno').value.trim();
+  if(!empno) return alert("사번을 입력하세요.");
+  clearToken(empno);
   alert(empno+' 인증이 초기화되었습니다.');
 });
 
-// 검색 버튼 이벤트
-document.getElementById('searchBtn')?.addEventListener('click',search);
-document.getElementById('searchInput')?.addEventListener('keydown',e=>{if(e.key==='Enter') search();});
-
-// 로그인 버튼 이벤트
-document.getElementById('loginBtn')?.addEventListener('click',login);
-document.getElementById('empno')?.addEventListener('keydown',e=>{if(e.key==='Enter') login();});
-document.getElementById('authCode')?.addEventListener('keydown',e=>{if(e.key==='Enter') login();});
+// 이벤트 바인딩
+document.getElementById('searchBtn').addEventListener('click',search);
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter') search();});
+document.getElementById('loginBtn').addEventListener('click',login);
+document.getElementById('empno').addEventListener('keydown',e=>{if(e.key==='Enter') login();});
+document.getElementById('authCode').addEventListener('keydown',e=>{if(e.key==='Enter') login();});
 </script>
 </body>
 </html>
