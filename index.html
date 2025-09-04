@@ -287,11 +287,11 @@ const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
 
 // GitHub 로그 설정
-  const GITHUB_CONFIG = {
+const GITHUB_CONFIG = {
   owner: 'bsens90-wq',
   repo: 'hwg_main',
   path: 'logs/user_logs.json',
-  token: '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', // 새로 생성한 토큰으로 교체하세요
+  token: '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',
   branch: 'main'
 };
 
@@ -328,6 +328,16 @@ async function testGitHubConnection() {
   
   msg.textContent = "";
   showDebug("=== GitHub 연결 테스트 시작 ===");
+  
+  // 토큰 상태 확인
+  showDebug(`토큰 길이: ${GITHUB_CONFIG.token ? GITHUB_CONFIG.token.length : '없음'}`);
+  showDebug(`토큰 시작: ${GITHUB_CONFIG.token ? GITHUB_CONFIG.token.substring(0, 10) + '...' : '없음'}`);
+  
+  if (!GITHUB_CONFIG.token || GITHUB_CONFIG.token === 'YOUR_NEW_TOKEN_HERE') {
+    showDebug("GitHub 토큰이 설정되지 않았습니다. 코드에서 토큰을 설정해주세요.", true);
+    msg.textContent = "토큰이 설정되지 않았습니다. 코드를 수정해주세요.";
+    return;
+  }
 
   try {
     // 1. 기본 GitHub API 응답 테스트
@@ -343,6 +353,9 @@ async function testGitHubConnection() {
     if (basicResponse.ok) {
       const userData = await basicResponse.json();
       showDebug(`인증된 사용자: ${userData.login}`);
+    } else {
+      const errorData = await basicResponse.json();
+      showDebug(`기본 API 오류: ${JSON.stringify(errorData)}`, true);
     }
 
     // 2. 리포지토리 접근 테스트
@@ -483,12 +496,12 @@ async function saveLogToGitHub(empno, action, details = '') {
     showDebug(`로컬 저장 완료: ${action} by ${empno}`);
 
     // GitHub에 로그 저장
-    if (GITHUB_CONFIG.token && GITHUB_CONFIG.token !== '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') {
+    if (GITHUB_CONFIG.token && GITHUB_CONFIG.token !== 'YOUR_NEW_TOKEN_HERE' && GITHUB_CONFIG.token !== null) {
       showDebug(`GitHub 저장 시도: ${action} by ${empno}`);
       await appendLogToGitHub(log);
       showDebug(`GitHub 저장 완료: ${action} by ${empno}`);
     } else {
-      showDebug('GitHub 토큰이 설정되지 않음 - 로컬 저장만 사용');
+      showDebug('GitHub 로그 저장 비활성화됨 - 로컬 저장만 사용');
     }
     
   } catch (error) {
