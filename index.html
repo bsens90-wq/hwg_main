@@ -1024,6 +1024,9 @@ async function loadLogs() {
 
 // 이벤트 리스너
 document.addEventListener('DOMContentLoaded', () => {
+  // 보험회사 데이터 먼저 초기화
+  initializeInsuranceData();
+  
   // 데이터 로드 및 자동 로그인 체크
   Promise.all([loadAllData()]).then(() => {
     checkAutoLogin();
