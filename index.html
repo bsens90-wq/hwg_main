@@ -161,7 +161,7 @@
       background:rgba(108,117,125,0.8);
       border-radius:50%;
       cursor:pointer;
-      display:flex;
+      display:none;
       align-items:center;
       justify-content:center;
       color:white;
@@ -222,20 +222,38 @@
       0%{transform:rotate(0deg);}
       100%{transform:rotate(360deg);}
     }
-    /* 보험회사 연락처 CSS 추가 */
+    
+    /* 보험회사 연락처 CSS */
     .insurance-section{
       margin-top:1.5rem;
     }
-    .insurance-card{
+    .insurance-card.hanwha{
       background:#fff;
-      border:1px solid var(--border);
+      border:3px solid var(--hanwha);
       border-radius:14px;
-      padding:16px;
-      box-shadow:0 2px 8px rgba(0,0,0,.04);
-      margin-bottom:12px;
+      padding:20px;
+      box-shadow:0 4px 12px rgba(255,127,0,0.15);
+      margin-bottom:16px;
       display:flex;
       align-items:center;
-      gap:16px;
+      gap:20px;
+    }
+    .insurance-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .insurance-card.small{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      box-shadow:0 2px 6px rgba(0,0,0,.04);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      min-height:130px;
     }
     .insurance-logo{
       width:120px;
@@ -243,8 +261,16 @@
       object-fit:contain;
       flex-shrink:0;
     }
+    .insurance-logo.small{
+      width:80px;
+      height:30px;
+      margin-bottom:8px;
+    }
     .insurance-info{
       flex:1;
+    }
+    .insurance-info.small{
+      width:100%;
     }
     .insurance-company{
       font-size:16px;
@@ -252,10 +278,19 @@
       color:#222;
       margin-bottom:8px;
     }
+    .insurance-company.small{
+      font-size:13px;
+      margin-bottom:6px;
+    }
     .insurance-contact{
       display:flex;
       gap:16px;
       flex-wrap:wrap;
+      align-items:center;
+    }
+    .insurance-contact.small{
+      flex-direction:column;
+      gap:4px;
       align-items:center;
     }
     .contact-item{
@@ -263,6 +298,10 @@
       align-items:center;
       gap:4px;
       font-size:14px;
+    }
+    .contact-item.small{
+      font-size:11px;
+      gap:2px;
     }
     .contact-item a{
       color:var(--hanwha);
@@ -273,10 +312,13 @@
       text-decoration:underline;
     }
     @media (max-width: 768px) {
-      .insurance-card{
+      .insurance-card.hanwha{
         flex-direction:column;
         align-items:flex-start;
         gap:12px;
+      }
+      .insurance-grid{
+        grid-template-columns:1fr;
       }
       .insurance-contact{
         flex-direction:column;
@@ -321,7 +363,7 @@
     </div>
     <button id="searchBtn" title="검색">검색</button>
     
-    <!-- 보험회사 연락처 섹션 추가 -->
+    <!-- 보험회사 연락처 섹션 -->
     <div class="insurance-section">
       <h2>보험회사 연락처</h2>
       <div id="insuranceList"></div>
@@ -356,8 +398,8 @@
   <!-- PWA 설치 프롬프트 -->
   <div id="installPrompt" class="install-prompt">홈화면에 추가하기</div>
 
-  <!-- 관리자 버튼 (기본적으로 숨김) -->
-  <button id="adminBtn" class="admin-btn" title="관리자" style="display:none; visibility:hidden;">Admin</button>
+  <!-- 관리자 버튼 -->
+  <button id="adminBtn" class="admin-btn" title="관리자">Admin</button>
 
 <script>
 // 전역 변수
@@ -365,6 +407,7 @@ let employees = [];
 let diseases = [];
 let currentUser = null;
 let userLogs = [];
+let isAdminUser = false;
 
 // PWA 설치 관련
 let deferredPrompt;
@@ -372,6 +415,12 @@ let deferredPrompt;
 // 데이터 URL
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
+
+// 관리자 계정 정보
+const ADMIN_ACCOUNT = {
+  empno: "8091768",
+  password: "dcw8091"
+};
 
 // GitHub 로그 설정
 const GITHUB_CONFIG = {
@@ -382,7 +431,7 @@ const GITHUB_CONFIG = {
   branch: 'main'
 };
 
-// 보험회사 데이터 (새로 추가)
+// 보험회사 데이터
 const INSURANCE_COMPANIES = [
   {
     "company": "한화손해보험",
@@ -456,32 +505,57 @@ const INSURANCE_COMPANIES = [
   }
 ];
 
-// 보험회사 연락처 표시 (새로 추가)
+// 보험회사 연락처 표시
 function showInsuranceContacts() {
   const insuranceList = document.getElementById("insuranceList");
   
-  const cards = INSURANCE_COMPANIES.map(company => {
-    const faxDisplay = company.fax === "콜센터 전화 접수" ? 
-      `<span style="color: #888; font-style: italic;">${company.fax}</span>` : 
-      company.fax;
+  // 한화손해보험 카드 (첫 번째, 특별 디자인)
+  const hanwhaCard = `
+    <div class="insurance-card hanwha">
+      <img src="${INSURANCE_COMPANIES[0].logoUrl}" alt="${INSURANCE_COMPANIES[0].company}" class="insurance-logo" 
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div style="display:none; width:120px; height:40px; background:#f0f0f0; border-radius:8px; flex-shrink:0; align-items:center; justify-content:center; font-size:12px; color:#666;">${INSURANCE_COMPANIES[0].company}</div>
+      <div class="insurance-info">
+        <div class="insurance-company">${INSURANCE_COMPANIES[0].company}</div>
+        <div class="insurance-contact">
+          <div class="contact-item">
+            <span>📞</span>
+            <a href="tel:${INSURANCE_COMPANIES[0].callCenter.replace(/-/g, '')}">${INSURANCE_COMPANIES[0].callCenter}</a>
+          </div>
+          <div class="contact-item">
+            <span>📠</span>
+            <span>${INSURANCE_COMPANIES[0].fax}</span>
+          </div>
+          <div class="contact-item">
+            <span>🔗</span>
+            <a href="${INSURANCE_COMPANIES[0].termsUrl}" target="_blank" rel="noopener">약관함</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // 나머지 보험회사들 (2열 그리드)
+  const otherCards = INSURANCE_COMPANIES.slice(1).map(company => {
+    const faxDisplay = company.fax === "콜센터 전화 접수" ? "콜센터접수" : company.fax;
     
     return `
-      <div class="insurance-card">
-        <img src="${company.logoUrl}" alt="${company.company}" class="insurance-logo" 
+      <div class="insurance-card small">
+        <img src="${company.logoUrl}" alt="${company.company}" class="insurance-logo small" 
              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-        <div style="display:none; width:120px; height:40px; background:#f0f0f0; border-radius:8px; flex-shrink:0; align-items:center; justify-content:center; font-size:12px; color:#666;">${company.company}</div>
-        <div class="insurance-info">
-          <div class="insurance-company">${company.company}</div>
-          <div class="insurance-contact">
-            <div class="contact-item">
+        <div style="display:none; width:80px; height:30px; background:#f0f0f0; border-radius:6px; flex-shrink:0; align-items:center; justify-content:center; font-size:10px; color:#666;">${company.company}</div>
+        <div class="insurance-info small">
+          <div class="insurance-company small">${company.company}</div>
+          <div class="insurance-contact small">
+            <div class="contact-item small">
               <span>📞</span>
               <a href="tel:${company.callCenter.replace(/-/g, '')}">${company.callCenter}</a>
             </div>
-            <div class="contact-item">
+            <div class="contact-item small">
               <span>📠</span>
               <span>${faxDisplay}</span>
             </div>
-            <div class="contact-item">
+            <div class="contact-item small">
               <span>🔗</span>
               <a href="${company.termsUrl}" target="_blank" rel="noopener">약관함</a>
             </div>
@@ -491,11 +565,13 @@ function showInsuranceContacts() {
     `;
   }).join('');
   
-  insuranceList.innerHTML = cards;
+  insuranceList.innerHTML = hanwhaCard + '<div class="insurance-grid">' + otherCards + '</div>';
 }
 
-// 디버그 정보 표시
+// 디버그 정보 표시 (관리자만)
 function showDebug(message, isError = false) {
+  if (!isAdminUser) return;
+  
   const debugElement = document.getElementById('debugInfo');
   const githubDebugElement = document.getElementById('githubDebug');
   
@@ -528,10 +604,6 @@ async function testGitHubConnection() {
   msg.textContent = "";
   showDebug("=== GitHub 연결 테스트 시작 ===");
   
-  // 토큰 상태 확인
-  showDebug(`토큰 길이: ${GITHUB_CONFIG.token ? GITHUB_CONFIG.token.length : '없음'}`);
-  showDebug(`토큰 시작: ${GITHUB_CONFIG.token ? GITHUB_CONFIG.token.substring(0, 10) + '...' : '없음'}`);
-  
   if (!GITHUB_CONFIG.token) {
     showDebug("GitHub 토큰이 설정되지 않았습니다.", true);
     msg.textContent = "토큰이 설정되지 않았습니다.";
@@ -539,15 +611,12 @@ async function testGitHubConnection() {
   }
 
   try {
-    // 1. 기본 GitHub API 응답 테스트
-    showDebug("1. GitHub API 기본 연결 테스트...");
     const basicResponse = await fetch('https://api.github.com/user', {
       headers: {
         'Authorization': `token ${GITHUB_CONFIG.token}`,
         'Accept': 'application/vnd.github.v3+json'
       }
     });
-    showDebug(`기본 API 응답: ${basicResponse.status} ${basicResponse.statusText}`);
     
     if (basicResponse.ok) {
       const userData = await basicResponse.json();
@@ -557,27 +626,8 @@ async function testGitHubConnection() {
       showDebug(`기본 API 오류: ${JSON.stringify(errorData)}`, true);
     }
 
-    // 2. 리포지토리 접근 테스트
-    showDebug("2. 리포지토리 접근 테스트...");
-    const repoUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`;
-    showDebug(`리포지토리 URL: ${repoUrl}`);
-    
-    const repoResponse = await fetch(repoUrl, {
-      headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-
-    showDebug(`리포지토리 응답: ${repoResponse.status} ${repoResponse.statusText}`);
-
-    if (!repoResponse.ok) {
-      const errorText = await fileResponse.text();
-      showDebug(`파일 접근 오류: ${fileResponse.status} - ${errorText}`, true);
-    }
-
     showDebug("=== GitHub 연결 테스트 완료 ===");
-    msg.innerHTML = '<span class="success">GitHub 연결 테스트 완료! 디버그 정보를 확인하세요.</span>';
+    msg.innerHTML = '<span class="success">GitHub 연결 테스트 완료!</span>';
 
   } catch (error) {
     showDebug(`GitHub 연결 테스트 실패: ${error.message}`, true);
@@ -596,7 +646,6 @@ function checkAutoLogin() {
     
     if (isAdminUser) {
       document.getElementById("adminBtn").style.display = "flex";
-      document.getElementById("adminBtn").style.visibility = "visible";
     }
     
     showLoginSuccess();
@@ -604,11 +653,11 @@ function checkAutoLogin() {
   }
 }
 
-// 로그인 성공 처리 (보험회사 연락처 표시 추가)
+// 로그인 성공 처리
 function showLoginSuccess() {
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("searchScreen").style.display = "flex";
-  document.getElementById("userText").textContent = `로그인: ${currentUser}`;
+  document.getElementById("userText").textContent = `로그인: ${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
   document.getElementById("searchInput").focus();
   
   // 보험회사 연락처 표시
@@ -618,19 +667,18 @@ function showLoginSuccess() {
 // 로그아웃 처리
 function logout() {
   if (currentUser) {
-    // 로그아웃 로그 기록
     saveLogToGitHub(currentUser, 'logout', '사용자 로그아웃');
     
-    // 로그인 상태 초기화
     localStorage.removeItem('hwg_current_user');
+    localStorage.removeItem('hwg_is_admin');
     currentUser = null;
+    isAdminUser = false;
     
-    // 화면 전환
+    document.getElementById("adminBtn").style.display = "none";
     document.getElementById("searchScreen").style.display = "none";
     document.getElementById("adminScreen").style.display = "none";
     document.getElementById("loginScreen").style.display = "flex";
     
-    // 입력 필드 초기화
     document.getElementById("empno").value = "";
     document.getElementById("password").value = "";
     document.getElementById("searchInput").value = "";
@@ -640,12 +688,11 @@ function logout() {
   }
 }
 
-// GitHub API를 통한 로그 추가 (중앙 로그 관리)
+// GitHub API를 통한 로그 추가
 async function appendLogToGitHub(newLog) {
   try {
     const fileUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
     
-    // 현재 파일 내용 가져오기
     const getResponse = await fetch(fileUrl, {
       headers: {
         'Authorization': `token ${GITHUB_CONFIG.token}`,
@@ -668,17 +715,14 @@ async function appendLogToGitHub(newLog) {
       throw new Error(`파일 가져오기 실패: ${getResponse.status}`);
     }
 
-    // 새 로그 추가
     existingLogs.push(newLog);
     
-    // 최대 1000개 로그만 유지
     if (existingLogs.length > 1000) {
       existingLogs = existingLogs.slice(-1000);
     }
 
     const newContent = btoa(JSON.stringify(existingLogs, null, 2));
 
-    // GitHub에 업데이트
     const updatePayload = {
       message: `Add log: ${newLog.action} by ${newLog.empno}`,
       content: newContent,
@@ -708,7 +752,6 @@ async function appendLogToGitHub(newLog) {
   } catch (error) {
     showDebug(`GitHub 로그 저장 오류: ${error.message}`, true);
     
-    // GitHub 저장 실패시 로컬에 백업
     const localLogs = JSON.parse(localStorage.getItem('backup_logs') || '[]');
     localLogs.push(newLog);
     if (localLogs.length > 100) {
@@ -719,7 +762,7 @@ async function appendLogToGitHub(newLog) {
   }
 }
 
-// 중앙 로그 저장 함수 (GitHub 연동)
+// 중앙 로그 저장 함수
 async function saveLogToGitHub(empno, action, details = '') {
   const newLog = {
     empno,
@@ -727,10 +770,9 @@ async function saveLogToGitHub(empno, action, details = '') {
     details,
     timestamp: new Date().toISOString(),
     date: new Date().toLocaleString('ko-KR'),
-    userAgent: navigator.userAgent.substring(0, 100) // 브라우저 정보 (제한적)
+    userAgent: navigator.userAgent.substring(0, 100)
   };
   
-  // 비동기로 GitHub에 저장
   appendLogToGitHub(newLog);
 }
 
@@ -760,7 +802,6 @@ async function loadLogsFromGitHub() {
   } catch (error) {
     showDebug(`GitHub 로그 불러오기 실패: ${error.message}`, true);
     
-    // GitHub에서 불러오기 실패시 로컬 백업 사용
     const backupLogs = JSON.parse(localStorage.getItem('backup_logs') || '[]');
     if (backupLogs.length > 0) {
       showDebug(`로컬 백업에서 ${backupLogs.length}개 로그 사용`);
@@ -769,12 +810,12 @@ async function loadLogsFromGitHub() {
   }
 }
 
-// 로그 기록 함수 (기존 로직 유지하면서 GitHub 연동 추가)
+// 로그 기록 함수
 function saveLog(empno, action, details = '') {
   saveLogToGitHub(empno, action, details);
 }
 
-// 관리자 로그인 상태 초기화 (실제 작동하도록 수정)
+// 관리자 로그인 상태 초기화
 async function resetAllLogins() {
   const password = document.getElementById("adminPassword").value.trim();
   const msg = document.getElementById("adminMsg");
@@ -785,36 +826,33 @@ async function resetAllLogins() {
   }
 
   try {
-    // 현재 모든 사용자의 로그인 상태 초기화
     localStorage.removeItem('hwg_current_user');
+    localStorage.removeItem('hwg_is_admin');
     
-    // 현재 사용자도 로그아웃 처리
     if (currentUser) {
       const previousUser = currentUser;
+      const wasAdmin = isAdminUser;
       currentUser = null;
+      isAdminUser = false;
       
-      // 화면을 로그인 화면으로 전환
+      document.getElementById("adminBtn").style.display = "none";
       document.getElementById("searchScreen").style.display = "none";
       document.getElementById("adminScreen").style.display = "none";
       document.getElementById("loginScreen").style.display = "flex";
       
-      // 입력 필드 초기화
       document.getElementById("empno").value = "";
       document.getElementById("password").value = "";
       
-      // 초기화 로그 기록
-      await saveLogToGitHub('ADMIN', 'reset_all_logins', `All user login states reset by admin. Previous user: ${previousUser}`);
+      await saveLogToGitHub('ADMIN', 'reset_all_logins', `All user login states reset by admin. Previous user: ${previousUser}${wasAdmin ? ' (관리자)' : ''}`);
       
-      showDebug(`관리자에 의한 전체 로그인 초기화 완료. 이전 사용자: ${previousUser}`);
+      showDebug(`관리자에 의한 전체 로그인 초기화 완료. 이전 사용자: ${previousUser}${wasAdmin ? ' (관리자)' : ''}`);
     } else {
-      // 초기화 로그 기록
       await saveLogToGitHub('ADMIN', 'reset_all_logins', 'All user login states reset by admin');
       showDebug("관리자에 의한 전체 로그인 초기화 완료");
     }
     
-    msg.innerHTML = '<span class="success">모든 사용자의 로그인 상태가 초기화되었습니다. 로그인 화면으로 이동합니다.</span>';
+    msg.innerHTML = '<span class="success">모든 사용자의 로그인 상태가 초기화되었습니다.</span>';
     
-    // 3초 후 로그인 화면으로 이동
     setTimeout(() => {
       document.getElementById("adminScreen").style.display = "none";
       document.getElementById("loginScreen").style.display = "flex";
@@ -896,6 +934,24 @@ function login(){
     return;
   }
 
+  // 관리자 계정 확인
+  if (empno === ADMIN_ACCOUNT.empno && password === ADMIN_ACCOUNT.password) {
+    currentUser = empno;
+    isAdminUser = true;
+    
+    localStorage.setItem('hwg_current_user', empno);
+    localStorage.setItem('hwg_is_admin', 'true');
+    
+    saveLog(empno, 'admin_login', `Admin login successful from ${window.location.href}`);
+    
+    showLoginSuccess();
+    msg.textContent = "";
+    showDebug(`관리자 로그인 성공: ${empno}`);
+    
+    document.getElementById("adminBtn").style.display = "flex";
+    return;
+  }
+
   if(!employees.length){
     msg.textContent = "데이터가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.";
     return;
@@ -905,11 +961,11 @@ function login(){
  
   if(user){
     currentUser = empno;
+    isAdminUser = false;
     
-    // 로그인 상태 저장 (자동 로그인용)
     localStorage.setItem('hwg_current_user', empno);
+    localStorage.removeItem('hwg_is_admin');
     
-    // 로그인 로그 기록
     saveLog(empno, 'login', `Login successful from ${window.location.href}`);
    
     showLoginSuccess();
@@ -941,7 +997,6 @@ function search(){
     return;
   }
 
-  // 검색 로그 저장
   if(currentUser) {
     saveLog(currentUser, 'search', query);
     showDebug(`검색 실행: ${currentUser} - "${query}"`);
@@ -952,12 +1007,10 @@ function search(){
   const matched = diseases.filter(d => {
     const name = normalize(d.name);
    
-    // 기본 검색 (공백으로 분리된 토큰들이 모두 포함)
     if(tokens.every(token => name.includes(token))) {
       return true;
     }
    
-    // 단일 토큰 분할 검색 (3글자 이상, 2글자씩 조합, 순서 고려)
     if(tokens.length === 1) {
       const token = tokens[0];
       if(token.length >= 3) {
@@ -1005,7 +1058,7 @@ function search(){
   showDebug(`검색 결과: ${matched.length}개 발견`);
 }
 
-// 관리자 로그 불러오기 (GitHub 연동)
+// 관리자 로그 불러오기
 async function loadLogs() {
   const password = document.getElementById("adminPassword").value.trim();
   const msg = document.getElementById("adminMsg");
@@ -1023,14 +1076,12 @@ async function loadLogs() {
   try {
     showDebug("관리자 로그 불러오기 시작...");
     
-    // GitHub에서 로그 불러오기
     userLogs = await loadLogsFromGitHub();
     userLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
    
     const stats = document.getElementById("logStats");
     const results = document.getElementById("logResults");
    
-    // 통계
     const totalLogs = userLogs.length;
     const uniqueUsers = new Set(userLogs.map(l => l.empno)).size;
     const loginCount = userLogs.filter(l => l.action === 'login').length;
@@ -1040,13 +1091,13 @@ async function loadLogs() {
     stats.textContent = `전체 ${totalLogs}개 | 사용자 ${uniqueUsers}명 | 로그인 ${loginCount}회 | 검색 ${searchCount}회 | 로그아웃 ${logoutCount}회`;
     showDebug(`로그 통계: 총 ${totalLogs}개, 사용자 ${uniqueUsers}명`);
    
-    // 로그 목록
     if(userLogs.length === 0) {
       results.innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
     } else {
       const actionNames = {
         'login': '로그인',
         'logout': '로그아웃', 
+        'admin_login': '관리자 로그인',
         'search': '검색',
         'reset_all_logins': '전체 로그인 초기화',
         'test_connection': 'GitHub 연결 테스트'
@@ -1078,12 +1129,10 @@ async function loadLogs() {
 
 // 이벤트 리스너
 document.addEventListener('DOMContentLoaded', () => {
-  // 데이터 로드 및 자동 로그인 체크
   Promise.all([loadAllData()]).then(() => {
     checkAutoLogin();
   });
  
-  // 로그인
   document.getElementById('loginBtn').addEventListener('click', login);
   document.getElementById('empno').addEventListener('keydown', e => {
     if(e.key === 'Enter') {
@@ -1094,16 +1143,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.key === 'Enter') login();
   });
 
-  // 로그아웃
   document.getElementById('logoutBtn').addEventListener('click', logout);
  
-  // 검색
   document.getElementById('searchBtn').addEventListener('click', search);
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if(e.key === 'Enter') search();
   });
  
-  // 관리자
   document.getElementById('adminBtn').addEventListener('click', () => {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('searchScreen').style.display = 'none';
@@ -1115,10 +1161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.key === 'Enter') loadLogs();
   });
 
-  // GitHub 테스트 버튼
   document.getElementById('testGitHubBtn').addEventListener('click', testGitHubConnection);
-
-  // 로그인 상태 초기화 버튼
   document.getElementById('resetLoginBtn').addEventListener('click', resetAllLogins);
  
   document.getElementById('backToSearchBtn').addEventListener('click', () => {
@@ -1130,7 +1173,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
  
-  // PWA 설치
   document.getElementById('installBtn').addEventListener('click', async () => {
     if(deferredPrompt) {
       deferredPrompt.prompt();
@@ -1149,78 +1191,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 </body>
-</html> = await repoResponse.text();
-      showDebug(`리포지토리 오류 내용: ${errorText}`, true);
-      throw new Error(`리포지토리 접근 실패: ${repoResponse.status}`);
-    }
-
-    const repoData = await repoResponse.json();
-    showDebug(`리포지토리명: ${repoData.name}, 공개여부: ${repoData.private ? 'Private' : 'Public'}`);
-
-    // 3. 파일 접근 테스트
-    showDebug("3. 로그 파일 접근 테스트...");
-    const fileUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
-    showDebug(`파일 URL: ${fileUrl}`);
-    
-    const fileResponse = await fetch(fileUrl, {
-      headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-
-    showDebug(`파일 접근 응답: ${fileResponse.status} ${fileResponse.statusText}`);
-
-    if (fileResponse.ok) {
-      const fileData = await fileResponse.json();
-      showDebug(`파일 존재함: ${GITHUB_CONFIG.path}`);
-      showDebug(`파일 크기: ${fileData.size} bytes, SHA: ${fileData.sha}`);
-      
-      try {
-        const content = atob(fileData.content);
-        const logs = JSON.parse(content);
-        showDebug(`현재 로그 개수: ${logs.length}개`);
-        
-        if (logs.length > 0) {
-          const lastLog = logs[logs.length - 1];
-          showDebug(`최근 로그: ${lastLog.date} - ${lastLog.empno} - ${lastLog.action}`);
-        }
-      } catch (parseError) {
-        showDebug(`파일 파싱 오류: ${parseError.message}`, true);
-      }
-      
-    } else if (fileResponse.status === 404) {
-      showDebug("파일이 존재하지 않음. 첫 로그 저장 시 자동 생성됩니다.");
-      
-      // 4. 파일 생성 테스트
-      showDebug("4. 파일 생성 테스트...");
-      const testLog = [{
-        empno: "TEST",
-        action: "test_connection",
-        details: "GitHub 연결 테스트",
-        timestamp: new Date().toISOString(),
-        date: new Date().toLocaleString('ko-KR')
-      }];
-      
-      const createResponse = await fetch(fileUrl, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${GITHUB_CONFIG.token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: 'GitHub 연결 테스트 - 로그 파일 생성',
-          content: btoa(JSON.stringify(testLog, null, 2)),
-          branch: GITHUB_CONFIG.branch
-        })
-      });
-      
-      if (createResponse.ok) {
-        showDebug("테스트 파일 생성 성공!");
-      } else {
-        const createErrorText = await createResponse.text();
-        showDebug(`파일 생성 실패: ${createResponse.status} - ${createErrorText}`, true);
-      }
-      
-    } else {
-      const errorText
+</html>
