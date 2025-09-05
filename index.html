@@ -17,7 +17,7 @@
     *{box-sizing:border-box}
     body{
       margin:0;
-      padding-top: 80px; /* 고정 헤더 공간 확보 */
+      padding-top: 70px; /* 고정 헤더 공간 확보 */
       font-family: Arial, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
       background:var(--bg);
       color:var(--text);
@@ -32,33 +32,20 @@
       z-index: 1000;
       background: var(--bg);
       border-bottom: 2px solid #ccc;
-      padding: 12px 0;
+      padding: 10px 0;
       text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,.08);
     }
     
-    .logo-container {
+    .header-fixed img {
+      height: 40px;
+      width: auto;
       cursor: pointer;
-      display: inline-block;
       transition: transform 0.2s ease;
     }
     
-    .logo-container:hover {
+    .header-fixed img:hover {
       transform: scale(1.05);
-    }
-    
-    .logo-image {
-      background: linear-gradient(135deg, var(--hanwha) 0%, var(--hanwha-dark) 100%);
-      color: white;
-      border-radius: 25px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      font-weight: bold;
-      padding: 8px 20px;
-      min-width: 120px;
-      height: 40px;
     }
     
     .screen{
@@ -178,7 +165,7 @@
     }
     .user-info{
       position:fixed;
-      top:90px;
+      top:250px;
       right:10px;
       background:rgba(255,127,0,0.1);
       padding:8px 12px;
@@ -339,9 +326,7 @@
 <body>
   <!-- 상단 고정 로고 헤더 -->
   <div class="header-fixed">
-    <div class="logo-container" onclick="goHome()">
-      <div class="logo-image">HMDR</div>
-    </div>
+    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODQwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDg0MCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjwhLS0g7KOx7Jqp7IOJ IOunhO2EgOyEoCAtLT4KPHN0eWxlPgoudGV4dCB7IGZvbnQtZmFtaWx5OiAnQXJpYWwnLCBzYW5zLXNlcmlmOyB9Cjwvc3R5bGU+CjwhLS0g7KOx7Jqp7IOJ7Iig64GcIOyMgOuEhCAtLT4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0ib3JhbmdlR3JhZGllbnQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgo8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkY4NzAwO3N0b3Atb3BhY2l0eToxIiAvPgo8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGRjdGMDA7c3RvcC1vcGFjaXR5OjEiIC8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KCjwhLS0g7KOx7Jqp7IOJ67KA7Jqt6raSIOyciOy9sCAtLT4KPHN0eWxlPgoucXVlc3Rpb24tYnViYmxlIHsgZmlsdDogdXJsKCNvcmFuZ2VHcmFkaWVudCk7IH0KPC9zdHlsZT4KCjwhLS0g7KOx7Jqp7IOJ67KA7Jqt6raSIOuyoSAtLT4KPHBhdGggY2xhc3M9InF1ZXN0aW9uLWJ1YmJsZSIgZD0iTTcwIDcwIEMzNSA3MCAzNSA3MCAzNSA3MCA2My4zIDcwIDEyMCA3MCAyMzAgNzAgQzI2NSA3MCAyNjUgMTA1IDI2NSAxMDUgTDI2NSAyMTAgQzI2NSAyNDUgMjMwIDI0NSAyMzAgMjQ1IEwyMDAgMjQ1IEMxOTAgMjUwIDE4MCAyNjAgMTcwIDI3MCA2MTcwIDI1NSAzOTAgMjQ1IDIwMCAyNDUgQzE2NSAyNDUgMzUgMjQ1IDM1IDIxMCBMMzUgMTA1IEMzNSA3MCA3MCA3MCA3MCA3MCBaIi8+Cgo8IS0tIOuwsOyekeyDiSBIIOusuOyekeydtCAtLT4KPHJlY3QgeD0iOTUiIHk9IjEwNSIgd2lkdGg9IjE4IiBoZWlnaHQ9IjkwIiBmaWxsPSJ3aGl0ZSIvPgo8cmVjdCB4PSIxODciIHk9IjEwNSIgd2lkdGg9IjE4IiBoZWlnaHQ9IjkwIiBmaWxsPSJ3aGl0ZSIvPgo8cmVjdCB4PSI5NSIgeT0iMTQxIiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjE4IiBmaWxsPSJ3aGl0ZSIvPgoKPCEtLSBNRFIg7YWN7Iqk7Yq4IC0tPgo8dGV4dCB4PSIzMjAiIHk9IjE4NSIgZm9udC1zaXplPSIxMjAiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiM0NDQ0NDQiIGNsYXNzPSJ0ZXh0Ij5NRFI8L3RleHQ+Cgo8IS0tIO2VmOuLqCDrp4Hrr6zsmIDrnbzrk5wg7YWN7Iqk7Yq4IC0tPgo8dGV4dCB4PSIzMjMiIHk9IjI0MCIgZm9udC1zaXplPSI0MiIgZmlsbD0iIzk5OTk5OSIgY2xhc3M9InRleHQiPuq3uOqxtOyCoSDrlojrk5zrnbzqsp0uLi48L3RleHQ+Cjwvc3ZnPgo=" alt="HMDR 로고" onclick="goHome()">
   </div>
 
  <!-- 로그인 화면 -->
@@ -547,7 +532,7 @@ const INSURANCE_COMPANIES = [
   }
 ];
 
-// 보험회사 연락처 표시 (원본 로직 유지하되 3섹션으로 확장)
+// 보험회사 연락처 표시 (원본 로직 + 공제 섹션)
 function showInsuranceContacts() {
   const insuranceList = document.getElementById("insuranceList");
   
@@ -814,7 +799,7 @@ function normalize(str){
   return String(str || "").toLowerCase().replace(/[\s·,\-\.]/g, "");
 }
 
-// 검색 (수정된 부분)
+// 검색 (수정된 부분 - 메시지 위치 변경)
 function search(){
   const query = document.getElementById("searchInput").value.trim();
   const results = document.getElementById("results");
@@ -906,8 +891,6 @@ function search(){
 document.addEventListener('DOMContentLoaded', () => {
   Promise.all([loadAllData()]).then(() => {
     checkAutoLogin();
-  }).catch(err => {
-    console.error("초기화 실패:", err);
   });
  
   document.getElementById('loginBtn').addEventListener('click', login);
