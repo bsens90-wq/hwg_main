@@ -84,6 +84,11 @@
       margin-bottom:8px;
     }
     button.debug:hover{background:#138496}
+    button.logout{
+      background:#28a745;
+      margin-bottom:8px;
+    }
+    button.logout:hover{background:#218838}
     .hint{color:var(--muted); font-size:13px; margin-top:.25rem}
     .error{color:#d93025; font-size:14px; margin-top:.5rem}
     .success{color:#137333; font-size:13px}
@@ -198,6 +203,16 @@
       font-size:12px;
       color:var(--hanwha);
       font-weight:600;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .user-info button{
+      padding:4px 8px;
+      font-size:11px;
+      margin:0;
+      width:auto;
+      min-width:50px;
     }
     .loading{
       display:inline-block;
@@ -232,7 +247,10 @@
 
 <!-- 검색 화면 -->
 <section id="searchScreen" class="screen" style="display:none;">
-  <div class="user-info" id="userInfo"></div>
+  <div class="user-info" id="userInfo">
+    <span id="userText"></span>
+    <button id="logoutBtn" class="logout">로그아웃</button>
+  </div>
   <div class="app-title">한화손보 유병자 인수 가이드</div>
   <div class="card container-narrow">
     <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
@@ -269,8 +287,8 @@
   <!-- PWA 설치 프롬프트 -->
   <div id="installPrompt" class="install-prompt">홈화면에 추가하기</div>
 
-  <!-- 관리자 버튼 -->
-  <button id="adminBtn" class="admin-btn" title="관리자">Admin</button>
+  <!-- 관리자 버튼 (기본적으로 숨김) -->
+  <button id="adminBtn" class="admin-btn" title="관리자" style="display:none;">Admin</button>
 
 <script>
 // 전역 변수
@@ -289,9 +307,9 @@ const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data
 // GitHub 로그 설정
 const GITHUB_CONFIG = {
   owner: 'bsens90-wq',
-  repo: 'patient-guide-logs', // 실제 생성한 리포지토리명으로 수정
+  repo: 'patient-guide-logs',
   path: 'logs/user_logs.json',
-  token: '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', // 실제 토큰으로 교체하세요
+  token: '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',
   branch: 'main'
 };
 
@@ -333,7 +351,7 @@ async function testGitHubConnection() {
   showDebug(`토큰 길이: ${GITHUB_CONFIG.token ? GITHUB_CONFIG.token.length : '없음'}`);
   showDebug(`토큰 시작: ${GITHUB_CONFIG.token ? GITHUB_CONFIG.token.substring(0, 10) + '...' : '없음'}`);
   
-if (!GITHUB_CONFIG.token) {
+  if (!GITHUB_CONFIG.token) {
     showDebug("GitHub 토큰이 설정되지 않았습니다.", true);
     msg.textContent = "토큰이 설정되지 않았습니다.";
     return;
@@ -465,40 +483,45 @@ function checkAutoLogin() {
   const savedUser = localStorage.getItem('hwg_current_user');
   if (savedUser) {
     currentUser = savedUser;
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("searchScreen").style.display = "flex";
-    document.getElementById("userInfo").textContent = `로그인: ${currentUser}`;
-    document.getElementById("searchInput").focus();
+    showLoginSuccess();
     showDebug(`자동 로그인: ${currentUser}`);
   }
 }
 
-// GitHub 로그 저장 함수 (Netlify Functions 사용)
-async function saveLogToGitHub(empno, action, details = '') {
-  try {
-    const response = await fetch('/.netlify/functions/github-log', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        empno,
-        action,
-        details
-      })
-    });
+// 로그인 성공 처리
+function showLoginSuccess() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("searchScreen").style.display = "flex";
+  document.getElementById("userText").textContent = `로그인: ${currentUser}`;
+  document.getElementById("searchInput").focus();
+}
 
-    if (!response.ok) {
-      throw new Error('서버 오류');
-    }
-
-    showDebug(`중앙 로그 저장 완료: ${action} by ${empno}`);
-  } catch (error) {
-    showDebug(`중앙 로그 저장 실패: ${error.message}`, true);
+// 로그아웃 처리
+function logout() {
+  if (currentUser) {
+    // 로그아웃 로그 기록
+    saveLogToGitHub(currentUser, 'logout', '사용자 로그아웃');
+    
+    // 로그인 상태 초기화
+    localStorage.removeItem('hwg_current_user');
+    currentUser = null;
+    
+    // 화면 전환
+    document.getElementById("searchScreen").style.display = "none";
+    document.getElementById("adminScreen").style.display = "none";
+    document.getElementById("loginScreen").style.display = "flex";
+    
+    // 입력 필드 초기화
+    document.getElementById("empno").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("searchInput").value = "";
+    document.getElementById("results").innerHTML = "";
+    
+    showDebug("로그아웃 완료");
   }
 }
 
-// GitHub API를 통한 로그 추가 (디버깅 강화)
+// GitHub API를 통한 로그 추가 (중앙 로그 관리)
 async function appendLogToGitHub(newLog) {
   try {
     const fileUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
@@ -561,12 +584,35 @@ async function appendLogToGitHub(newLog) {
       throw new Error(`GitHub 업데이트 실패: ${updateResponse.status} - ${errorText}`);
     }
 
-    showDebug(`GitHub 업데이트 성공: 총 ${existingLogs.length}개 로그`);
+    showDebug(`GitHub 로그 저장 성공: ${newLog.action} by ${newLog.empno}`);
 
   } catch (error) {
     showDebug(`GitHub 로그 저장 오류: ${error.message}`, true);
-    throw error;
+    
+    // GitHub 저장 실패시 로컬에 백업
+    const localLogs = JSON.parse(localStorage.getItem('backup_logs') || '[]');
+    localLogs.push(newLog);
+    if (localLogs.length > 100) {
+      localLogs.splice(0, localLogs.length - 100);
+    }
+    localStorage.setItem('backup_logs', JSON.stringify(localLogs));
+    showDebug("로컬 백업에 저장됨");
   }
+}
+
+// 중앙 로그 저장 함수 (GitHub 연동)
+async function saveLogToGitHub(empno, action, details = '') {
+  const newLog = {
+    empno,
+    action,
+    details,
+    timestamp: new Date().toISOString(),
+    date: new Date().toLocaleString('ko-KR'),
+    userAgent: navigator.userAgent.substring(0, 100) // 브라우저 정보 (제한적)
+  };
+  
+  // 비동기로 GitHub에 저장
+  appendLogToGitHub(newLog);
 }
 
 // GitHub에서 로그 불러오기
@@ -580,22 +626,85 @@ async function loadLogsFromGitHub() {
     });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        showDebug("로그 파일이 아직 생성되지 않았습니다.");
+        return [];
+      }
       throw new Error(`GitHub API 오류: ${response.status}`);
     }
 
     const data = await response.json();
     const content = atob(data.content);
-    return JSON.parse(content);
+    const logs = JSON.parse(content);
+    showDebug(`GitHub에서 ${logs.length}개 로그 불러옴`);
+    return logs;
   } catch (error) {
     showDebug(`GitHub 로그 불러오기 실패: ${error.message}`, true);
-    // GitHub에서 불러오기 실패시 로컬 로그 반환
-    return JSON.parse(localStorage.getItem('userLogs') || '[]');
+    
+    // GitHub에서 불러오기 실패시 로컬 백업 사용
+    const backupLogs = JSON.parse(localStorage.getItem('backup_logs') || '[]');
+    if (backupLogs.length > 0) {
+      showDebug(`로컬 백업에서 ${backupLogs.length}개 로그 사용`);
+    }
+    return backupLogs;
   }
 }
 
 // 로그 기록 함수 (기존 로직 유지하면서 GitHub 연동 추가)
 function saveLog(empno, action, details = '') {
   saveLogToGitHub(empno, action, details);
+}
+
+// 관리자 로그인 상태 초기화 (실제 작동하도록 수정)
+async function resetAllLogins() {
+  const password = document.getElementById("adminPassword").value.trim();
+  const msg = document.getElementById("adminMsg");
+  
+  if(password !== "admin123") {
+    msg.textContent = "관리자 비밀번호가 올바르지 않습니다.";
+    return;
+  }
+
+  try {
+    // 현재 모든 사용자의 로그인 상태 초기화
+    localStorage.removeItem('hwg_current_user');
+    
+    // 현재 사용자도 로그아웃 처리
+    if (currentUser) {
+      const previousUser = currentUser;
+      currentUser = null;
+      
+      // 화면을 로그인 화면으로 전환
+      document.getElementById("searchScreen").style.display = "none";
+      document.getElementById("adminScreen").style.display = "none";
+      document.getElementById("loginScreen").style.display = "flex";
+      
+      // 입력 필드 초기화
+      document.getElementById("empno").value = "";
+      document.getElementById("password").value = "";
+      
+      // 초기화 로그 기록
+      await saveLogToGitHub('ADMIN', 'reset_all_logins', `All user login states reset by admin. Previous user: ${previousUser}`);
+      
+      showDebug(`관리자에 의한 전체 로그인 초기화 완료. 이전 사용자: ${previousUser}`);
+    } else {
+      // 초기화 로그 기록
+      await saveLogToGitHub('ADMIN', 'reset_all_logins', 'All user login states reset by admin');
+      showDebug("관리자에 의한 전체 로그인 초기화 완료");
+    }
+    
+    msg.innerHTML = '<span class="success">모든 사용자의 로그인 상태가 초기화되었습니다. 로그인 화면으로 이동합니다.</span>';
+    
+    // 3초 후 로그인 화면으로 이동
+    setTimeout(() => {
+      document.getElementById("adminScreen").style.display = "none";
+      document.getElementById("loginScreen").style.display = "flex";
+    }, 3000);
+
+  } catch (error) {
+    showDebug(`로그인 초기화 중 오류: ${error.message}`, true);
+    msg.textContent = `초기화 중 오류가 발생했습니다: ${error.message}`;
+  }
 }
 
 // PWA 설치 이벤트
@@ -648,8 +757,11 @@ async function loadAllData(){
     document.getElementById("empMeta").textContent =
       `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건`;
 
+    showDebug(`데이터 로드 완료: 직원 ${employees.length}명, 질병 ${diseases.length}개`);
+
   }catch(err){
     console.error("데이터 로드 실패:", err);
+    showDebug(`데이터 로드 실패: ${err.message}`, true);
     document.getElementById("loginMsg").textContent = "데이터 로드 실패";
   }
 }
@@ -660,8 +772,13 @@ function login(){
   const password = document.getElementById("password").value.trim();
   const msg = document.getElementById("loginMsg");
 
+  if(!empno || !password) {
+    msg.textContent = "코드와 비밀번호를 모두 입력해주세요.";
+    return;
+  }
+
   if(!employees.length){
-    msg.textContent = "데이터가 로드되지 않았습니다.";
+    msg.textContent = "데이터가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.";
     return;
   }
 
@@ -673,15 +790,15 @@ function login(){
     // 로그인 상태 저장 (자동 로그인용)
     localStorage.setItem('hwg_current_user', empno);
     
-    saveLog(empno, 'login');
+    // 로그인 로그 기록
+    saveLog(empno, 'login', `Login successful from ${window.location.href}`);
    
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("searchScreen").style.display = "flex";
-    document.getElementById("userInfo").textContent = `로그인: ${empno}`;
-    document.getElementById("searchInput").focus();
+    showLoginSuccess();
     msg.textContent = "";
+    showDebug(`로그인 성공: ${empno}`);
   }else{
     msg.textContent = "코드 또는 비밀번호가 올바르지 않습니다.";
+    showDebug(`로그인 실패: ${empno}`);
   }
 }
 
@@ -700,9 +817,15 @@ function search(){
     return;
   }
 
+  if(!diseases.length) {
+    results.innerHTML = '<div class="error">질병 데이터가 로드되지 않았습니다.</div>';
+    return;
+  }
+
   // 검색 로그 저장
   if(currentUser) {
     saveLog(currentUser, 'search', query);
+    showDebug(`검색 실행: ${currentUser} - "${query}"`);
   }
 
   const tokens = query.split(/[\sÂ·,\-\.]+/).filter(Boolean).map(normalize);
@@ -759,28 +882,8 @@ function search(){
       <div class="restrictions">제한사항: ${d.restrictions || "없음"}</div>
     </div>
   `).join('');
-}
 
-// 관리자 로그인 초기화
-function resetAllLogins() {
-  const password = document.getElementById("adminPassword").value.trim();
-  const msg = document.getElementById("adminMsg");
-  
-  if(password !== "admin123") {
-    msg.textContent = "관리자 비밀번호가 올바르지 않습니다.";
-    return;
-  }
-
-  // 모든 사용자의 로그인 상태 초기화
-  localStorage.removeItem('hwg_current_user');
-  
-  // 현재 사용자도 로그아웃
-  currentUser = null;
-  
-  msg.innerHTML = '<span class="success">모든 사용자의 로그인 상태가 초기화되었습니다.</span>';
-  
-  // 초기화 로그 기록
-  saveLogToGitHub('ADMIN', 'reset_all_logins', 'All user login states reset');
+  showDebug(`검색 결과: ${matched.length}개 발견`);
 }
 
 // 관리자 로그 불러오기 (GitHub 연동)
@@ -813,24 +916,38 @@ async function loadLogs() {
     const uniqueUsers = new Set(userLogs.map(l => l.empno)).size;
     const loginCount = userLogs.filter(l => l.action === 'login').length;
     const searchCount = userLogs.filter(l => l.action === 'search').length;
+    const logoutCount = userLogs.filter(l => l.action === 'logout').length;
    
-    stats.textContent = `전체 ${totalLogs}개 | 사용자 ${uniqueUsers}명 | 로그인 ${loginCount}회 | 검색 ${searchCount}회`;
+    stats.textContent = `전체 ${totalLogs}개 | 사용자 ${uniqueUsers}명 | 로그인 ${loginCount}회 | 검색 ${searchCount}회 | 로그아웃 ${logoutCount}회`;
     showDebug(`로그 통계: 총 ${totalLogs}개, 사용자 ${uniqueUsers}명`);
    
     // 로그 목록
     if(userLogs.length === 0) {
       results.innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
     } else {
-      results.innerHTML = userLogs.map(log => `
+      const actionNames = {
+        'login': '로그인',
+        'logout': '로그아웃', 
+        'search': '검색',
+        'reset_all_logins': '전체 로그인 초기화',
+        'test_connection': 'GitHub 연결 테스트'
+      };
+
+      results.innerHTML = userLogs.slice(0, 50).map(log => `
         <div class="log-card">
-          <div class="log-header">코드: ${log.empno} - ${log.action === 'login' ? '로그인' : log.action === 'search' ? '검색' : log.action}</div>
+          <div class="log-header">코드: ${log.empno} - ${actionNames[log.action] || log.action}</div>
           <div class="log-time">${log.date}</div>
-          ${log.details ? `<div class="log-search">검색어: "${log.details}"</div>` : ''}
+          ${log.details ? `<div class="log-search">상세: "${log.details}"</div>` : ''}
         </div>
       `).join('');
+      
+      if(userLogs.length > 50) {
+        results.innerHTML += `<div class="hint">최근 50개 로그만 표시됩니다. (전체 ${userLogs.length}개)</div>`;
+      }
     }
     
     showDebug("로그 불러오기 완료");
+    msg.innerHTML = '<span class="success">로그를 성공적으로 불러왔습니다.</span>';
   } catch (error) {
     showDebug(`로그 불러오기 실패: ${error.message}`, true);
     msg.textContent = "로그 불러오기 실패: " + error.message;
@@ -850,11 +967,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // 로그인
   document.getElementById('loginBtn').addEventListener('click', login);
   document.getElementById('empno').addEventListener('keydown', e => {
-    if(e.key === 'Enter') login();
+    if(e.key === 'Enter') {
+      document.getElementById('password').focus();
+    }
   });
   document.getElementById('password').addEventListener('keydown', e => {
     if(e.key === 'Enter') login();
   });
+
+  // 로그아웃
+  document.getElementById('logoutBtn').addEventListener('click', logout);
  
   // 검색
   document.getElementById('searchBtn').addEventListener('click', search);
@@ -895,6 +1017,7 @@ document.addEventListener('DOMContentLoaded', () => {
       deferredPrompt.prompt();
       await deferredPrompt.userChoice;
       deferredPrompt = null;
+      document.getElementById('installPrompt').style.display = 'none';
     } else {
       alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
     }
