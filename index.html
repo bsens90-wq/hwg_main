@@ -507,7 +507,7 @@ const INSURANCE_COMPANIES = [
 
 // 보험회사 연락처 표시 (2그룹으로 분리)
 function showInsuranceContacts() {
-  const insuranceSection = document.getElementById("insuranceSection");
+  const insuranceList = document.getElementById("insuranceList");
   
   // 손해보험사 (한화손해보험 제외한 처음 9개)
   const damageInsurance = INSURANCE_COMPANIES.slice(1, 10);
@@ -582,7 +582,7 @@ function showInsuranceContacts() {
   ` : '';
   
   // 전체 HTML 구성
-  insuranceSection.innerHTML = `
+  insuranceList.innerHTML = `
     ${hanwhaCard}
     <div class="insurance-category">
       <h3>손해보험</h3>
