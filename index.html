@@ -617,6 +617,16 @@ async function saveLogToGitHub(empno, action, details = '') {
 
 // GitHub에서 로그 불러오기
 async function loadLogsFromGitHub() {
+  // GitHub 연동이 비활성화된 경우 로컬 백업만 사용
+  if (!GITHUB_CONFIG.enabled || !GITHUB_CONFIG.token) {
+    showDebug("GitHub 연동이 비활성화됨. 로컬 백업 사용");
+    const backupLogs = JSON.parse(localStorage.getItem('backup_logs') || '[]');
+    if (backupLogs.length > 0) {
+      showDebug(`로컬 백업에서 ${backupLogs.length}개 로그 사용`);
+    }
+    return backupLogs;
+  }
+
   try {
     const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
       headers: {
