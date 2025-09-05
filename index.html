@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>유병자 인수가이드</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi7ZWc7ZmU7Jqw67O07JuQIOycoOuzteyekSDsnbTsiJjqsIDsnbTrk5wiLCJzaG9ydF9uYW1lIjoi7ZWc7ZmU7Jqw67O07JuQIOycoOuzteyekyIsInN0YXJ0X3VybCI6Ii4vaW5kZXguaHRtbCIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwidGhlbWVfY29sb3IiOiIjZmY3ZjAwIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmOGY5ZmEiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yV3lCM2FXUjBhRDBpTWpRd0lpQm9aV2xuYUhROUlqSTBNQ0lnZG1sbGQwSnZlRDBpTUNBd0lESTBNQ0F5TkRBaUlHWnBiR3c5SWlObVpqZG1NREFpSUhodGJHNXpQU0pvZEhSd09pOHZkM2QzTG5jekxtOXlaaTh5TURBd0wzTjJaeUkrUEdOcGNtTnNaU0JqZUQwaU1USTBJaUJqZVQwaU1USTBJaUJ5UFNJeE1ERWlJR1pwYkd3OUlpTm1aalk0REFBMU9VNGlMejRBUEhCaGRHZ2daRDBpVFRFME9TQXRNRGxDTGpBeFNIazNOem93TlFGc05qZ3VPRGd1TURNMUxqQXhObDBpSUdacGJHdzlJaU5tWmpkbU1EQWlMejQ4TDNOMlp6ND0iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0=" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root{
       --hanwha:#ff7f00;
@@ -137,62 +136,6 @@
       color:var(--muted);
       text-align:center;
     }
-    .install-prompt{
-      position:fixed;
-      bottom:20px;
-      left:50%;
-      transform:translateX(-50%);
-      background:var(--hanwha);
-      color:white;
-      padding:12px 20px;
-      border-radius:25px;
-      box-shadow:0 4px 12px rgba(0,0,0,.15);
-      display:none;
-      z-index:1000;
-      cursor:pointer;
-      font-weight:700;
-    }
-    .admin-btn{
-      position:fixed;
-      bottom:10px;
-      right:10px;
-      width:40px;
-      height:40px;
-      background:rgba(108,117,125,0.8);
-      border-radius:50%;
-      cursor:pointer;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      color:white;
-      font-size:12px;
-      font-weight:700;
-      border:none;
-    }
-    .log-card{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:12px;
-      margin-bottom:8px;
-      font-size:14px;
-    }
-    .log-header{
-      font-weight:700;
-      color:var(--hanwha);
-      margin-bottom:4px;
-    }
-    .log-time{
-      color:var(--muted);
-      font-size:12px;
-    }
-    .log-search{
-      background:#f0f8ff;
-      padding:4px 8px;
-      border-radius:5px;
-      margin-top:4px;
-      font-family:monospace;
-    }
     .user-info{
       position:fixed;
       top:10px;
@@ -260,27 +203,25 @@
       height:40px;
       object-fit:contain;
       flex-shrink:0;
+      background:#f0f0f0;
+      border-radius:8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      color:#666;
     }
     .insurance-logo.small{
       width:80px;
       height:30px;
       margin-bottom:8px;
+      font-size:10px;
     }
     .insurance-info{
       flex:1;
     }
     .insurance-info.small{
       width:100%;
-    }
-    .insurance-company{
-      font-size:16px;
-      font-weight:700;
-      color:#222;
-      margin-bottom:8px;
-    }
-    .insurance-company.small{
-      font-size:13px;
-      margin-bottom:6px;
     }
     .insurance-contact{
       display:flex;
@@ -311,19 +252,45 @@
     .contact-item a:hover{
       text-decoration:underline;
     }
+    
+    /* 카테고리 제목 스타일 */
+    .insurance-category h3{
+      font-size:18px;
+      font-weight:700;
+      color:#333;
+      margin:1.5rem 0 1rem 0;
+      text-align:center;
+      border-bottom:2px solid var(--hanwha);
+      padding-bottom:8px;
+    }
+    
     @media (max-width: 768px) {
       .insurance-card.hanwha{
         flex-direction:column;
         align-items:flex-start;
         gap:12px;
       }
+      /* 모바일에서도 2열 그리드 유지 */
       .insurance-grid{
-        grid-template-columns:1fr;
+        grid-template-columns:1fr 1fr;
+        gap:8px;
       }
       .insurance-contact{
         flex-direction:column;
         align-items:flex-start;
         gap:8px;
+      }
+      /* 모바일에서 폰트 크기 조정 */
+      .contact-item.small{
+        font-size:10px;
+      }
+      .insurance-card.small{
+        padding:8px;
+        min-height:120px;
+      }
+      .insurance-logo.small{
+        width:70px;
+        height:25px;
       }
     }
   </style>
@@ -335,10 +302,10 @@
   <div class="card">
     <h2>로그인</h2>
     <div class="row">
-      <input id="empno" type="text" placeholder="코드 입력" autocomplete="username" />
+      <input id="empno" type="text" placeholder="코드 입력" autocomplete="username">
     </div>
     <div class="row">
-      <input id="password" type="password" placeholder="비밀번호 입력" autocomplete="current-password" />
+      <input id="password" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
       <div class="hint">코드는 사전 승인된 기관에 부여됩니다.</div>
     </div>
     <button id="loginBtn">로그인</button>
@@ -359,7 +326,7 @@
   <div class="card container-narrow">
     <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
     <div class="row">
-      <input id="searchInput" type="text" placeholder="예시: 용종, 골절, 당뇨 등" />
+      <input id="searchInput" type="text" placeholder="예시: 용종, 골절, 당뇨 등">
     </div>
     <button id="searchBtn" title="검색">검색</button>
     
@@ -375,41 +342,12 @@
   </div>
 </section>
 
-  <!-- 관리자 로그 화면 -->
-  <section id="adminScreen" class="screen" style="display:none;">
-    <div class="app-title">관리자 로그 조회</div>
-    <div class="card container-narrow">
-      <h2>사용자 활동 로그</h2>
-      <div class="row">
-        <input id="adminPassword" type="password" placeholder="관리자 비밀번호를 입력하세요." />
-      </div>
-      <button id="loadLogsBtn">로그 불러오기</button>
-      <button id="testGitHubBtn" class="debug">GitHub 연결 테스트</button>
-      <button id="resetLoginBtn" class="reset">모든 사용자 로그인 초기화</button>
-      <button id="backToSearchBtn" class="secondary">검색화면으로 돌아가기</button>
-      <div id="adminMsg" class="error"></div>
-      <div class="debug" id="githubDebug"></div>
-      <div class="meta" id="logStats"></div>
-      <div id="logResults" class="results"></div>
-    </div>
-  </section>
-
-  <!-- PWA 설치 프롬프트 -->
-  <div id="installPrompt" class="install-prompt">홈화면에 추가하기</div>
-
-  <!-- 관리자 버튼 -->
-  <button id="adminBtn" class="admin-btn" title="관리자">Admin</button>
-
 <script>
 // 전역 변수
 let employees = [];
 let diseases = [];
 let currentUser = null;
-let userLogs = [];
 let isAdminUser = false;
-
-// PWA 설치 관련
-let deferredPrompt;
 
 // 데이터 URL
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
@@ -421,304 +359,130 @@ const ADMIN_ACCOUNT = {
   password: "dcw8091"
 };
 
-// GitHub 로그 설정
-const GITHUB_CONFIG = {
-  owner: 'bsens90-wq',
-  repo: 'patient-guide-logs',
-  path: 'logs/user_logs.json',
-  token: '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',
-  branch: 'main'
-};
-
 // 보험회사 데이터
 const INSURANCE_COMPANIES = [
   {
     "company": "한화손해보험",
-    "logoUrl": "https://via.placeholder.com/200x60/ff7f00/ffffff?text=hwgeneralins",
     "callCenter": "1566-8000",
     "fax": "0502-779-1004",
     "termsUrl": "https://www.hwgeneralins.com/notice/ir/product-ing01.do"
   },
   {
     "company": "삼성화재",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=samsungfire",
     "callCenter": "1588-5114", 
     "fax": "0505-162-0872",
     "termsUrl": "https://www.samsungfire.com/vh/page/VH.HPIF0103.do"
   },
   {
     "company": "메리츠화재",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=meritzfire",
     "callCenter": "1566-7711", 
     "fax": "0505-021-3400",
     "termsUrl": "https://www.meritzfire.com/disclosure/product-announcement/product-list.do#!/"
-  },  {
+  },
+  {
     "company": "DB손해보험",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=idbins",
     "callCenter": "1588-0100", 
     "fax": "0505-181-4862",
     "termsUrl": "https://www.idbins.com/FWMAIV1534.do"
-  },  {
+  },
+  {
     "company": "KB손해보험",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=kbinsure",
     "callCenter": "1544-0114", 
     "fax": "0505-136-6500",
     "termsUrl": "https://www.kbinsure.co.kr/CG802030001.ec"
-  },  {
+  },
+  {
     "company": "현대해상",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=hi",
     "callCenter": "1588-5656", 
     "fax": "0507-774-6060",
     "termsUrl": "https://www.hi.co.kr/serviceAction.do?view=bin/PA/03/HHPA03010M#none"
-  },  {
+  },
+  {
     "company": "롯데손해보험",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=lotteins",
     "callCenter": "1588-3344", 
     "fax": "0507-333-9999",
     "termsUrl": "https://www.lotteins.co.kr/web/C/D/H/cdh190.jsp"
-  },  {
+  },
+  {
     "company": "흥국화재",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=heungkukfire",
     "callCenter": "1688-1688", 
     "fax": "0504-800-0700",
     "termsUrl": "https://www.heungkukfire.co.kr/FRW/announce/insGoodsGongsiSale.do"
-  },  {
+  },
+  {
     "company": "하나손해보험",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=hanainsure",
     "callCenter": "1566-3000", 
     "fax": "0505-170-0765",
     "termsUrl": "https://www.hanainsure.co.kr/w/disclosure/product/saleProduct"
-  },  {
+  },
+  {
     "company": "NH농협손해보험",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=nhfire",
     "callCenter": "1644-9000", 
     "fax": "0505-060-7000",
     "termsUrl": "https://www.nhfire.co.kr/announce/productAnnounce/retrieveInsuranceProductsAnnounce.nhfire"
-  },  {
+  },
+  {
     "company": "라이나손해보험",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=linafire",
     "callCenter": "1566-5800", 
     "fax": "콜센터 전화 접수",
     "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"
-  },  {
+  },
+  {
     "company": "AIG손해보험",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=aig",
     "callCenter": "1544-2792", 
     "fax": "02-2011-4607",
     "termsUrl": "https://www.aig.co.kr/wo/dpwot001.html?menuId=MS702"
-  },  {
-    "company": "MG손해보험(예별)",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=yebyeol",
-    "callCenter": "1588-5959", 
-    "fax": "0505-088-1646 ",
-    "termsUrl": "https://www.yebyeol.co.kr/PB031210DM.scp?menuId=MN0803006"
-  },  {
+  },
+  {
     "company": "한화생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=hanwhalife",
     "callCenter": "1588-6363", 
     "fax": "콜센터 전화 접수",
     "termsUrl": "https://www.hanwhalife.com/main/disclosure/goods/disclosurenotice/DF_GDDN000_P10000.do?MENU_ID1=DF_GDGL000"
-  },  {
+  },
+  {
     "company": "동양생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=pbano",
     "callCenter": "1577-1004", 
     "fax": "02-3289-4516",
     "termsUrl": "https://pbano.myangel.co.kr/paging/WE_AC_WEPAAP020100L"
-  },  {
+  },
+  {
     "company": "교보생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=kyobo",
     "callCenter": "1588-1001", 
     "fax": "콜센터 전화 접수",
     "termsUrl": "https://www.kyobo.com/dgt/web/product-official/all-product/search"
-  },  {
+  },
+  {
     "company": "삼성생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=samsunglife",
     "callCenter": "1588-3114", 
     "fax": "콜센터 전화 접수",
     "termsUrl": "https://www.samsunglife.com/individual/products/disclosure/sales/PDO-PRPRI010110M"
-  },  {
+  },
+  {
     "company": "라이나생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=linalife",
     "callCenter": "1588-0058", 
     "fax": "02-6944-1200",
     "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"
-  },  {
+  },
+  {
     "company": "KDB생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=kdblife",
     "callCenter": "1588-4040", 
     "fax": "02-2669-6500",
     "termsUrl": "https://www.kdblife.co.kr/ajax.do?scrId=HDLMA002M02P"
-  },  {
-    "company": "iM라이프",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=imlifeins",
-    "callCenter": "1588-4770", 
-    "fax": "0505-083-5420",
-    "termsUrl": "https://www.imlifeins.co.kr/BA/BA_A020.do"
-  },
-{
-    "company": "미래에셋생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=miraeasset",
-    "callCenter": "1588-0220", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://life.miraeasset.com/micro/disclosure/product/PC-HO-080301-000000.do"
-  },
-{
-    "company": "신한라이프",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=shinhanlife",
-    "callCenter": "1588-5580", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://www.shinhanlife.co.kr/hp/cdhi0010.do"
-  },
-{
-    "company": "KB라이프",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=kblife",
-    "callCenter": "1588-3374", 
-    "fax": "02-390-4629",
-    "termsUrl": "https://www.kblife.co.kr/?/=true&tab=currently-selling"
-  },
-{
-    "company": "DB생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=idblife",
-    "callCenter": "1588-3131", 
-    "fax": "0505-129-3134",
-    "termsUrl": "https://www.idblife.com/notice/product/sale"
-  },
-{
-    "company": "하나생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=hanalife",
-    "callCenter": "1577-1112", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://hanalife.co.kr/anm/product/allProduct.do?status=on"
-  },
-{
-    "company": "흥국생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=heungkuklife",
-    "callCenter": "1588-2288", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://www.heungkuklife.co.kr/front/public/saleProduct.do?searchFlgSale=Y"
-  },
-{
-    "company": "ABL생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=abllife",
-    "callCenter": "1588-6500", 
-    "fax": "02-3299-5544",
-    "termsUrl": "https://www.abllife.co.kr/st/pban/prdtPban/whlPrdt/whlPrdt1/whlPrdt11?page=index"
-  },
-{
-    "company": "IBK연금보험",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=ibki",
-    "callCenter": "1577-4117", 
-    "fax": "02-2270-1577",
-    "termsUrl": "https://www.ibki.co.kr/process/HP_PBANO_PDT_SP_INDV"
-  },
-
-{
-    "company": "NH농협생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=nhlife",
-    "callCenter": "1544-4000", 
-    "fax": "02-6971-6040",
-    "termsUrl": "https://www.nhlife.co.kr/ho/on/HOON0004M00.nhl"
-  },
-
-{
-    "company": "메트라이프",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=metlife",
-    "callCenter": "1588-9600", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://brand.metlife.co.kr/pn/paReal/insuProductDisclMain.do"
-  },
-
-{
-    "company": "처브라이프",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=chubblife",
-    "callCenter": "1599-4600", 
-    "fax": "02-3480-7801",
-    "termsUrl": "https://www.chubblife.co.kr/front/official/sale/list.do"
-  },
-
-{
-    "company": "푸본현대생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=fubonhyundai",
-    "callCenter": "1577-3311", 
-    "fax": "0505-106-0311",
-    "termsUrl": "https://www.fubonhyundai.com/#CUSI150102010101"
-  },
-
-{
-    "company": "BNP파리바카디프",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=cardif",
-    "callCenter": "1688-1118", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://www.cardif.co.kr/disclosure/papag101.do"
-  },
-
-{
-    "company": "AIA생명",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=aia",
-    "callCenter": "1588-9898", 
-    "fax": "02-2021-4540",
-    "termsUrl": "https://www.aia.co.kr/ko/products.html?highlights=&product=&productFeatures=&priceMin=0&priceMax=1000&sortBy=&filterTab="
-  },
-
-{
-    "company": "MG새마을금고",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=insure",
-    "callCenter": "1599-9010", 
-    "fax": "02-3016-7674",
-    "termsUrl": "https://insure.kfcc.co.kr/#/PGE_IHJ_00003"
-  },
-
-{
-    "company": "더케이",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=ktcu",
-    "callCenter": "1577-3993", 
-    "fax": "02-3278-9696",
-    "termsUrl": "https://www.ktcu.or.kr/PPW-FIC-800101"
-  },
-
-{
-    "company": "우체국",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=epostbank",
-    "callCenter": "1599-0100", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://mall.epostbank.go.kr/IPPSKE0000.do"
-  },
-
-{
-    "company": "수협공제",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=suhyup",
-    "callCenter": "1588-4119", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://www.suhyup-bank.com/"
-  },
-
-{
-    "company": "신협공제",
-    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=openbank",
-    "callCenter": "1544-3030", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://openbank.cu.co.kr/?sub=6000"
   }
+];
 
-
-]
-;
-
-// 보험회사 연락처 표시 (3개 섹션으로 분리)
+// 보험회사 연락처 표시
 function showInsuranceContacts() {
   const insuranceList = document.getElementById("insuranceList");
   
   // 섹션별로 분류
   const damageInsurance = INSURANCE_COMPANIES.slice(1, 12); // 손해보험 (한화손해보험 제외)
-  const lifeInsurance = INSURANCE_COMPANIES.slice(13, 33); // 생명보험 2개
-  const mutualAid = INSURANCE_COMPANIES.slice(34  , 38); // 공제 2개
+  const lifeInsurance = INSURANCE_COMPANIES.slice(12); // 생명보험 
   
   // 한화손해보험 카드 (특별 디자인)
   const hanwhaCard = `
     <div class="insurance-card hanwha">
-      <img src="${INSURANCE_COMPANIES[0].logoUrl}" alt="${INSURANCE_COMPANIES[0].company}" class="insurance-logo" 
-           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-      <div style="display:none; width:120px; height:40px; background:#f0f0f0; border-radius:8px; flex-shrink:0; align-items:center; justify-content:center; font-size:12px; color:#666;">${INSURANCE_COMPANIES[0].company}</div>
+      <div class="insurance-logo">${INSURANCE_COMPANIES[0].company}</div>
       <div class="insurance-info">
         <div class="insurance-contact">
           <div class="contact-item">
@@ -744,9 +508,7 @@ function showInsuranceContacts() {
     
     return `
       <div class="insurance-card small">
-        <img src="${company.logoUrl}" alt="${company.company}" class="insurance-logo small" 
-             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-        <div style="display:none; width:80px; height:30px; background:#f0f0f0; border-radius:6px; flex-shrink:0; align-items:center; justify-content:center; font-size:10px; color:#666;">${company.company}</div>
+        <div class="insurance-logo small">${company.company}</div>
         <div class="insurance-info small">
           <div class="insurance-contact small">
             <div class="contact-item small">
@@ -770,7 +532,6 @@ function showInsuranceContacts() {
   // 각 섹션별 카드들 생성
   const damageCards = damageInsurance.map(createCard).join('');
   const lifeCards = lifeInsurance.map(createCard).join('');
-  const mutualCards = mutualAid.map(createCard).join('');
   
   // 전체 HTML 구성
   insuranceList.innerHTML = `
@@ -783,78 +544,7 @@ function showInsuranceContacts() {
       <h3>생명보험</h3>
       <div class="insurance-grid">${lifeCards}</div>
     </div>
-    <div class="insurance-category">
-      <h3>공제</h3>
-      <div class="insurance-grid">${mutualCards}</div>
-    </div>
   `;
-}
-
-// 디버그 정보 표시 (관리자만)
-function showDebug(message, isError = false) {
-  if (!isAdminUser) return;
-  
-  const debugElement = document.getElementById('debugInfo');
-  const githubDebugElement = document.getElementById('githubDebug');
-  
-  const timestamp = new Date().toLocaleTimeString();
-  const debugMsg = `[${timestamp}] ${message}\n`;
-  
-  if (debugElement) {
-    debugElement.style.display = 'block';
-    debugElement.textContent += debugMsg;
-    debugElement.scrollTop = debugElement.scrollHeight;
-  }
-  if (githubDebugElement) {
-    githubDebugElement.textContent += debugMsg;
-    githubDebugElement.scrollTop = githubDebugElement.scrollHeight;
-  }
-  
-  console.log(isError ? 'ERROR:' : 'DEBUG:', message);
-}
-
-// GitHub 연결 테스트
-async function testGitHubConnection() {
-  const msg = document.getElementById("adminMsg");
-  const password = document.getElementById("adminPassword").value.trim();
-  
-  if(password !== "admin123") {
-    msg.textContent = "관리자 비밀번호가 올바르지 않습니다.";
-    return;
-  }
-  
-  msg.textContent = "";
-  showDebug("=== GitHub 연결 테스트 시작 ===");
-  
-  if (!GITHUB_CONFIG.token) {
-    showDebug("GitHub 토큰이 설정되지 않았습니다.", true);
-    msg.textContent = "토큰이 설정되지 않았습니다.";
-    return;
-  }
-
-  try {
-    const basicResponse = await fetch('https://api.github.com/user', {
-      headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-    
-    if (basicResponse.ok) {
-      const userData = await basicResponse.json();
-      showDebug(`인증된 사용자: ${userData.login}`);
-    } else {
-      const errorData = await basicResponse.json();
-      showDebug(`기본 API 오류: ${JSON.stringify(errorData)}`, true);
-    }
-
-    showDebug("=== GitHub 연결 테스트 완료 ===");
-    msg.innerHTML = '<span class="success">GitHub 연결 테스트 완료!</span>';
-
-  } catch (error) {
-    showDebug(`GitHub 연결 테스트 실패: ${error.message}`, true);
-    msg.textContent = `GitHub 연결 실패: ${error.message}`;
-  }
 }
 
 // 자동 로그인 체크
@@ -865,13 +555,7 @@ function checkAutoLogin() {
   if (savedUser) {
     currentUser = savedUser;
     isAdminUser = savedIsAdmin;
-    
-    if (isAdminUser) {
-      document.getElementById("adminBtn").style.display = "flex";
-    }
-    
     showLoginSuccess();
-    showDebug(`자동 로그인: ${currentUser}${isAdminUser ? ' (관리자)' : ''}`);
   }
 }
 
@@ -889,209 +573,20 @@ function showLoginSuccess() {
 // 로그아웃 처리
 function logout() {
   if (currentUser) {
-    saveLogToGitHub(currentUser, 'logout', '사용자 로그아웃');
-    
     localStorage.removeItem('hwg_current_user');
     localStorage.removeItem('hwg_is_admin');
     currentUser = null;
     isAdminUser = false;
     
-    document.getElementById("adminBtn").style.display = "none";
     document.getElementById("searchScreen").style.display = "none";
-    document.getElementById("adminScreen").style.display = "none";
     document.getElementById("loginScreen").style.display = "flex";
     
     document.getElementById("empno").value = "";
     document.getElementById("password").value = "";
     document.getElementById("searchInput").value = "";
     document.getElementById("results").innerHTML = "";
-    
-    showDebug("로그아웃 완료");
   }
 }
-
-// GitHub API를 통한 로그 추가
-async function appendLogToGitHub(newLog) {
-  try {
-    const fileUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
-    
-    const getResponse = await fetch(fileUrl, {
-      headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-
-    let existingLogs = [];
-    let sha = null;
-
-    if (getResponse.ok) {
-      const data = await getResponse.json();
-      sha = data.sha;
-      const content = atob(data.content);
-      existingLogs = JSON.parse(content);
-      showDebug(`기존 로그 ${existingLogs.length}개 발견`);
-    } else if (getResponse.status === 404) {
-      showDebug("파일이 존재하지 않음. 새로 생성합니다.");
-    } else {
-      throw new Error(`파일 가져오기 실패: ${getResponse.status}`);
-    }
-
-    existingLogs.push(newLog);
-    
-    if (existingLogs.length > 1000) {
-      existingLogs = existingLogs.slice(-1000);
-    }
-
-    const newContent = btoa(JSON.stringify(existingLogs, null, 2));
-
-    const updatePayload = {
-      message: `Add log: ${newLog.action} by ${newLog.empno}`,
-      content: newContent,
-      branch: GITHUB_CONFIG.branch
-    };
-    
-    if (sha) {
-      updatePayload.sha = sha;
-    }
-
-    const updateResponse = await fetch(fileUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(updatePayload)
-    });
-
-    if (!updateResponse.ok) {
-      const errorText = await updateResponse.text();
-      throw new Error(`GitHub 업데이트 실패: ${updateResponse.status} - ${errorText}`);
-    }
-
-    showDebug(`GitHub 로그 저장 성공: ${newLog.action} by ${newLog.empno}`);
-
-  } catch (error) {
-    showDebug(`GitHub 로그 저장 오류: ${error.message}`, true);
-    
-    const localLogs = JSON.parse(localStorage.getItem('backup_logs') || '[]');
-    localLogs.push(newLog);
-    if (localLogs.length > 100) {
-      localLogs.splice(0, localLogs.length - 100);
-    }
-    localStorage.setItem('backup_logs', JSON.stringify(localLogs));
-    showDebug("로컬 백업에 저장됨");
-  }
-}
-
-// 중앙 로그 저장 함수
-async function saveLogToGitHub(empno, action, details = '') {
-  const newLog = {
-    empno,
-    action,
-    details,
-    timestamp: new Date().toISOString(),
-    date: new Date().toLocaleString('ko-KR'),
-    userAgent: navigator.userAgent.substring(0, 100)
-  };
-  
-  appendLogToGitHub(newLog);
-}
-
-// GitHub에서 로그 불러오기
-async function loadLogsFromGitHub() {
-  try {
-    const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-      headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        showDebug("로그 파일이 아직 생성되지 않았습니다.");
-        return [];
-      }
-      throw new Error(`GitHub API 오류: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const content = atob(data.content);
-    const logs = JSON.parse(content);
-    showDebug(`GitHub에서 ${logs.length}개 로그 불러옴`);
-    return logs;
-  } catch (error) {
-    showDebug(`GitHub 로그 불러오기 실패: ${error.message}`, true);
-    
-    const backupLogs = JSON.parse(localStorage.getItem('backup_logs') || '[]');
-    if (backupLogs.length > 0) {
-      showDebug(`로컬 백업에서 ${backupLogs.length}개 로그 사용`);
-    }
-    return backupLogs;
-  }
-}
-
-// 로그 기록 함수
-function saveLog(empno, action, details = '') {
-  saveLogToGitHub(empno, action, details);
-}
-
-// 관리자 로그인 상태 초기화
-async function resetAllLogins() {
-  const password = document.getElementById("adminPassword").value.trim();
-  const msg = document.getElementById("adminMsg");
-  
-  if(password !== "admin123") {
-    msg.textContent = "관리자 비밀번호가 올바르지 않습니다.";
-    return;
-  }
-
-  try {
-    localStorage.removeItem('hwg_current_user');
-    localStorage.removeItem('hwg_is_admin');
-    
-    if (currentUser) {
-      const previousUser = currentUser;
-      const wasAdmin = isAdminUser;
-      currentUser = null;
-      isAdminUser = false;
-      
-      document.getElementById("adminBtn").style.display = "none";
-      document.getElementById("searchScreen").style.display = "none";
-      document.getElementById("adminScreen").style.display = "none";
-      document.getElementById("loginScreen").style.display = "flex";
-      
-      document.getElementById("empno").value = "";
-      document.getElementById("password").value = "";
-      
-      await saveLogToGitHub('ADMIN', 'reset_all_logins', `All user login states reset by admin. Previous user: ${previousUser}${wasAdmin ? ' (관리자)' : ''}`);
-      
-      showDebug(`관리자에 의한 전체 로그인 초기화 완료. 이전 사용자: ${previousUser}${wasAdmin ? ' (관리자)' : ''}`);
-    } else {
-      await saveLogToGitHub('ADMIN', 'reset_all_logins', 'All user login states reset by admin');
-      showDebug("관리자에 의한 전체 로그인 초기화 완료");
-    }
-    
-    msg.innerHTML = '<span class="success">모든 사용자의 로그인 상태가 초기화되었습니다.</span>';
-    
-    setTimeout(() => {
-      document.getElementById("adminScreen").style.display = "none";
-      document.getElementById("loginScreen").style.display = "flex";
-    }, 3000);
-
-  } catch (error) {
-    showDebug(`로그인 초기화 중 오류: ${error.message}`, true);
-    msg.textContent = `초기화 중 오류가 발생했습니다: ${error.message}`;
-  }
-}
-
-// PWA 설치 이벤트
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('installPrompt').style.display = 'block';
-});
 
 // JSON 로더
 async function loadJsonFlexible(url){
@@ -1136,11 +631,8 @@ async function loadAllData(){
     document.getElementById("empMeta").textContent =
       `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건`;
 
-    showDebug(`데이터 로드 완료: 직원 ${employees.length}명, 질병 ${diseases.length}개`);
-
   }catch(err){
     console.error("데이터 로드 실패:", err);
-    showDebug(`데이터 로드 실패: ${err.message}`, true);
     document.getElementById("loginMsg").textContent = "데이터 로드 실패";
   }
 }
@@ -1164,13 +656,8 @@ function login(){
     localStorage.setItem('hwg_current_user', empno);
     localStorage.setItem('hwg_is_admin', 'true');
     
-    saveLog(empno, 'admin_login', `Admin login successful from ${window.location.href}`);
-    
     showLoginSuccess();
     msg.textContent = "";
-    showDebug(`관리자 로그인 성공: ${empno}`);
-    
-    document.getElementById("adminBtn").style.display = "flex";
     return;
   }
 
@@ -1187,21 +674,17 @@ function login(){
     
     localStorage.setItem('hwg_current_user', empno);
     localStorage.removeItem('hwg_is_admin');
-    
-    saveLog(empno, 'login', `Login successful from ${window.location.href}`);
    
     showLoginSuccess();
     msg.textContent = "";
-    showDebug(`로그인 성공: ${empno}`);
   }else{
     msg.textContent = "코드 또는 비밀번호가 올바르지 않습니다.";
-    showDebug(`로그인 실패: ${empno}`);
   }
 }
 
 // 검색 정규화
 function normalize(str){
-  return String(str || "").toLowerCase().replace(/[\sÂ·,\-\.]/g, "");
+  return String(str || "").toLowerCase().replace(/[\s·,\-\.]/g, "");
 }
 
 // 검색
@@ -1212,7 +695,6 @@ function search(){
  
   if(!query){
     results.innerHTML = '<div class="hint">검색어를 입력하세요.</div>';
-    // 검색어가 없으면 보험회사 리스트 표시
     insuranceSection.style.display = "block";
     return;
   }
@@ -1223,12 +705,7 @@ function search(){
     return;
   }
 
-  if(currentUser) {
-    saveLog(currentUser, 'search', query);
-    showDebug(`검색 실행: ${currentUser} - "${query}"`);
-  }
-
-  const tokens = query.split(/[\sÂ·,\-\.]+/).filter(Boolean).map(normalize);
+  const tokens = query.split(/[\s·,\-\.]+/).filter(Boolean).map(normalize);
  
   const matched = diseases.filter(d => {
     const name = normalize(d.name);
@@ -1261,7 +738,6 @@ function search(){
 
   if(!matched.length){
     results.innerHTML = '<div class="hint">검색 결과가 없습니다.</div>';
-    // 검색 결과가 없으면 보험회사 리스트 표시
     insuranceSection.style.display = "block";
     return;
   }
@@ -1285,77 +761,6 @@ function search(){
       <div class="restrictions">제한사항: ${d.restrictions || "없음"}</div>
     </div>
   `).join('');
-
-  showDebug(`검색 결과: ${matched.length}개 발견`);
-}
-
-// 관리자 로그 불러오기
-async function loadLogs() {
-  const password = document.getElementById("adminPassword").value.trim();
-  const msg = document.getElementById("adminMsg");
-  const loadBtn = document.getElementById("loadLogsBtn");
- 
-  if(password !== "admin123") {
-    msg.textContent = "관리자 비밀번호가 올바르지 않습니다.";
-    return;
-  }
- 
-  msg.textContent = "";
-  loadBtn.innerHTML = '<span class="loading">⟳</span> 로그 불러오는 중...';
-  loadBtn.disabled = true;
-
-  try {
-    showDebug("관리자 로그 불러오기 시작...");
-    
-    userLogs = await loadLogsFromGitHub();
-    userLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-   
-    const stats = document.getElementById("logStats");
-    const results = document.getElementById("logResults");
-   
-    const totalLogs = userLogs.length;
-    const uniqueUsers = new Set(userLogs.map(l => l.empno)).size;
-    const loginCount = userLogs.filter(l => l.action === 'login').length;
-    const searchCount = userLogs.filter(l => l.action === 'search').length;
-    const logoutCount = userLogs.filter(l => l.action === 'logout').length;
-   
-    stats.textContent = `전체 ${totalLogs}개 | 사용자 ${uniqueUsers}명 | 로그인 ${loginCount}회 | 검색 ${searchCount}회 | 로그아웃 ${logoutCount}회`;
-    showDebug(`로그 통계: 총 ${totalLogs}개, 사용자 ${uniqueUsers}명`);
-   
-    if(userLogs.length === 0) {
-      results.innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
-    } else {
-      const actionNames = {
-        'login': '로그인',
-        'logout': '로그아웃', 
-        'admin_login': '관리자 로그인',
-        'search': '검색',
-        'reset_all_logins': '전체 로그인 초기화',
-        'test_connection': 'GitHub 연결 테스트'
-      };
-
-      results.innerHTML = userLogs.slice(0, 50).map(log => `
-        <div class="log-card">
-          <div class="log-header">코드: ${log.empno} - ${actionNames[log.action] || log.action}</div>
-          <div class="log-time">${log.date}</div>
-          ${log.details ? `<div class="log-search">상세: "${log.details}"</div>` : ''}
-        </div>
-      `).join('');
-      
-      if(userLogs.length > 50) {
-        results.innerHTML += `<div class="hint">최근 50개 로그만 표시됩니다. (전체 ${userLogs.length}개)</div>`;
-      }
-    }
-    
-    showDebug("로그 불러오기 완료");
-    msg.innerHTML = '<span class="success">로그를 성공적으로 불러왔습니다.</span>';
-  } catch (error) {
-    showDebug(`로그 불러오기 실패: ${error.message}`, true);
-    msg.textContent = "로그 불러오기 실패: " + error.message;
-  } finally {
-    loadBtn.innerHTML = '로그 불러오기';
-    loadBtn.disabled = false;
-  }
 }
 
 // 이벤트 리스너
@@ -1381,42 +786,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.key === 'Enter') search();
   });
  
-  document.getElementById('adminBtn').addEventListener('click', () => {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('searchScreen').style.display = 'none';
-    document.getElementById('adminScreen').style.display = 'flex';
-  });
- 
-  document.getElementById('loadLogsBtn').addEventListener('click', loadLogs);
-  document.getElementById('adminPassword').addEventListener('keydown', e => {
-    if(e.key === 'Enter') loadLogs();
-  });
-
-  document.getElementById('testGitHubBtn').addEventListener('click', testGitHubConnection);
-  document.getElementById('resetLoginBtn').addEventListener('click', resetAllLogins);
- 
-  document.getElementById('backToSearchBtn').addEventListener('click', () => {
-    document.getElementById('adminScreen').style.display = 'none';
-    if(currentUser) {
-      document.getElementById('searchScreen').style.display = 'flex';
-    } else {
-      document.getElementById('loginScreen').style.display = 'flex';
-    }
-  });
- 
-  document.getElementById('installBtn').addEventListener('click', async () => {
-    if(deferredPrompt) {
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      document.getElementById('installPrompt').style.display = 'none';
-    } else {
-      alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
-    }
-  });
- 
-  document.getElementById('installPrompt').addEventListener('click', () => {
-    document.getElementById('installBtn').click();
+  document.getElementById('installBtn').addEventListener('click', () => {
+    alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
   });
 });
 </script>
