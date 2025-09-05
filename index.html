@@ -588,10 +588,19 @@ async function testGitHubConnection() {
 // 자동 로그인 체크
 function checkAutoLogin() {
   const savedUser = localStorage.getItem('hwg_current_user');
+  const savedIsAdmin = localStorage.getItem('hwg_is_admin') === 'true';
+  
   if (savedUser) {
     currentUser = savedUser;
+    isAdminUser = savedIsAdmin;
+    
+    if (isAdminUser) {
+      document.getElementById("adminBtn").style.display = "flex";
+      document.getElementById("adminBtn").style.visibility = "visible";
+    }
+    
     showLoginSuccess();
-    showDebug(`자동 로그인: ${currentUser}`);
+    showDebug(`자동 로그인: ${currentUser}${isAdminUser ? ' (관리자)' : ''}`);
   }
 }
 
