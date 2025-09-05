@@ -505,11 +505,17 @@ const INSURANCE_COMPANIES = [
   }
 ];
 
-// 보험회사 연락처 표시
+// 보험회사 연락처 표시 (2그룹으로 분리)
 function showInsuranceContacts() {
-  const insuranceList = document.getElementById("insuranceList");
+  const insuranceSection = document.getElementById("insuranceSection");
   
-  // 한화손해보험 카드 (첫 번째, 특별 디자인)
+  // 손해보험사 (한화손해보험 제외한 처음 9개)
+  const damageInsurance = INSURANCE_COMPANIES.slice(1, 10);
+  
+  // 생명보험사 (나중에 추가할 예정)
+  const lifeInsurance = [];
+  
+  // 한화손해보험 카드 (특별 디자인)
   const hanwhaCard = `
     <div class="insurance-card hanwha">
       <img src="${INSURANCE_COMPANIES[0].logoUrl}" alt="${INSURANCE_COMPANIES[0].company}" class="insurance-logo" 
@@ -535,8 +541,8 @@ function showInsuranceContacts() {
     </div>
   `;
   
-  // 나머지 보험회사들 (2열 그리드)
-  const otherCards = INSURANCE_COMPANIES.slice(1).map(company => {
+  // 손해보험사 카드들 생성
+  const damageCards = damageInsurance.map(company => {
     const faxDisplay = company.fax === "콜센터 전화 접수" ? "콜센터접수" : company.fax;
     
     return `
@@ -565,7 +571,25 @@ function showInsuranceContacts() {
     `;
   }).join('');
   
-  insuranceList.innerHTML = hanwhaCard + '<div class="insurance-grid">' + otherCards + '</div>';
+  // 생명보험사 섹션 (현재는 빈 상태)
+  const lifeSection = lifeInsurance.length > 0 ? `
+    <div class="insurance-category">
+      <h3>생명보험</h3>
+      <div class="insurance-grid">
+        <!-- 생명보험사 카드들이 여기에 들어갈 예정 -->
+      </div>
+    </div>
+  ` : '';
+  
+  // 전체 HTML 구성
+  insuranceSection.innerHTML = `
+    ${hanwhaCard}
+    <div class="insurance-category">
+      <h3>손해보험</h3>
+      <div class="insurance-grid">${damageCards}</div>
+    </div>
+    ${lifeSection}
+  `;
 }
 
 // 디버그 정보 표시 (관리자만)
