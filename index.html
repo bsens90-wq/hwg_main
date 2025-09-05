@@ -746,4 +746,194 @@ async function loadAllData(){
     })).filter(e => e.empno && e.password);
 
     diseases = dis.map(d => ({
-      name: String(d.name
+      name: String(d.name || "").trim(),
+      acceptance: String(d.acceptance || ""),
+      signature355: String(d.signature355 || ""),
+      treatmentDays: String(d.treatmentDays || ""),
+      surgery: String(d.surgery || ""),
+      recurrence: String(d.recurrence || ""),
+      restrictions: String(d.restrictions || "")
+    })).filter(d => d.name);
+
+    document.getElementById("empMeta").textContent =
+      `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건`;
+
+  }catch(err){
+    console.error("데이터 로드 실패:", err);
+    document.getElementById("loginMsg").textContent = "데이터 로드 실패";
+  }
+}
+
+// 로그인
+function login(){
+  const empno = document.getElementById("empno").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const msg = document.getElementById("loginMsg");
+
+  if(!empno || !password) {
+    msg.textContent = "코드와 비밀번호를 모두 입력해주세요.";
+    return;
+  }
+
+  // 관리자 계정 확인
+  if (empno === ADMIN_ACCOUNT.empno && password === ADMIN_ACCOUNT.password) {
+    currentUser = empno;
+    isAdminUser = true;
+    
+    localStorage.setItem('hwg_current_user', empno);
+    localStorage.setItem('hwg_is_admin', 'true');
+    
+    showLoginSuccess();
+    msg.textContent = "";
+    return;
+  }
+
+  if(!employees.length){
+    msg.textContent = "데이터가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.";
+    return;
+  }
+
+  const user = employees.find(u => u.empno === empno && u.password === password);
+ 
+  if(user){
+    currentUser = empno;
+    isAdminUser = false;
+    
+    localStorage.setItem('hwg_current_user', empno);
+    localStorage.removeItem('hwg_is_admin');
+   
+    showLoginSuccess();
+    msg.textContent = "";
+  }else{
+    msg.textContent = "코드 또는 비밀번호가 올바르지 않습니다.";
+  }
+}
+
+// 검색 정규화
+function normalize(str){
+  return String(str || "").toLowerCase().replace(/[\s·,\-\.]/g, "");
+}
+
+// 검색 (수정된 부분)
+function search(){
+  const query = document.getElementById("searchInput").value.trim();
+  const results = document.getElementById("results");
+  const insuranceSection = document.querySelector(".insurance-section");
+  const searchMessage = document.getElementById("searchMessage");
+  const backBtn = document.getElementById("backBtn");
+ 
+  if(!query){
+    searchMessage.style.display = "none";
+    results.innerHTML = "";
+    insuranceSection.style.display = "block";
+    backBtn.style.display = "none";
+    return;
+  }
+
+  if(!diseases.length) {
+    searchMessage.innerHTML = '<div class="error">질병 데이터가 로드되지 않았습니다.</div>';
+    searchMessage.style.display = "block";
+    results.innerHTML = "";
+    insuranceSection.style.display = "block";
+    backBtn.style.display = "none";
+    return;
+  }
+
+  const tokens = query.split(/[\s·,\-\.]+/).filter(Boolean).map(normalize);
+ 
+  const matched = diseases.filter(d => {
+    const name = normalize(d.name);
+   
+    if(tokens.every(token => name.includes(token))) {
+      return true;
+    }
+   
+    if(tokens.length === 1) {
+      const token = tokens[0];
+      if(token.length >= 3) {
+        for(let i = 2; i <= token.length - 2; i++) {
+          const left = token.substring(0, i);
+          const right = token.substring(i);
+         
+          if(left.length >= 2 && right.length >= 2) {
+            const leftPos = name.indexOf(left);
+            const rightPos = name.indexOf(right);
+           
+            if(leftPos >= 0 && rightPos >= 0 && leftPos < rightPos) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+   
+    return false;
+  });
+
+  if(!matched.length){
+    searchMessage.innerHTML = '<div class="hint">검색 결과가 없습니다.</div>';
+    searchMessage.style.display = "block";
+    results.innerHTML = "";
+    insuranceSection.style.display = "none";
+    backBtn.style.display = "block";
+    return;
+  }
+
+  // 검색 결과가 있으면 보험회사 리스트 숨김
+  searchMessage.style.display = "none";
+  insuranceSection.style.display = "none";
+  backBtn.style.display = "block";
+
+  results.innerHTML = matched.map(d => `
+    <div class="result-card">
+      <div class="result-title">${d.name}</div>
+      <div class="result-sub">인수기준: ${d.acceptance || "-"}</div>
+      <div class="result-sub">시그니처355: ${d.signature355 || "-"}</div>
+      <table class="info-table">
+        <tr><th>치료일수</th><th>수술여부</th><th>재발여부</th></tr>
+        <tr>
+          <td>${d.treatmentDays || "-"}</td>
+          <td>${d.surgery || "-"}</td>
+          <td>${d.recurrence || "-"}</td>
+        </tr>
+      </table>
+      <div class="restrictions">제한사항: ${d.restrictions || "없음"}</div>
+    </div>
+  `).join('');
+}
+
+// 이벤트 리스너
+document.addEventListener('DOMContentLoaded', () => {
+  Promise.all([loadAllData()]).then(() => {
+    checkAutoLogin();
+  }).catch(err => {
+    console.error("초기화 실패:", err);
+  });
+ 
+  document.getElementById('loginBtn').addEventListener('click', login);
+  document.getElementById('empno').addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      document.getElementById('password').focus();
+    }
+  });
+  document.getElementById('password').addEventListener('keydown', e => {
+    if(e.key === 'Enter') login();
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', logout);
+ 
+  document.getElementById('searchBtn').addEventListener('click', search);
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter') search();
+  });
+  
+  document.getElementById('backBtn').addEventListener('click', goBack);
+ 
+  document.getElementById('installBtn').addEventListener('click', () => {
+    alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
+  });
+});
+</script>
+
+</body>
+</html>
