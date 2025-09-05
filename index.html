@@ -694,6 +694,7 @@ function showInsuranceContacts() {
   // 각 섹션별 카드들 생성
   const damageCards = damageInsurance.map(createCard).join('');
   const lifeCards = lifeInsurance.map(createCard).join('');
+  const mutualCards = mutualAid.map(createCard).join('');
   
   // 전체 HTML 구성
   insuranceList.innerHTML = `
@@ -705,6 +706,10 @@ function showInsuranceContacts() {
     <div class="insurance-category">
       <h3>생명보험</h3>
       <div class="insurance-grid">${lifeCards}</div>
+    </div>
+    <div class="insurance-category">
+      <h3>공제</h3>
+      <div class="insurance-grid">${mutualCards}</div>
     </div>
   `;
 }
