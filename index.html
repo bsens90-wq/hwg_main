@@ -817,12 +817,19 @@ function showInsuranceContacts() {
   const insuranceSection = document.getElementById("insuranceContacts");
   const insuranceList = document.getElementById("insuranceList");
   
+  console.log("showInsuranceContacts 호출됨");
+  console.log("insuranceCompanies 길이:", insuranceCompanies.length);
+  console.log("insuranceSection:", insuranceSection);
+  console.log("insuranceList:", insuranceList);
+  
   if (!insuranceCompanies.length) {
+    console.log("보험회사 데이터가 없음");
     insuranceSection.style.display = "none";
     return;
   }
   
   insuranceSection.style.display = "block";
+  console.log("보험회사 섹션 표시함");
   
   const cards = insuranceCompanies.map(company => {
     const faxDisplay = company.fax === "콜센터 전화 접수" ? 
@@ -833,7 +840,7 @@ function showInsuranceContacts() {
       <div class="insurance-card">
         <img src="${company.logoUrl}" alt="${company.company}" class="insurance-logo" 
              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-        <div style="display:none; width:120px; height:40px; background:#f0f0f0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; color:#666;">${company.company}</div>
+        <div style="display:none; width:120px; height:40px; background:#f0f0f0; border-radius:8px; flex-shrink:0; align-items:center; justify-content:center; font-size:12px; color:#666;">${company.company}</div>
         <div class="insurance-info">
           <div class="insurance-company">${company.company}</div>
           <div class="insurance-contact">
@@ -856,6 +863,7 @@ function showInsuranceContacts() {
   }).join('');
   
   insuranceList.innerHTML = cards;
+  console.log("보험회사 카드 HTML 생성됨:", cards.length);
   showDebug(`보험회사 연락처 ${insuranceCompanies.length}개 표시됨`);
 }
 
