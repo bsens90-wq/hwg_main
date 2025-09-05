@@ -1009,14 +1009,18 @@ function normalize(str){
 function search(){
   const query = document.getElementById("searchInput").value.trim();
   const results = document.getElementById("results");
+  const insuranceSection = document.querySelector(".insurance-section");
  
   if(!query){
     results.innerHTML = '<div class="hint">검색어를 입력하세요.</div>';
+    // 검색어가 없으면 보험회사 리스트 표시
+    insuranceSection.style.display = "block";
     return;
   }
 
   if(!diseases.length) {
     results.innerHTML = '<div class="error">질병 데이터가 로드되지 않았습니다.</div>';
+    insuranceSection.style.display = "block";
     return;
   }
 
@@ -1058,8 +1062,13 @@ function search(){
 
   if(!matched.length){
     results.innerHTML = '<div class="hint">검색 결과가 없습니다.</div>';
+    // 검색 결과가 없으면 보험회사 리스트 표시
+    insuranceSection.style.display = "block";
     return;
   }
+
+  // 검색 결과가 있으면 보험회사 리스트 숨김
+  insuranceSection.style.display = "none";
 
   results.innerHTML = matched.map(d => `
     <div class="result-card">
