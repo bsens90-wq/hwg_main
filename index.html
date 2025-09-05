@@ -1024,76 +1024,166 @@ async function loadLogs() {
 
 // 이벤트 리스너
 document.addEventListener('DOMContentLoaded', () => {
-  // 보험회사 데이터 먼저 초기화
-  initializeInsuranceData();
+  console.log("DOM 로드 완료");
   
-  // 데이터 로드 및 자동 로그인 체크
-  Promise.all([loadAllData()]).then(() => {
-    checkAutoLogin();
-  });
+  try {
+    // 보험회사 데이터 먼저 초기화
+    initializeInsuranceData();
+    console.log("보험회사 데이터 초기화 완료");
+    
+    // 데이터 로드 및 자동 로그인 체크
+    Promise.all([loadAllData()]).then(() => {
+      checkAutoLogin();
+    }).catch(err => {
+      console.error("데이터 로드 중 오류:", err);
+    });
+  } catch(err) {
+    console.error("초기화 중 오류:", err);
+  }
  
-  // 로그인
-  document.getElementById('loginBtn').addEventListener('click', login);
-  document.getElementById('empno').addEventListener('keydown', e => {
-    if(e.key === 'Enter') {
-      document.getElementById('password').focus();
+  // 로그인 이벤트 리스너
+  try {
+    const loginBtn = document.getElementById('loginBtn');
+    const empnoInput = document.getElementById('empno');
+    const passwordInput = document.getElementById('password');
+    
+    console.log("로그인 버튼 요소:", loginBtn);
+    console.log("입력 필드들:", empnoInput, passwordInput);
+    
+    if (loginBtn) {
+      loginBtn.addEventListener('click', () => {
+        console.log("로그인 버튼 클릭됨");
+        login();
+      });
     }
-  });
-  document.getElementById('password').addEventListener('keydown', e => {
-    if(e.key === 'Enter') login();
-  });
-
-  // 로그아웃
-  document.getElementById('logoutBtn').addEventListener('click', logout);
- 
-  // 검색
-  document.getElementById('searchBtn').addEventListener('click', search);
-  document.getElementById('searchInput').addEventListener('keydown', e => {
-    if(e.key === 'Enter') search();
-  });
- 
-  // 관리자
-  document.getElementById('adminBtn').addEventListener('click', () => {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('searchScreen').style.display = 'none';
-    document.getElementById('adminScreen').style.display = 'flex';
-  });
- 
-  document.getElementById('loadLogsBtn').addEventListener('click', loadLogs);
-  document.getElementById('adminPassword').addEventListener('keydown', e => {
-    if(e.key === 'Enter') loadLogs();
-  });
-
-  // GitHub 테스트 버튼
-  document.getElementById('testGitHubBtn').addEventListener('click', testGitHubConnection);
-
-  // 로그인 상태 초기화 버튼
-  document.getElementById('resetLoginBtn').addEventListener('click', resetAllLogins);
- 
-  document.getElementById('backToSearchBtn').addEventListener('click', () => {
-    document.getElementById('adminScreen').style.display = 'none';
-    if(currentUser) {
-      document.getElementById('searchScreen').style.display = 'flex';
-    } else {
-      document.getElementById('loginScreen').style.display = 'flex';
+    
+    if (empnoInput) {
+      empnoInput.addEventListener('keydown', e => {
+        if(e.key === 'Enter') {
+          passwordInput && passwordInput.focus();
+        }
+      });
     }
-  });
- 
-  // PWA 설치
-  document.getElementById('installBtn').addEventListener('click', async () => {
-    if(deferredPrompt) {
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      document.getElementById('installPrompt').style.display = 'none';
-    } else {
-      alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
+    
+    if (passwordInput) {
+      passwordInput.addEventListener('keydown', e => {
+        if(e.key === 'Enter') login();
+      });
     }
-  });
+  } catch(err) {
+    console.error("로그인 이벤트 리스너 설정 오류:", err);
+  }
+
+  // 로그아웃 이벤트 리스너
+  try {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', logout);
+    }
+  } catch(err) {
+    console.error("로그아웃 이벤트 리스너 설정 오류:", err);
+  }
  
-  document.getElementById('installPrompt').addEventListener('click', () => {
-    document.getElementById('installBtn').click();
-  });
+  // 검색 이벤트 리스너
+  try {
+    const searchBtn = document.getElementById('searchBtn');
+    const searchInput = document.getElementById('searchInput');
+    
+    if (searchBtn) {
+      searchBtn.addEventListener('click', search);
+    }
+    
+    if (searchInput) {
+      searchInput.addEventListener('keydown', e => {
+        if(e.key === 'Enter') search();
+      });
+    }
+  } catch(err) {
+    console.error("검색 이벤트 리스너 설정 오류:", err);
+  }
+ 
+  // 관리자 이벤트 리스너
+  try {
+    const adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) {
+      adminBtn.addEventListener('click', () => {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('searchScreen').style.display = 'none';
+        document.getElementById('adminScreen').style.display = 'flex';
+      });
+    }
+    
+    const loadLogsBtn = document.getElementById('loadLogsBtn');
+    const adminPassword = document.getElementById('adminPassword');
+    
+    if (loadLogsBtn) {
+      loadLogsBtn.addEventListener('click', loadLogs);
+    }
+    
+    if (adminPassword) {
+      adminPassword.addEventListener('keydown', e => {
+        if(e.key === 'Enter') loadLogs();
+      });
+    }
+
+    // GitHub 테스트 버튼
+    const testGitHubBtn = document.getElementById('testGitHubBtn');
+    if (testGitHubBtn) {
+      testGitHubBtn.addEventListener('click', testGitHubConnection);
+    }
+
+    // 로그인 상태 초기화 버튼
+    const resetLoginBtn = document.getElementById('resetLoginBtn');
+    if (resetLoginBtn) {
+      resetLoginBtn.addEventListener('click', resetAllLogins);
+    }
+    
+    const backToSearchBtn = document.getElementById('backToSearchBtn');
+    if (backToSearchBtn) {
+      backToSearchBtn.addEventListener('click', () => {
+        document.getElementById('adminScreen').style.display = 'none';
+        if(currentUser) {
+          document.getElementById('searchScreen').style.display = 'flex';
+        } else {
+          document.getElementById('loginScreen').style.display = 'flex';
+        }
+      });
+    }
+  } catch(err) {
+    console.error("관리자 이벤트 리스너 설정 오류:", err);
+  }
+ 
+  // PWA 설치 이벤트 리스너
+  try {
+    const installBtn = document.getElementById('installBtn');
+    const installPrompt = document.getElementById('installPrompt');
+    
+    console.log("설치 버튼 요소:", installBtn);
+    
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        console.log("설치 버튼 클릭됨");
+        if(deferredPrompt) {
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          installPrompt && (installPrompt.style.display = 'none');
+        } else {
+          alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
+        }
+      });
+    }
+    
+    if (installPrompt) {
+      installPrompt.addEventListener('click', () => {
+        installBtn && installBtn.click();
+      });
+    }
+  } catch(err) {
+    console.error("PWA 이벤트 리스너 설정 오류:", err);
+  }
+  
+  console.log("모든 이벤트 리스너 설정 완료");
 });
 </script>
 
