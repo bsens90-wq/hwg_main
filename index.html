@@ -561,6 +561,11 @@ function checkAutoLogin() {
     currentUser = savedUser;
     isAdminUser = savedIsAdmin;
     showLoginSuccess();
+  } else {
+    // 로그인되지 않은 상태일 때 보험회사 리스트 표시
+    if (document.getElementById("searchScreen").style.display === "flex") {
+      showInsuranceContacts();
+    }
   }
 }
 
