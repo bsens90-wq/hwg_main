@@ -222,6 +222,68 @@
       0%{transform:rotate(0deg);}
       100%{transform:rotate(360deg);}
     }
+    /* 보험회사 연락처 CSS 추가 */
+    .insurance-section{
+      margin-top:1.5rem;
+    }
+    .insurance-card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:16px;
+      box-shadow:0 2px 8px rgba(0,0,0,.04);
+      margin-bottom:12px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+    }
+    .insurance-logo{
+      width:120px;
+      height:40px;
+      object-fit:contain;
+      flex-shrink:0;
+    }
+    .insurance-info{
+      flex:1;
+    }
+    .insurance-company{
+      font-size:16px;
+      font-weight:700;
+      color:#222;
+      margin-bottom:8px;
+    }
+    .insurance-contact{
+      display:flex;
+      gap:16px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .contact-item{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      font-size:14px;
+    }
+    .contact-item a{
+      color:var(--hanwha);
+      text-decoration:none;
+      font-weight:600;
+    }
+    .contact-item a:hover{
+      text-decoration:underline;
+    }
+    @media (max-width: 768px) {
+      .insurance-card{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:12px;
+      }
+      .insurance-contact{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:8px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -258,6 +320,13 @@
       <input id="searchInput" type="text" placeholder="예시: 용종, 골절, 당뇨 등" />
     </div>
     <button id="searchBtn" title="검색">검색</button>
+    
+    <!-- 보험회사 연락처 섹션 추가 -->
+    <div class="insurance-section">
+      <h2>보험회사 연락처</h2>
+      <div id="insuranceList"></div>
+    </div>
+    
     <div class="results" id="results"></div>
     <div class="meta" id="disMeta"></div>
     <div class="debug" id="debugInfo" style="display:none;"></div>
@@ -312,6 +381,118 @@ const GITHUB_CONFIG = {
   token: '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',
   branch: 'main'
 };
+
+// 보험회사 데이터 (새로 추가)
+const INSURANCE_COMPANIES = [
+  {
+    "company": "한화손해보험",
+    "logoUrl": "https://via.placeholder.com/200x60/ff7f00/ffffff?text=hwgeneralins",
+    "callCenter": "1566-8000",
+    "fax": "0502-779-1004",
+    "termsUrl": "https://www.hwgeneralins.com/notice/ir/product-ing01.do"
+  },
+  {
+    "company": "삼성화재",
+    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=samsungfire",
+    "callCenter": "1588-5114", 
+    "fax": "0505-162-0872",
+    "termsUrl": "https://www.samsungfire.com/vh/page/VH.HPIF0103.do"
+  },
+  {
+    "company": "메리츠화재",
+    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=meritzfire",
+    "callCenter": "1566-7711", 
+    "fax": "0505-021-3400",
+    "termsUrl": "https://www.meritzfire.com/disclosure/product-announcement/product-list.do#!/"
+  },
+  {
+    "company": "DB손해보험",
+    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=idbins",
+    "callCenter": "1588-0100", 
+    "fax": "0505-181-4862",
+    "termsUrl": "https://www.idbins.com/FWMAIV1534.do"
+  },
+  {
+    "company": "KB손해보험",
+    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=kbinsure",
+    "callCenter": "1544-0114", 
+    "fax": "0505-136-6500",
+    "termsUrl": "https://www.kbinsure.co.kr/CG802030001.ec"
+  },
+  {
+    "company": "현대해상",
+    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=hi",
+    "callCenter": "1588-5656", 
+    "fax": "0507-774-6060",
+    "termsUrl": "https://www.hi.co.kr/serviceAction.do?view=bin/PA/03/HHPA03010M#none"
+  },
+  {
+    "company": "롯데손해보험",
+    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=lotteins",
+    "callCenter": "1588-3344", 
+    "fax": "0507-333-9999",
+    "termsUrl": "https://www.lotteins.co.kr/web/C/D/H/cdh190.jsp"
+  },
+  {
+    "company": "흥국화재",
+    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=heungkukfire",
+    "callCenter": "1688-1688", 
+    "fax": "0504-800-0700",
+    "termsUrl": "https://www.heungkukfire.co.kr/FRW/announce/insGoodsGongsiSale.do"
+  },
+  {
+    "company": "하나손해보험",
+    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=hanainsure",
+    "callCenter": "1566-3000", 
+    "fax": "0505-170-0765",
+    "termsUrl": "https://www.hanainsure.co.kr/w/disclosure/product/saleProduct"
+  },
+  {
+    "company": "NH농협손해보험",
+    "logoUrl": "https://via.placeholder.com/200x60/1f4788/ffffff?text=nhfire",
+    "callCenter": "1644-9000", 
+    "fax": "0505-060-7000",
+    "termsUrl": "https://www.nhfire.co.kr/announce/productAnnounce/retrieveInsuranceProductsAnnounce.nhfire"
+  }
+];
+
+// 보험회사 연락처 표시 (새로 추가)
+function showInsuranceContacts() {
+  const insuranceList = document.getElementById("insuranceList");
+  
+  const cards = INSURANCE_COMPANIES.map(company => {
+    const faxDisplay = company.fax === "콜센터 전화 접수" ? 
+      `<span style="color: #888; font-style: italic;">${company.fax}</span>` : 
+      company.fax;
+    
+    return `
+      <div class="insurance-card">
+        <img src="${company.logoUrl}" alt="${company.company}" class="insurance-logo" 
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div style="display:none; width:120px; height:40px; background:#f0f0f0; border-radius:8px; flex-shrink:0; align-items:center; justify-content:center; font-size:12px; color:#666;">${company.company}</div>
+        <div class="insurance-info">
+          <div class="insurance-company">${company.company}</div>
+          <div class="insurance-contact">
+            <div class="contact-item">
+              <span>📞</span>
+              <a href="tel:${company.callCenter.replace(/-/g, '')}">${company.callCenter}</a>
+            </div>
+            <div class="contact-item">
+              <span>📠</span>
+              <span>${faxDisplay}</span>
+            </div>
+            <div class="contact-item">
+              <span>🔗</span>
+              <a href="${company.termsUrl}" target="_blank" rel="noopener">약관함</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  insuranceList.innerHTML = cards;
+}
 
 // 디버그 정보 표시
 function showDebug(message, isError = false) {
@@ -391,80 +572,6 @@ async function testGitHubConnection() {
     showDebug(`리포지토리 응답: ${repoResponse.status} ${repoResponse.statusText}`);
 
     if (!repoResponse.ok) {
-      const errorText = await repoResponse.text();
-      showDebug(`리포지토리 오류 내용: ${errorText}`, true);
-      throw new Error(`리포지토리 접근 실패: ${repoResponse.status}`);
-    }
-
-    const repoData = await repoResponse.json();
-    showDebug(`리포지토리명: ${repoData.name}, 공개여부: ${repoData.private ? 'Private' : 'Public'}`);
-
-    // 3. 파일 접근 테스트
-    showDebug("3. 로그 파일 접근 테스트...");
-    const fileUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
-    showDebug(`파일 URL: ${fileUrl}`);
-    
-    const fileResponse = await fetch(fileUrl, {
-      headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-
-    showDebug(`파일 접근 응답: ${fileResponse.status} ${fileResponse.statusText}`);
-
-    if (fileResponse.ok) {
-      const fileData = await fileResponse.json();
-      showDebug(`파일 존재함: ${GITHUB_CONFIG.path}`);
-      showDebug(`파일 크기: ${fileData.size} bytes, SHA: ${fileData.sha}`);
-      
-      try {
-        const content = atob(fileData.content);
-        const logs = JSON.parse(content);
-        showDebug(`현재 로그 개수: ${logs.length}개`);
-        
-        if (logs.length > 0) {
-          const lastLog = logs[logs.length - 1];
-          showDebug(`최근 로그: ${lastLog.date} - ${lastLog.empno} - ${lastLog.action}`);
-        }
-      } catch (parseError) {
-        showDebug(`파일 파싱 오류: ${parseError.message}`, true);
-      }
-      
-    } else if (fileResponse.status === 404) {
-      showDebug("파일이 존재하지 않음. 첫 로그 저장 시 자동 생성됩니다.");
-      
-      // 4. 파일 생성 테스트
-      showDebug("4. 파일 생성 테스트...");
-      const testLog = [{
-        empno: "TEST",
-        action: "test_connection",
-        details: "GitHub 연결 테스트",
-        timestamp: new Date().toISOString(),
-        date: new Date().toLocaleString('ko-KR')
-      }];
-      
-      const createResponse = await fetch(fileUrl, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${GITHUB_CONFIG.token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: 'GitHub 연결 테스트 - 로그 파일 생성',
-          content: btoa(JSON.stringify(testLog, null, 2)),
-          branch: GITHUB_CONFIG.branch
-        })
-      });
-      
-      if (createResponse.ok) {
-        showDebug("테스트 파일 생성 성공!");
-      } else {
-        const createErrorText = await createResponse.text();
-        showDebug(`파일 생성 실패: ${createResponse.status} - ${createErrorText}`, true);
-      }
-      
-    } else {
       const errorText = await fileResponse.text();
       showDebug(`파일 접근 오류: ${fileResponse.status} - ${errorText}`, true);
     }
@@ -488,12 +595,15 @@ function checkAutoLogin() {
   }
 }
 
-// 로그인 성공 처리
+// 로그인 성공 처리 (보험회사 연락처 표시 추가)
 function showLoginSuccess() {
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("searchScreen").style.display = "flex";
   document.getElementById("userText").textContent = `로그인: ${currentUser}`;
   document.getElementById("searchInput").focus();
+  
+  // 보험회사 연락처 표시
+  showInsuranceContacts();
 }
 
 // 로그아웃 처리
@@ -617,16 +727,6 @@ async function saveLogToGitHub(empno, action, details = '') {
 
 // GitHub에서 로그 불러오기
 async function loadLogsFromGitHub() {
-  // GitHub 연동이 비활성화된 경우 로컬 백업만 사용
-  if (!GITHUB_CONFIG.enabled || !GITHUB_CONFIG.token) {
-    showDebug("GitHub 연동이 비활성화됨. 로컬 백업 사용");
-    const backupLogs = JSON.parse(localStorage.getItem('backup_logs') || '[]');
-    if (backupLogs.length > 0) {
-      showDebug(`로컬 백업에서 ${backupLogs.length}개 로그 사용`);
-    }
-    return backupLogs;
-  }
-
   try {
     const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
       headers: {
@@ -765,7 +865,7 @@ async function loadAllData(){
     })).filter(d => d.name);
 
     document.getElementById("empMeta").textContent =
-      `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건 • 관리자: 8091768`;
+      `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건`;
 
     showDebug(`데이터 로드 완료: 직원 ${employees.length}명, 질병 ${diseases.length}개`);
 
@@ -1040,4 +1140,78 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 </body>
-</html>
+</html> = await repoResponse.text();
+      showDebug(`리포지토리 오류 내용: ${errorText}`, true);
+      throw new Error(`리포지토리 접근 실패: ${repoResponse.status}`);
+    }
+
+    const repoData = await repoResponse.json();
+    showDebug(`리포지토리명: ${repoData.name}, 공개여부: ${repoData.private ? 'Private' : 'Public'}`);
+
+    // 3. 파일 접근 테스트
+    showDebug("3. 로그 파일 접근 테스트...");
+    const fileUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+    showDebug(`파일 URL: ${fileUrl}`);
+    
+    const fileResponse = await fetch(fileUrl, {
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    showDebug(`파일 접근 응답: ${fileResponse.status} ${fileResponse.statusText}`);
+
+    if (fileResponse.ok) {
+      const fileData = await fileResponse.json();
+      showDebug(`파일 존재함: ${GITHUB_CONFIG.path}`);
+      showDebug(`파일 크기: ${fileData.size} bytes, SHA: ${fileData.sha}`);
+      
+      try {
+        const content = atob(fileData.content);
+        const logs = JSON.parse(content);
+        showDebug(`현재 로그 개수: ${logs.length}개`);
+        
+        if (logs.length > 0) {
+          const lastLog = logs[logs.length - 1];
+          showDebug(`최근 로그: ${lastLog.date} - ${lastLog.empno} - ${lastLog.action}`);
+        }
+      } catch (parseError) {
+        showDebug(`파일 파싱 오류: ${parseError.message}`, true);
+      }
+      
+    } else if (fileResponse.status === 404) {
+      showDebug("파일이 존재하지 않음. 첫 로그 저장 시 자동 생성됩니다.");
+      
+      // 4. 파일 생성 테스트
+      showDebug("4. 파일 생성 테스트...");
+      const testLog = [{
+        empno: "TEST",
+        action: "test_connection",
+        details: "GitHub 연결 테스트",
+        timestamp: new Date().toISOString(),
+        date: new Date().toLocaleString('ko-KR')
+      }];
+      
+      const createResponse = await fetch(fileUrl, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${GITHUB_CONFIG.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: 'GitHub 연결 테스트 - 로그 파일 생성',
+          content: btoa(JSON.stringify(testLog, null, 2)),
+          branch: GITHUB_CONFIG.branch
+        })
+      });
+      
+      if (createResponse.ok) {
+        showDebug("테스트 파일 생성 성공!");
+      } else {
+        const createErrorText = await createResponse.text();
+        showDebug(`파일 생성 실패: ${createResponse.status} - ${createErrorText}`, true);
+      }
+      
+    } else {
+      const errorText
