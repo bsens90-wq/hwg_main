@@ -23,7 +23,7 @@
       color:var(--text);
     }
     
-    /* 상단 고정 로고 영역 - 텍스트 로고로 변경 */
+    /* 상단 고정 로고 영역 - THE-RA 브랜드 로고 */
     .header-fixed {
       position: fixed;
       top: 0;
@@ -32,27 +32,47 @@
       z-index: 1000;
       background: var(--bg);
       border-bottom: 2px solid #ccc;
-      padding: 10px 0;
+      padding: 8px 0;
       text-align: center;
       box-shadow: 0 2px 4px rgba(0,0,0,.08);
     }
     
-    .header-fixed .logo-text {
-      font-size: 28px;
-      font-weight: 900;
-      color: var(--hanwha);
+    .logo-container {
       cursor: pointer;
       transition: all 0.3s ease;
       display: inline-block;
-      text-decoration: none;
-      letter-spacing: 2px;
-      text-shadow: 0 2px 4px rgba(255,127,0,0.2);
     }
     
-    .header-fixed .logo-text:hover {
+    .logo-container:hover {
       transform: scale(1.05);
+    }
+    
+    .logo-main {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--hanwha);
+      letter-spacing: 3px;
+      text-shadow: 0 2px 4px rgba(255,127,0,0.2);
+      margin: 0;
+      line-height: 1;
+    }
+    
+    .logo-sub {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 400;
+      margin-top: 2px;
+      letter-spacing: 1px;
+      opacity: 0.8;
+    }
+    
+    .logo-container:hover .logo-main {
       color: var(--hanwha-dark);
       text-shadow: 0 4px 8px rgba(255,127,0,0.3);
+    }
+    
+    .logo-container:hover .logo-sub {
+      opacity: 1;
     }
     
     .screen{
@@ -300,9 +320,14 @@
     }
     
     @media (max-width: 768px) {
-      .header-fixed .logo-text {
-        font-size: 24px;
-        letter-spacing: 1px;
+      .logo-main {
+        font-size: 26px;
+        letter-spacing: 2px;
+      }
+      
+      .logo-sub {
+        font-size: 10px;
+        letter-spacing: 0.5px;
       }
       
       .insurance-card.hanwha{
@@ -336,9 +361,12 @@
   </style>
 </head>
 <body>
-  <!-- 상단 고정 로고 헤더 - 텍스트 로고로 변경 -->
+  <!-- 상단 고정 로고 헤더 - THE-RA 브랜드 로고 -->
   <div class="header-fixed">
-    <div class="logo-text" onclick="goHome()">H-MDR</div>
+    <div class="logo-container" onclick="goHome()">
+      <div class="logo-main">THE-RA</div>
+      <div class="logo-sub">뭐더라, 어딨더라...</div>
+    </div>
   </div>
 
  <!-- 로그인 화면 -->
@@ -361,13 +389,38 @@
   </div>
 </section>
 
-<!-- 검색 화면 -->
-<section id="searchScreen" class="screen" style="display:none;">
+<!-- 메뉴 화면 -->
+<section id="menuScreen" class="screen" style="display:none;">
   <div class="user-info" id="userInfo">
     <span id="userText"></span>
     <button id="logoutBtn" class="logout">로그아웃</button>
   </div>
   <div class="app-title">한화손보 유병자 인수 가이드</div>
+  <div class="card">
+    <h2 style="margin-bottom:1.5rem;">메뉴 선택</h2>
+    
+    <button id="diseaseMenuBtn" style="margin-bottom:1rem;">
+      <span style="font-size:18px; display:block; margin-bottom:4px;">🔍 한화손보 SI 즉시인수 질환</span>
+      <span style="font-size:13px; opacity:0.8;">질병명으로 인수기준 검색</span>
+    </button>
+    
+    <button id="contactMenuBtn" style="margin-bottom:1rem;">
+      <span style="font-size:18px; display:block; margin-bottom:4px;">📞 회사별 콜센터, 청구팩스 번호</span>
+      <span style="font-size:13px; opacity:0.8;">보험회사 연락처 정보</span>
+    </button>
+    
+    <div class="meta" style="margin-top:2rem;">Copyright 2025 하세봉 all rights reserved.</div>
+  </div>
+</section>
+
+<!-- 검색 화면 -->
+<section id="searchScreen" class="screen" style="display:none;">
+  <div class="user-info">
+    <span id="userTextSearch"></span>
+    <button id="homeBtn" class="secondary" style="margin-right:8px;">홈</button>
+    <button id="logoutBtnSearch" class="logout">로그아웃</button>
+  </div>
+  <div class="app-title">한화손보 SI 즉시인수 질환</div>
   <div class="card container-narrow">
     <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
     <div class="row">
@@ -379,14 +432,27 @@
     <button id="searchBtn" title="검색">검색</button>
     <button id="backBtn" class="secondary" style="display:none; margin-top:8px;">뒤로가기</button>
     
-    <!-- 보험회사 연락처 섹션 -->
-    <div class="insurance-section">
-      <div id="insuranceList"></div>
-    </div>
-    
     <div class="results" id="results"></div>
     <div class="meta" id="disMeta"></div>
     <div class="debug" id="debugInfo" style="display:none;"></div>
+    <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+  </div>
+</section>
+
+<!-- 연락처 화면 -->
+<section id="contactScreen" class="screen" style="display:none;">
+  <div class="user-info">
+    <span id="userTextContact"></span>
+    <button id="homeBtnContact" class="secondary" style="margin-right:8px;">홈</button>
+    <button id="logoutBtnContact" class="logout">로그아웃</button>
+  </div>
+  <div class="app-title">회사별 콜센터, 청구팩스 번호</div>
+  <div class="card container-narrow">
+    <!-- 보험회사 연락처 섹션 -->
+    <div class="insurance-section">
+      <div id="insuranceListContact"></div>
+    </div>
+    
     <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
   </div>
 </section>
@@ -544,9 +610,9 @@ const INSURANCE_COMPANIES = [
   }
 ];
 
-// 보험회사 연락처 표시 (원본 로직 + 공제 섹션)
-function showInsuranceContacts() {
-  const insuranceList = document.getElementById("insuranceList");
+// 보험회사 연락처 표시 (연락처 화면용)
+function showInsuranceContactsInContactScreen() {
+  const insuranceList = document.getElementById("insuranceListContact");
   
   // 섹션별로 분류
   const damageInsurance = INSURANCE_COMPANIES.slice(1, 12); // 손해보험 (한화손해보험 제외)
@@ -635,108 +701,27 @@ function showInsuranceContacts() {
 // 홈 버튼 기능 (로고 클릭 시)
 function goHome() {
   if (currentUser) {
-    // 로그인된 상태면 검색 화면으로 이동
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("searchScreen").style.display = "flex";
+    // 로그인된 상태면 메뉴 화면으로 이동
+    hideAllScreens();
+    document.getElementById("menuScreen").style.display = "flex";
     
-    // 검색 초기화
-    document.getElementById("searchInput").value = "";
-    document.getElementById("results").innerHTML = "";
-    const searchMessage = document.getElementById("searchMessage");
-    const backBtn = document.getElementById("backBtn");
-    if (searchMessage) searchMessage.style.display = "none";
-    if (backBtn) backBtn.style.display = "none";
-    document.querySelector(".insurance-section").style.display = "block";
-    
-    showInsuranceContacts();
+    // 사용자 정보 업데이트
+    document.getElementById("userText").textContent = `로그인: ${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
   } else {
     // 로그인되지 않은 상태면 로그인 화면으로 이동
-    document.getElementById("searchScreen").style.display = "none";
+    hideAllScreens();
     document.getElementById("loginScreen").style.display = "flex";
   }
 }
 
-// 뒤로가기 기능
-function goBack() {
-  const searchInput = document.getElementById("searchInput");
-  const results = document.getElementById("results");
-  const insuranceSection = document.querySelector(".insurance-section");
-  const searchMessage = document.getElementById("searchMessage");
-  const backBtn = document.getElementById("backBtn");
-  
-  searchInput.value = "";
-  results.innerHTML = "";
-  searchMessage.style.display = "none";
-  insuranceSection.style.display = "block";
-  backBtn.style.display = "none";
-}
-
-// 자동 로그인 체크
-function checkAutoLogin() {
-  const savedUser = localStorage.getItem('hwg_current_user');
-  const savedIsAdmin = localStorage.getItem('hwg_is_admin') === 'true';
-  
-  if (savedUser) {
-    currentUser = savedUser;
-    isAdminUser = savedIsAdmin;
-    showLoginSuccess();
-  }
-}
-
-// 로그인 성공 처리
-function showLoginSuccess() {
+// 모든 화면 숨기기
+function hideAllScreens() {
   document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("searchScreen").style.display = "flex";
-  document.getElementById("userText").textContent = `로그인: ${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
-  document.getElementById("searchInput").focus();
-  
-  // 보험회사 연락처 표시
-  showInsuranceContacts();
+  document.getElementById("menuScreen").style.display = "none";
+  document.getElementById("searchScreen").style.display = "none";
+  document.getElementById("contactScreen").style.display = "none";
 }
 
-// 로그아웃 처리
-function logout() {
-  if (currentUser) {
-    localStorage.removeItem('hwg_current_user');
-    localStorage.removeItem('hwg_is_admin');
-    currentUser = null;
-    isAdminUser = false;
-    
-    document.getElementById("searchScreen").style.display = "none";
-    document.getElementById("loginScreen").style.display = "flex";
-    
-    document.getElementById("empno").value = "";
-    document.getElementById("password").value = "";
-    document.getElementById("searchInput").value = "";
-    document.getElementById("results").innerHTML = "";
-  }
-}
-
-// JSON 로더
-async function loadJsonFlexible(url){
-  const res = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
-  if(!res.ok) throw new Error("네트워크 오류: " + res.status);
- 
-  const text = await res.text();
-  const cleaned = text.replace(/^\uFEFF/, "");
-  let json = JSON.parse(cleaned);
-
-  if(json && typeof json === "object" && !Array.isArray(json) && Array.isArray(json.data)){
-    json = json.data;
-  }
-  if(!Array.isArray(json)) throw new Error("JSON이 배열이 아닙니다.");
- 
-  return json;
-}
-
-// 데이터 로드
-async function loadAllData(){
-  try{
-    const [emp, dis] = await Promise.all([
-      loadJsonFlexible(EMP_URL),
-      loadJsonFlexible(DIS_URL)
-    ]);
-
-    employees = emp.map(e => ({
-      empno: String(e.empno || e.code || "").trim(),
-      password:
+// 질병 검색 화면으로 이동
+function showDiseaseScreen() {
+  hideAllScreens();
