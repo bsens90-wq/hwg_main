@@ -180,8 +180,8 @@
     button.logout:hover{background:#218838}
     button.small{
       width:auto;
-      padding:6px 12px;
-      font-size:12px;
+      padding:8px 12px;
+      font-size:14px;
       margin:0 4px 0 0;
     }
     .hint{color:var(--muted); font-size:13px; margin-top:.25rem}
@@ -329,36 +329,79 @@
       padding-bottom:8px;
     }
 
-    /* 인수한도 기능 추가 스타일 */
+    /* 인수한도 기능 추가 스타일 - 개선된 스타일 */
+    .limit-table-container {
+      position: relative;
+      overflow: auto;
+      max-height: 70vh;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+    
     .limit-table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:1rem;
-      font-size:13px;
+      width: auto;
+      min-width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 16px; /* 폰트 크기 증가 */
+      background: white;
     }
+    
     .limit-table th, .limit-table td{
-      border:1px solid var(--border);
-      padding:8px 4px;
-      text-align:center;
-      vertical-align:middle;
+      border: 1px solid var(--border);
+      padding: 12px 8px; /* 패딩 증가 */
+      text-align: center;
+      vertical-align: middle;
+      background: white;
     }
-    .limit-table th{
-      background:var(--bg);
-      font-weight:600;
+    
+    .limit-table thead th {
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      font-weight: 600;
+      z-index: 10;
+      border-bottom: 2px solid var(--hanwha);
     }
+    
     .limit-table .coverage-name{
-      text-align:left;
-      font-weight:500;
-      min-width:120px;
-      word-break:break-word;
+      position: sticky;
+      left: 0;
+      text-align: left;
+      font-weight: 600;
+      min-width: 180px; /* 너비 증가 */
+      word-break: break-word;
+      background: white;
+      z-index: 5;
+      border-right: 2px solid var(--hanwha);
     }
+    
+    .limit-table thead .coverage-name {
+      z-index: 15;
+      background: var(--bg);
+    }
+    
     .limit-table .age-group{
-      min-width:80px;
-      font-size:11px;
+      min-width: 100px; /* 너비 증가 */
+      font-size: 14px;
     }
+    
     .limit-table .amount{
-      font-weight:600;
-      color:var(--hanwha);
+      font-weight: 600;
+      color: var(--hanwha);
+      min-width: 100px; /* 너비 증가 */
+    }
+
+    .product-plan-info {
+      position: sticky;
+      top: 0;
+      background: white;
+      padding: 15px 20px;
+      border-bottom: 2px solid var(--hanwha);
+      margin: -20px -20px 20px -20px;
+      z-index: 20;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     /* 팝업 모달 */
@@ -415,18 +458,18 @@
     /* 모바일 최적화 */
     @media (max-width: 768px) {
       .limit-table{
-        font-size:11px;
+        font-size:14px;
       }
       .limit-table th, .limit-table td{
-        padding:6px 2px;
+        padding:8px 4px;
       }
       .limit-table .coverage-name{
-        min-width:100px;
-        font-size:10px;
+        min-width:140px;
+        font-size:13px;
       }
       .limit-table .age-group{
-        min-width:60px;
-        font-size:10px;
+        min-width:80px;
+        font-size:12px;
       }
       .container-wide{
         max-width:100%;
@@ -435,6 +478,10 @@
       .card{
         max-width:100%;
         margin:0 10px;
+      }
+      .product-plan-info {
+        margin: -20px -10px 20px -10px;
+        padding: 10px 15px;
       }
     }
   </style>
@@ -665,8 +712,10 @@ function generateLimitTable(selectedProduct, selectedPlan) {
   });
   
   let tableHTML = `
-    <div class="result-title">${selectedProduct} - ${selectedPlan}</div>
-    <div style="overflow-x: auto;">
+    <div class="product-plan-info">
+      <div class="result-title">${selectedProduct} - ${selectedPlan}</div>
+    </div>
+    <div class="limit-table-container">
       <table class="limit-table">
         <thead>
           <tr>
@@ -693,8 +742,13 @@ function generateLimitTable(selectedProduct, selectedPlan) {
     const hasNote = items.some(item => item.note && item.note.trim());
     if (hasNote) {
       const noteContent = items.find(item => item.note && item.note.trim())?.note || '';
-      const cleanNote = noteContent.replace(/'/g, "\\'").replace(/"/g, '\\"');
-      tableHTML += `<td><button class="small" onclick="showNoteModal('${coverage}', '${cleanNote}')">상세조회</button></td>`;
+      // HTML 특수문자와 줄바꿈 처리를 개선
+      const cleanNote = noteContent
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')
+        .replace(/\r?\n/g, '\\n');
+      tableHTML += `<td><button class="small" onclick="showNoteModal(\`${coverage}\`, \`${cleanNote}\`)">상세조회</button></td>`;
     } else {
       tableHTML += '<td>-</td>';
     }
@@ -716,7 +770,14 @@ function formatAmount(amount) {
 
 
 function showNoteModal(coverage, note) {
-  document.getElementById('noteModalBody').textContent = note;
+  // 이스케이프된 문자열을 원래대로 복원
+  const restoredNote = note
+    .replace(/\\n/g, '\n')
+    .replace(/\\"/g, '"')
+    .replace(/\\'/g, "'")
+    .replace(/\\\\/g, '\\');
+    
+  document.getElementById('noteModalBody').textContent = restoredNote;
   document.querySelector('.modal-title').textContent = `${coverage} - 비고 상세조회`;
   document.getElementById('noteModal').style.display = 'block';
 }
@@ -922,6 +983,7 @@ function checkAutoLogin() {
   if (savedUser) {
     currentUser = savedUser;
     isAdminUser = savedIsAdmin;
+    // 자동 로그인 시 바로 메뉴 화면으로 이동
     showLoginSuccess();
   } else {
     const hash = window.location.hash.substring(1);
@@ -1191,14 +1253,17 @@ function goBack() {
   backBtn.style.display = "none";
 }
 
+// 페이지 로드 시 자동 로그인 체크를 먼저 수행
 document.addEventListener('DOMContentLoaded', () => {
   if (window.location.hash) {
     history.replaceState({ screen: 'login' }, '', window.location.pathname);
   }
   
-  Promise.all([loadAllData()]).then(() => {
-    checkAutoLogin();
-  });
+  // 자동 로그인 체크를 먼저 수행
+  checkAutoLogin();
+  
+  // 그 다음 데이터 로드
+  loadAllData();
  
   document.getElementById('loginBtn').addEventListener('click', login);
   document.getElementById('empno').addEventListener('keydown', e => {
