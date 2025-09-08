@@ -1010,10 +1010,9 @@ async function loadJsonFlexible(url){
 
 async function loadAllData(){
   try{
-    const [emp, dis, limit] = await Promise.all([
+    const [emp, dis] = await Promise.all([
       loadJsonFlexible(EMP_URL),
-      loadJsonFlexible(DIS_URL),
-      loadJsonFlexible(LIMIT_URL)
+      loadJsonFlexible(DIS_URL)
     ]);
 
     employees = emp.map(e => ({
@@ -1031,23 +1030,9 @@ async function loadAllData(){
       restrictions: String(d.restrictions || "")
     })).filter(d => d.name);
 
-    limitData = limit.map(l => ({
-      product: String(l.product || "").trim(),
-      plan: String(l.plan || "").trim(),
-      coverage: String(l.coverage || "").trim(),
-      minAge: Number(l.minAge || 0),
-      maxAge: Number(l.maxAge || 0),
-      amount: Number(l.amount || 0),
-      note: String(l.note || "")
-    })).filter(l => l.product && l.plan && l.coverage);
+    await loadLimitData();
 
-    console.log("로드된 데이터:", {
-      employees: employees.length,
-      diseases: diseases.length, 
-      limitData: limitData.length
-    });
-
-    document.getElementById("empMeta").textContent = `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건 • 인수한도 ${limitData.length}건`;
+    document.getElementById("empMeta").textContent = `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건`;
   }catch(err){
     console.error("데이터 로드 실패:", err);
     document.getElementById("loginMsg").textContent = "데이터 로드 실패";
