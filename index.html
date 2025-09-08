@@ -659,6 +659,12 @@ const LIMIT_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/da
 async function loadLimitData() {
   try {
     limitData = await loadJsonFlexible(LIMIT_URL);
+    console.log("인수한도 데이터 로드 완료:", limitData.length + "건");
+    
+    // 현재 인수한도 화면이 표시되어 있다면 상품 목록 업데이트
+    if (currentScreen === 'limit') {
+      updateProductSelect();
+    }
   } catch(err) {
     console.error("인수한도 데이터 로드 실패:", err);
   }
@@ -668,6 +674,11 @@ async function loadLimitData() {
 function extractProductsAndPlans() {
   const products = new Set();
   const plans = new Map();
+  
+  // limitData가 없으면 빈 결과 반환
+  if (!limitData || limitData.length === 0) {
+    return { products: [], plans: new Map() };
+  }
   
   limitData.forEach(item => {
     if (item.product && item.plan) {
@@ -770,7 +781,6 @@ function formatAmount(amount) {
   return formattedNumber + '만';
 }
 
-
 function showNoteModal(coverage, note) {
   // 이스케이프된 문자열을 원래대로 복원
   const restoredNote = note
@@ -857,16 +867,34 @@ function initializeLimitScreen() {
   document.getElementById("limitSearchBtn").disabled = true;
   limitResults.innerHTML = "";
   
-  updateProductSelect();
+  // 데이터가 로드되었는지 확인 후 상품 목록 업데이트
+  if (limitData && limitData.length > 0) {
+    updateProductSelect();
+  } else {
+    // 데이터가 없으면 잠시 후 다시 시도
+    setTimeout(() => {
+      if (limitData && limitData.length > 0) {
+        updateProductSelect();
+      }
+    }, 500);
+  }
 }
 
 function updateProductSelect() {
-  const { products } = extractProductsAndPlans();
   const productSelect = document.getElementById("productSelect");
   
+  // 기존 옵션들 제거 (첫 번째 기본 옵션 제외)
   while (productSelect.options.length > 1) {
     productSelect.remove(1);
   }
+  
+  // limitData가 없으면 리턴
+  if (!limitData || limitData.length === 0) {
+    console.log("인수한도 데이터가 아직 로드되지 않았습니다.");
+    return;
+  }
+  
+  const { products } = extractProductsAndPlans();
   
   products.forEach(product => {
     const option = document.createElement("option");
