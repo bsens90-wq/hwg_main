@@ -608,55 +608,11 @@ const INSURANCE_COMPANIES = [
 ];
 
 // 인수한도 데이터 로드 함수
+const LIMIT_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/limits.json";
+
 async function loadLimitData() {
   try {
-    limitData = [
-      {
-        product: "한화 굿밸런스종합보험",
-        plan: "[굿밸]올인원",
-        coverage: "통합암진단비",
-        minAge: 20,
-        maxAge: 40,
-        amount: 10000,
-        note: "가입금액 연계비율 적용"
-      },
-      {
-        product: "한화 굿밸런스종합보험",
-        plan: "[굿밸]올인원",
-        coverage: "통합암진단비",
-        minAge: 41,
-        maxAge: 50,
-        amount: 10000,
-        note: "가입금액 연계비율 적용"
-      },
-      {
-        product: "한화 굿밸런스종합보험",
-        plan: "[굿밸]올인원",
-        coverage: "통합암진단비",
-        minAge: 51,
-        maxAge: 60,
-        amount: 5000,
-        note: "가입금액 연계비율 적용"
-      },
-      {
-        product: "한화 굿밸런스종합보험",
-        plan: "[굿밸]올인원",
-        coverage: "급성심근경색증진단비",
-        minAge: 20,
-        maxAge: 40,
-        amount: 15000,
-        note: ""
-      },
-      {
-        product: "한화 굿밸런스종합보험",
-        plan: "[굿밸]올인원",
-        coverage: "급성심근경색증진단비",
-        minAge: 41,
-        maxAge: 50,
-        amount: 10000,
-        note: ""
-      }
-    ];
+    limitData = await loadJsonFlexible(LIMIT_URL);
   } catch(err) {
     console.error("인수한도 데이터 로드 실패:", err);
   }
