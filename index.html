@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>생각 안 날 땐? 머드라!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="data:,"><!-- favicon 404 방지 -->
   <style>
     :root{
       --hanwha:#ff7f00;
@@ -232,11 +231,1297 @@
       color:var(--muted);
       text-align:center;
     }
-    ... (이하 전체 CSS 및 HTML, JS는 앞서 드린 코드와 동일하게 그대로 유지) ...
+    
+    .insurance-section{
+      margin-top:1.5rem;
+    }
+    .insurance-card.hanwha{
+      background:#fff;
+      border:3px solid var(--hanwha);
+      border-radius:14px;
+      padding:20px;
+      box-shadow:0 4px 12px rgba(255,127,0,0.15);
+      margin-bottom:16px;
+      display:flex;
+      align-items:center;
+      gap:20px;
+    }
+    .insurance-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .insurance-card.small{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      box-shadow:0 2px 6px rgba(0,0,0,.04);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      min-height:130px;
+    }
+    .insurance-logo{
+      width:120px;
+      height:40px;
+      object-fit:contain;
+      flex-shrink:0;
+      background:#f0f0f0;
+      border-radius:8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+      color:#333;
+      font-weight:600;
+    }
+    .insurance-logo.small{
+      width:80px;
+      height:30px;
+      margin-bottom:8px;
+      font-size:12px;
+    }
+    .insurance-info{
+      flex:1;
+    }
+    .insurance-info.small{
+      width:100%;
+    }
+    .insurance-contact{
+      display:flex;
+      gap:16px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .insurance-contact.small{
+      flex-direction:column;
+      gap:4px;
+      align-items:center;
+    }
+    .contact-item{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:16px;
+    }
+    .contact-item.small{
+      font-size:13px;
+      gap:6px;
+    }
+    .contact-item a{
+      color:var(--hanwha);
+      text-decoration:none;
+      font-weight:600;
+    }
+    .contact-item a:hover{
+      text-decoration:underline;
+    }
+    
+    .insurance-category h3{
+      font-size:18px;
+      font-weight:700;
+      color:#333;
+      margin:1.5rem 0 1rem 0;
+      text-align:center;
+      border-bottom:2px solid var(--hanwha);
+      padding-bottom:8px;
+    }
+
+    /* 인수한도 기능 스타일 개선 */
+    .limit-table-container {
+      position: relative;
+      overflow: auto;
+      max-height: 70vh;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+    
+    .limit-table{
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 14px;
+      background: white;
+      table-layout: fixed;
+    }
+    
+    .limit-table th, .limit-table td{
+      border: 1px solid var(--border);
+      padding: 8px 4px;
+      text-align: center;
+      vertical-align: middle;
+      background: white;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .limit-table thead th {
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      font-weight: 600;
+      z-index: 10;
+      border-bottom: 2px solid var(--hanwha);
+    }
+    
+    .limit-table .detail-btn{
+      width: 15%;
+      min-width: 45px;
+      font-size: 11px;
+    }
+    
+    .limit-table .coverage-name{
+      width: 60%;
+      text-align: left;
+      font-weight: 600;
+      word-break: break-word;
+      padding-left: 8px;
+    }
+    
+    .limit-table .amount{
+      width: 25%;
+      font-weight: 600;
+      color: var(--hanwha);
+    }
+    
+    .coverage-clickable {
+      cursor: pointer;
+      color: var(--hanwha);
+      text-decoration: underline;
+    }
+    
+    .coverage-clickable:hover {
+      color: var(--hanwha-dark);
+    }
+    
+    .coverage-search-container {
+      margin-top: 10px;
+    }
+    
+    .coverage-search-container input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+    
+    .coverage-search-container input:focus {
+      border-color: var(--hanwha);
+    }
+
+    .product-plan-info {
+      position: sticky;
+      top: 0;
+      background: white;
+      padding: 15px 20px;
+      border-bottom: 2px solid var(--hanwha);
+      margin: -20px -20px 20px -20px;
+      z-index: 20;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* 팝업 모달 */
+    .modal{
+      display:none;
+      position:fixed;
+      z-index:2000;
+      left:0;
+      top:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,0.5);
+    }
+    .modal-content{
+      background:#fff;
+      margin:10% auto;
+      padding:20px;
+      border-radius:16px;
+      width:90%;
+      max-width:600px;
+      max-height:70vh;
+      overflow-y:auto;
+      position:relative;
+    }
+    .modal-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:1rem;
+      padding-bottom:1rem;
+      border-bottom:1px solid var(--border);
+    }
+    .modal-title{
+      font-size:18px;
+      font-weight:700;
+      color:var(--text);
+    }
+    .close{
+      color:#aaa;
+      font-size:28px;
+      font-weight:bold;
+      cursor:pointer;
+      line-height:1;
+    }
+    .close:hover{
+      color:#000;
+    }
+    .modal-body{
+      white-space:pre-line;
+      line-height:1.6;
+      color:var(--text);
+    }
+
+    /* 모바일 최적화 */
+    @media (max-width: 768px) {
+      .limit-table{
+        font-size:12px;
+      }
+      .limit-table th, .limit-table td{
+        padding:6px 2px;
+      }
+      .limit-table .detail-btn{
+        width: 18%;
+        min-width: 40px;
+        font-size: 10px;
+      }
+      .limit-table .coverage-name{
+        width: 57%;
+        font-size:11px;
+        padding-left: 4px;
+      }
+      .limit-table .amount{
+        width: 25%;
+        font-size:11px;
+      }
+      .container-wide{
+        max-width:100%;
+        padding:0 10px;
+      }
+      .card{
+        max-width:100%;
+        margin:0 10px;
+      }
+      .product-plan-info {
+        margin: -20px -10px 20px -10px;
+        padding: 10px 15px;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- 기존 HTML 본문 전체 -->
-  <!-- 기존 JS 전체 -->
+  <div class="header-fixed">
+    <div class="header-left"></div>
+    <div class="header-center">
+      <div class="logo-container" onclick="goHome()">
+        <div class="logo-main">머드라</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div id="userInfoHeader" class="user-info-header">
+        <span id="userTextHeader"></span>
+        <button id="logoutBtnHeader">로그아웃</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 로그인 화면 -->
+  <section id="loginScreen" class="screen">
+    <div class="app-title">뭐더라.. 어딨더라..</div>
+    <div class="card">
+      <h2>로그인</h2>
+      <div class="row">
+        <input id="empno" type="text" placeholder="코드 입력" autocomplete="username">
+      </div>
+      <div class="row">
+        <input id="password" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
+        <div class="hint">사전 승인된 기관만 로그인 가능합니다. </div>
+      </div>
+      <button id="loginBtn">로그인</button>
+      <button id="installBtn" class="secondary">홈화면에 추가</button>
+      <div id="loginMsg" class="error"></div>
+      <div class="meta" id="empMeta"></div>
+      <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+    </div>
+  </section>
+
+  <!-- 메뉴 화면 -->
+  <section id="menuScreen" class="screen" style="display:none;">
+    <div class="app-title">뭐더라.. 어딨더라..</div>
+    <div class="card">
+      <h2 style="margin-bottom:1.5rem;">메뉴 선택</h2>
+      
+      <button id="diseaseMenuBtn" style="margin-bottom:1rem;">
+        <span style="font-size:18px; display:block; margin-bottom:4px;">한화손보 SI 즉시 인수 질환</span>
+      </button>
+      
+      <button id="contactMenuBtn" style="margin-bottom:1rem;">
+        <span style="font-size:18px; display:block; margin-bottom:4px;">콜센터, 보험금 청구 팩스</span>
+      </button>
+
+      <button id="limitMenuBtn" style="margin-bottom:1rem;">
+        <span style="font-size:18px; display:block; margin-bottom:4px;">상품별/플랜별 인수한도</span>
+      </button>
+      
+      <div class="meta" style="margin-top:2rem;">Copyright 2025 하세봉 all rights reserved.</div>
+    </div>
+  </section>
+
+  <!-- 검색 화면 -->
+  <section id="searchScreen" class="screen" style="display:none;">
+    <div class="app-title">한화손보 SI 즉시 인수 질환</div>
+    <div class="card container-narrow">
+      <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
+      <div class="row">
+        <input id="searchInput" type="text" placeholder="예시: 용종, 골절, 당뇨 등">
+      </div>
+      <div id="searchMessage" class="hint" style="margin-bottom:1rem; display:none;"></div>
+      
+      <button id="searchBtn">검색</button>
+      <button id="backBtn" class="secondary" style="display:none; margin-top:8px;">뒤로가기</button>
+      
+      <div class="results" id="results"></div>
+      <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+    </div>
+  </section>
+
+  <!-- 연락처 화면 -->
+  <section id="contactScreen" class="screen" style="display:none;">
+    <div class="app-title">콜센터, 보험금 청구 팩스</div>
+    <div class="card container-narrow">
+      <div class="insurance-section">
+        <div id="insuranceListContact"></div>
+      </div>
+      
+      <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+    </div>
+  </section>
+
+  <!-- 인수한도 화면 -->
+  <section id="limitScreen" class="screen" style="display:none;">
+    <div class="app-title">상품별/플랜별 인수한도</div>
+    <div class="card container-wide">
+      <h2 style="margin-bottom:1rem;">상품 및 플랜 선택</h2>
+      
+      <div class="row">
+        <select id="productSelect">
+          <option value="">상품을 선택하세요</option>
+        </select>
+      </div>
+      
+      <div class="row">
+        <select id="planSelect" disabled>
+          <option value="">플랜을 선택하세요</option>
+        </select>
+      </div>
+      
+      <div class="row" id="ageSelectRow" style="display:none;">
+        <select id="ageSelect" disabled>
+          <option value="">연령구간을 선택하세요</option>
+        </select>
+      </div>
+      
+      <button id="limitBackBtn" class="secondary" style="margin-top:8px;">뒤로가기</button>
+      
+      <div id="limitResults" class="results"></div>
+      <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+    </div>
+  </section>
+
+  <!-- 상세조회 모달 -->
+  <div id="noteModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">비고 상세조회</h3>
+        <span class="close">&times;</span>
+      </div>
+      <div class="modal-body" id="noteModalBody"></div>
+    </div>
+  </div>
+
+<script>
+let employees = [];
+let diseases = [];
+let limitData = [];
+let currentUser = null;
+let isAdminUser = false;
+let currentScreen = 'login';
+const screenHistory = [];
+
+const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
+const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
+
+const ADMIN_ACCOUNT = {
+  empno: "8091768",
+  password: "dcw8091"
+};
+
+const INSURANCE_COMPANIES = [
+  {"company": "한화손해보험", "callCenter": "1566-8000", "fax": "0502-779-1004", "termsUrl": "https://www.hwgeneralins.com/notice/ir/product-ing01.do"},
+  {"company": "삼성화재", "callCenter": "1588-5114", "fax": "0505-162-0872", "termsUrl": "https://www.samsungfire.com/vh/page/VH.HPIF0103.do"},
+  {"company": "메리츠화재", "callCenter": "1566-7711", "fax": "0505-021-3400", "termsUrl": "https://www.meritzfire.com/disclosure/product-announcement/product-list.do#!/"},
+  {"company": "DB손해보험", "callCenter": "1588-0100", "fax": "0505-181-4862", "termsUrl": "https://www.idbins.com/FWMAIV1534.do"},
+  {"company": "KB손해보험", "callCenter": "1544-0114", "fax": "0505-136-6500", "termsUrl": "https://www.kbinsure.co.kr/CG802030001.ec"},
+  {"company": "현대해상", "callCenter": "1588-5656", "fax": "0507-774-6060", "termsUrl": "https://www.hi.co.kr/serviceAction.do?view=bin/PA/03/HHPA03010M#none"},
+  {"company": "롯데손해보험", "callCenter": "1588-3344", "fax": "0507-333-9999", "termsUrl": "https://www.lotteins.co.kr/web/C/D/H/cdh190.jsp"},
+  {"company": "흥국화재", "callCenter": "1688-1688", "fax": "0504-800-0700", "termsUrl": "https://www.heungkukfire.co.kr/FRW/announce/insGoodsGongsiSale.do"},
+  {"company": "하나손해보험", "callCenter": "1566-3000", "fax": "0505-170-0765", "termsUrl": "https://www.hanainsure.co.kr/w/disclosure/product/saleProduct"},
+  {"company": "NH농협손해보험", "callCenter": "1644-9000", "fax": "0505-060-7000", "termsUrl": "https://www.nhfire.co.kr/announce/productAnnounce/retrieveInsuranceProductsAnnounce.nhfire"},
+  {"company": "라이나손해보험", "callCenter": "1566-5800", "fax": "콜센터 전화 접수", "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"},
+  {"company": "AIG손해보험", "callCenter": "1544-2792", "fax": "02-2011-4607", "termsUrl": "https://www.aig.co.kr/wo/dpwot001.html?menuId=MS702"},
+  {"company": "한화생명", "callCenter": "1588-6363", "fax": "콜센터 전화 접수", "termsUrl": "https://www.hanwhalife.com/main/disclosure/goods/disclosurenotice/DF_GDDN000_P10000.do?MENU_ID1=DF_GDGL000"},
+  {"company": "동양생명", "callCenter": "1577-1004", "fax": "02-3289-4516", "termsUrl": "https://pbano.myangel.co.kr/paging/WE_AC_WEPAAP020100L"},
+  {"company": "교보생명", "callCenter": "1588-1001", "fax": "콜센터 전화 접수", "termsUrl": "https://www.kyobo.com/dgt/web/product-official/all-product/search"},
+  {"company": "삼성생명", "callCenter": "1588-3114", "fax": "콜센터 전화 접수", "termsUrl": "https://www.samsunglife.com/individual/products/disclosure/sales/PDO-PRPRI010110M"},
+  {"company": "라이나생명", "callCenter": "1588-0058", "fax": "02-6944-1200", "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"},
+  {"company": "KDB생명", "callCenter": "1588-4040", "fax": "02-2669-6500", "termsUrl": "https://www.kdblife.co.kr/ajax.do?scrId=HDLMA002M02P"},
+  {"company": "MG새마을금고", "callCenter": "1599-9010", "fax": "02-3016-7674", "termsUrl": "https://insure.kfcc.co.kr/#/PGE_IHJ_00003"},
+  {"company": "더케이", "callCenter": "1577-3993", "fax": "02-3278-9696", "termsUrl": "https://www.ktcu.or.kr/PPW-FIC-800101"},
+  {"company": "우체국", "callCenter": "1599-0100", "fax": "콜센터 전화 접수", "termsUrl": "https://mall.epostbank.go.kr/IPPSKE0000.do"},
+  {"company": "수협공제", "callCenter": "1588-4119", "fax": "콜센터 전화 접수", "termsUrl": "https://www.suhyup-bank.com/"}
+];
+
+// 인수한도 데이터 로드 함수
+const LIMIT_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/limits.json";
+
+async function loadLimitData() {
+  try {
+    limitData = await loadJsonFlexible(LIMIT_URL);
+    console.log("인수한도 데이터 로드 완료:", limitData.length + "건");
+    
+    // 현재 인수한도 화면이 표시되어 있다면 상품 목록 업데이트
+    if (currentScreen === 'limit') {
+      updateProductSelect();
+    }
+  } catch(err) {
+    console.error("인수한도 데이터 로드 실패:", err);
+  }
+}
+
+// 상품과 플랜 목록 추출 함수
+function extractProductsAndPlans() {
+  const products = new Set();
+  const plans = new Map();
+  
+  // limitData가 없으면 빈 결과 반환
+  if (!limitData || limitData.length === 0) {
+    return { products: [], plans: new Map() };
+  }
+  
+  limitData.forEach(item => {
+    if (item.product && item.plan) {
+      products.add(item.product);
+      
+      if (!plans.has(item.product)) {
+        plans.set(item.product, new Set());
+      }
+      plans.get(item.product).add(item.plan);
+    }
+  });
+  
+  return { products: Array.from(products), plans };
+}
+
+// 연령구간 추출 함수
+function extractAgeRanges(selectedProduct, selectedPlan) {
+  const filteredData = limitData.filter(item => 
+    item.product === selectedProduct && item.plan === selectedPlan
+  );
+  
+  const ageRanges = new Set();
+  filteredData.forEach(item => {
+    ageRanges.add(`${item.minAge}세~${item.maxAge}세`);
+  });
+  
+  return Array.from(ageRanges).sort((a, b) => {
+    const ageA = parseInt(a.split('세')[0]);
+    const ageB = parseInt(b.split('세')[0]);
+    return ageA - ageB;
+  });
+}
+
+// 인수한도 테이블 생성 함수 (특정 연령구간만)
+function generateLimitTable(selectedProduct, selectedPlan, selectedAgeRange) {
+  const filteredData = limitData.filter(item => 
+    item.product === selectedProduct && 
+    item.plan === selectedPlan &&
+    `${item.minAge}세~${item.maxAge}세` === selectedAgeRange
+  );
+  
+  if (filteredData.length === 0) {
+    return '<div class="hint">해당 조건의 인수한도 데이터가 없습니다.</div>';
+  }
+  
+  const coverageGroups = new Map();
+  filteredData.forEach(item => {
+    if (!coverageGroups.has(item.coverage)) {
+      coverageGroups.set(item.coverage, []);
+    }
+    coverageGroups.get(item.coverage).push(item);
+  });
+  
+  let tableHTML = `
+    <div class="product-plan-info">
+      <div class="result-title">${selectedProduct} - ${selectedPlan} (${selectedAgeRange})</div>
+      <div class="coverage-search-container">
+        <input id="coverageSearchInput" type="text" placeholder="담보명 검색..." style="margin-top:10px; font-size:14px;">
+      </div>
+    </div>
+    <div class="limit-table-container">
+      <table class="limit-table">
+        <thead>
+          <tr>
+            <th class="detail-btn">상세</th>
+            <th class="coverage-name">담보명</th>
+            <th class="amount">인수한도</th>
+          </tr>
+        </thead>
+        <tbody id="limitTableBody">
+  `;
+  
+  coverageGroups.forEach((items, coverage) => {
+    const item = items[0]; // 선택된 연령구간의 데이터
+    const hasNote = item.note && item.note.trim();
+    
+    tableHTML += `<tr class="coverage-row" data-coverage="${coverage.toLowerCase()}">`;
+    
+    if (hasNote) {
+      const cleanNote = item.note
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')
+        .replace(/\r?\n/g, '\\n');
+      tableHTML += `<td class="detail-btn"><button class="small" onclick="showNoteModal(\`${coverage}\`, \`${cleanNote}\`)">상세</button></td>`;
+    } else {
+      tableHTML += '<td class="detail-btn">-</td>';
+    }
+    
+    tableHTML += `<td class="coverage-name"><span class="coverage-clickable" onclick="showCoverageDetailModal('${selectedProduct}', '${selectedPlan}', '${coverage}')">${coverage}</span></td>`;
+    tableHTML += `<td class="amount">${formatAmount(item.amount)}</td>`;
+    tableHTML += '</tr>';
+  });
+  
+  tableHTML += '</tbody></table></div>';
+  return tableHTML;
+}
+
+function formatAmount(amount) {
+  if (!amount || amount === 0) return '-';
+  
+  // 숫자를 천단위 콤마로 포맷팅
+  const formattedNumber = amount.toLocaleString();
+  return formattedNumber + '만';
+}
+
+function showNoteModal(coverage, note) {
+  // 이스케이프된 문자열을 원래대로 복원
+  const restoredNote = note
+    .replace(/\\n/g, '\n')
+    .replace(/\\"/g, '"')
+    .replace(/\\'/g, "'")
+    .replace(/\\\\/g, '\\');
+    
+  document.getElementById('noteModalBody').textContent = restoredNote;
+  document.querySelector('.modal-title').textContent = `${coverage} - 비고 상세조회`;
+  document.getElementById('noteModal').style.display = 'block';
+}
+
+function showCoverageDetailModal(selectedProduct, selectedPlan, coverage) {
+  const filteredData = limitData.filter(item => 
+    item.product === selectedProduct && 
+    item.plan === selectedPlan &&
+    item.coverage === coverage
+  );
+  
+  if (filteredData.length === 0) {
+    return;
+  }
+  
+  // 연령순으로 정렬
+  const sortedData = filteredData.sort((a, b) => a.minAge - b.minAge);
+  
+  let tableHTML = `
+    <table style="width:100%; border-collapse:collapse; margin-top:1rem;">
+      <thead>
+        <tr style="background:#f8f9fa;">
+          <th style="border:1px solid #e6e6e6; padding:8px; text-align:center;">연령</th>
+          <th style="border:1px solid #e6e6e6; padding:8px; text-align:center;">인수한도</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  
+  sortedData.forEach(item => {
+    tableHTML += `
+      <tr>
+        <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${item.minAge}세~${item.maxAge}세</td>
+        <td style="border:1px solid #e6e6e6; padding:8px; text-align:center; font-weight:600; color:#ff7f00;">${formatAmount(item.amount)}</td>
+      </tr>
+    `;
+  });
+  
+  tableHTML += '</tbody></table>';
+  
+  document.getElementById('noteModalBody').innerHTML = tableHTML;
+  document.querySelector('.modal-title').textContent = coverage;
+  document.getElementById('noteModal').style.display = 'block';
+}
+
+function closeNoteModal() {
+  document.getElementById('noteModal').style.display = 'none';
+}
+
+function pushHistory(screen) {
+  screenHistory.push(currentScreen);
+  currentScreen = screen;
+  if (screen !== 'login') {
+    history.pushState({ screen: screen }, '', `#${screen}`);
+  }
+}
+
+window.addEventListener('popstate', function(event) {
+  if (event.state && event.state.screen) {
+    navigateToScreen(event.state.screen, false);
+  } else if (currentUser) {
+    navigateToScreen('menu', false);
+  } else {
+    navigateToScreen('login', false);
+  }
+});
+
+function navigateToScreen(screen, addToHistory = true) {
+  if (addToHistory && screen !== currentScreen) {
+    pushHistory(screen);
+  } else {
+    currentScreen = screen;
+  }
+  
+  hideAllScreens();
+  
+  switch(screen) {
+    case 'login':
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("userInfoHeader").style.display = "none";
+      break;
+    case 'menu':
+      document.getElementById("menuScreen").style.display = "flex";
+      if (currentUser) {
+        document.getElementById("userInfoHeader").style.display = "inline-flex";
+        document.getElementById("userTextHeader").textContent = `${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
+      }
+      break;
+    case 'search':
+      document.getElementById("searchScreen").style.display = "flex";
+      document.getElementById("searchInput").focus();
+      document.getElementById("searchInput").value = "";
+      document.getElementById("results").innerHTML = "";
+      document.getElementById("searchMessage").style.display = "none";
+      document.getElementById("backBtn").style.display = "none";
+      break;
+    case 'contact':
+      document.getElementById("contactScreen").style.display = "flex";
+      showInsuranceContactsInContactScreen();
+      break;
+    case 'limit':
+      document.getElementById("limitScreen").style.display = "flex";
+      initializeLimitScreen();
+      break;
+  }
+}
+
+function initializeLimitScreen() {
+  const productSelect = document.getElementById("productSelect");
+  const planSelect = document.getElementById("planSelect");
+  const ageSelectRow = document.getElementById("ageSelectRow");
+  const ageSelect = document.getElementById("ageSelect");
+  const limitResults = document.getElementById("limitResults");
+  
+  productSelect.selectedIndex = 0;
+  planSelect.selectedIndex = 0;
+  planSelect.disabled = true;
+  ageSelect.selectedIndex = 0;
+  ageSelect.disabled = true;
+  ageSelectRow.style.display = "none";
+  limitResults.innerHTML = "";
+  
+  // 데이터가 로드되었는지 확인 후 상품 목록 업데이트
+  if (limitData && limitData.length > 0) {
+    updateProductSelect();
+  } else {
+    // 데이터가 없으면 잠시 후 다시 시도
+    setTimeout(() => {
+      if (limitData && limitData.length > 0) {
+        updateProductSelect();
+      }
+    }, 500);
+  }
+}
+
+function updateProductSelect() {
+  const productSelect = document.getElementById("productSelect");
+  
+  // 기존 옵션들 제거 (첫 번째 기본 옵션 제외)
+  while (productSelect.options.length > 1) {
+    productSelect.remove(1);
+  }
+  
+  // limitData가 없으면 리턴
+  if (!limitData || limitData.length === 0) {
+    console.log("인수한도 데이터가 아직 로드되지 않았습니다.");
+    return;
+  }
+  
+  const { products } = extractProductsAndPlans();
+  
+  products.forEach(product => {
+    const option = document.createElement("option");
+    option.value = product;
+    option.textContent = product;
+    productSelect.appendChild(option);
+  });
+}
+
+function updatePlanSelect(selectedProduct) {
+  const { plans } = extractProductsAndPlans();
+  const planSelect = document.getElementById("planSelect");
+  const ageSelectRow = document.getElementById("ageSelectRow");
+  const ageSelect = document.getElementById("ageSelect");
+  const limitResults = document.getElementById("limitResults");
+  
+  // 플랜 셀렉트 초기화
+  while (planSelect.options.length > 1) {
+    planSelect.remove(1);
+  }
+  
+  // 연령구간 셀렉트 숨기기 및 초기화
+  ageSelectRow.style.display = "none";
+  ageSelect.disabled = true;
+  while (ageSelect.options.length > 1) {
+    ageSelect.remove(1);
+  }
+  
+  // 결과 초기화
+  limitResults.innerHTML = "";
+  
+  if (selectedProduct && plans.has(selectedProduct)) {
+    const productPlans = Array.from(plans.get(selectedProduct));
+    productPlans.forEach(plan => {
+      const option = document.createElement("option");
+      option.value = plan;
+      option.textContent = plan;
+      planSelect.appendChild(option);
+    });
+    planSelect.disabled = false;
+  } else {
+    planSelect.disabled = true;
+  }
+}
+
+function updateAgeSelect(selectedProduct, selectedPlan) {
+  const ageSelectRow = document.getElementById("ageSelectRow");
+  const ageSelect = document.getElementById("ageSelect");
+  const limitResults = document.getElementById("limitResults");
+  
+  // 연령구간 셀렉트 초기화
+  while (ageSelect.options.length > 1) {
+    ageSelect.remove(1);
+  }
+  
+  // 결과 초기화
+  limitResults.innerHTML = "";
+  
+  if (selectedProduct && selectedPlan) {
+    const ageRanges = extractAgeRanges(selectedProduct, selectedPlan);
+    
+    ageRanges.forEach(ageRange => {
+      const option = document.createElement("option");
+      option.value = ageRange;
+      option.textContent = ageRange;
+      ageSelect.appendChild(option);
+    });
+    
+    ageSelect.disabled = false;
+    ageSelectRow.style.display = "block";
+  } else {
+    ageSelect.disabled = true;
+    ageSelectRow.style.display = "none";
+  }
+}
+
+function searchLimitsAuto(selectedProduct, selectedPlan, selectedAgeRange) {
+  const limitResults = document.getElementById("limitResults");
+  
+  if (!selectedProduct || !selectedPlan || !selectedAgeRange) {
+    limitResults.innerHTML = '';
+    return;
+  }
+  
+  const tableHTML = generateLimitTable(selectedProduct, selectedPlan, selectedAgeRange);
+  
+  limitResults.innerHTML = `
+    <div class="result-card">
+      ${tableHTML}
+    </div>
+  `;
+  
+  // 담보 검색 기능 추가
+  setTimeout(() => {
+    const coverageSearchInput = document.getElementById('coverageSearchInput');
+    if (coverageSearchInput) {
+      coverageSearchInput.addEventListener('input', searchCoverage);
+    }
+  }, 100);
+}
+
+function searchCoverage() {
+  const query = document.getElementById('coverageSearchInput').value.trim();
+  const rows = document.querySelectorAll('.coverage-row');
+  
+  if (!query) {
+    rows.forEach(row => {
+      row.style.display = '';
+    });
+    return;
+  }
+  
+  const normalizedQuery = normalize(query);
+  const tokens = normalizedQuery.split(/[\s·,\-\.]+/).filter(Boolean);
+  
+  rows.forEach(row => {
+    const coverage = row.dataset.coverage;
+    const normalizedCoverage = normalize(coverage);
+    
+    let isMatch = false;
+    
+    // 모든 토큰이 포함되는지 확인
+    if (tokens.every(token => normalizedCoverage.includes(token))) {
+      isMatch = true;
+    }
+    
+    // 단일 토큰에 대한 부분 매칭 (3글자 이상일 때)
+    if (!isMatch && tokens.length === 1) {
+      const token = tokens[0];
+      if (token.length >= 3) {
+        for (let i = 2; i <= token.length - 2; i++) {
+          const left = token.substring(0, i);
+          const right = token.substring(i);
+          
+          if (left.length >= 2 && right.length >= 2) {
+            const leftPos = normalizedCoverage.indexOf(left);
+            const rightPos = normalizedCoverage.indexOf(right);
+            
+            if (leftPos >= 0 && rightPos >= 0 && leftPos < rightPos) {
+              isMatch = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+    
+    row.style.display = isMatch ? '' : 'none';
+  });
+}
+
+function goBackFromLimit() {
+  navigateToScreen('menu');
+}
+
+async function loadJsonFlexible(url){
+  const res = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
+  if(!res.ok) throw new Error("네트워크 오류: " + res.status);
+  const text = await res.text();
+  const cleaned = text.replace(/^\uFEFF/, "");
+  let json = JSON.parse(cleaned);
+  if(json && typeof json === "object" && !Array.isArray(json) && Array.isArray(json.data)){
+    json = json.data;
+  }
+  if(!Array.isArray(json)) throw new Error("JSON이 배열이 아닙니다.");
+  return json;
+}
+
+async function loadAllData(){
+  try{
+    const [emp, dis] = await Promise.all([
+      loadJsonFlexible(EMP_URL),
+      loadJsonFlexible(DIS_URL)
+    ]);
+
+    employees = emp.map(e => ({
+      empno: String(e.empno || e.code || "").trim(),
+      password: String(e.password || "").trim()
+    })).filter(e => e.empno && e.password);
+
+    diseases = dis.map(d => ({
+      name: String(d.name || "").trim(),
+      acceptance: String(d.acceptance || ""),
+      signature355: String(d.signature355 || ""),
+      treatmentDays: String(d.treatmentDays || ""),
+      surgery: String(d.surgery || ""),
+      recurrence: String(d.recurrence || ""),
+      restrictions: String(d.restrictions || "")
+    })).filter(d => d.name);
+
+    await loadLimitData();
+
+    document.getElementById("empMeta").textContent = `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건`;
+  }catch(err){
+    console.error("데이터 로드 실패:", err);
+    document.getElementById("loginMsg").textContent = "데이터 로드 실패";
+  }
+}
+
+function checkAutoLogin() {
+  const savedUser = localStorage.getItem('hwg_current_user');
+  const savedIsAdmin = localStorage.getItem('hwg_is_admin') === 'true';
+  
+  if (savedUser) {
+    currentUser = savedUser;
+    isAdminUser = savedIsAdmin;
+    // 자동 로그인 시 바로 메뉴 화면으로 이동
+    showLoginSuccess();
+  } else {
+    const hash = window.location.hash.substring(1);
+    if (hash && ['menu', 'search', 'contact', 'limit'].includes(hash)) {
+      window.location.hash = '';
+    }
+    navigateToScreen('login', false);
+  }
+}
+
+function login(){
+  const empno = document.getElementById("empno").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const msg = document.getElementById("loginMsg");
+
+  if(!empno || !password) {
+    msg.textContent = "코드와 비밀번호를 모두 입력해주세요.";
+    return;
+  }
+
+  if (empno === ADMIN_ACCOUNT.empno && password === ADMIN_ACCOUNT.password) {
+    currentUser = empno;
+    isAdminUser = true;
+    localStorage.setItem('hwg_current_user', empno);
+    localStorage.setItem('hwg_is_admin', 'true');
+    showLoginSuccess();
+    msg.textContent = "";
+    return;
+  }
+
+  if(!employees.length){
+    msg.textContent = "데이터가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.";
+    return;
+  }
+
+  const user = employees.find(u => u.empno === empno && u.password === password);
+ 
+  if(user){
+    currentUser = empno;
+    isAdminUser = false;
+    localStorage.setItem('hwg_current_user', empno);
+    localStorage.removeItem('hwg_is_admin');
+    showLoginSuccess();
+    msg.textContent = "";
+  }else{
+    msg.textContent = "코드 또는 비밀번호가 올바르지 않습니다.";
+  }
+}
+
+function hideAllScreens() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("menuScreen").style.display = "none";
+  document.getElementById("searchScreen").style.display = "none";
+  document.getElementById("contactScreen").style.display = "none";
+  document.getElementById("limitScreen").style.display = "none";
+}
+
+function showLoginSuccess() {
+  navigateToScreen('menu');
+}
+
+function goHome() {
+  if (currentUser) {
+    navigateToScreen('menu');
+  } else {
+    navigateToScreen('login');
+  }
+}
+
+function showDiseaseScreen() {
+  navigateToScreen('search');
+}
+
+function showContactScreen() {
+  navigateToScreen('contact');
+}
+
+function showLimitScreen() {
+  navigateToScreen('limit');
+}
+
+function showInsuranceContactsInContactScreen() {
+  const insuranceList = document.getElementById("insuranceListContact");
+  const damageInsurance = INSURANCE_COMPANIES.slice(1, 12);
+  const lifeInsurance = INSURANCE_COMPANIES.slice(12, 18);
+  const mutualAid = INSURANCE_COMPANIES.slice(18, 22);
+  
+  const hanwhaCard = `
+    <div class="insurance-card hanwha">
+      <div class="insurance-logo">${INSURANCE_COMPANIES[0].company}</div>
+      <div class="insurance-info">
+        <div class="insurance-contact">
+          <div class="contact-item">
+            <span>콜센터</span>
+            <a href="tel:${INSURANCE_COMPANIES[0].callCenter.replace(/-/g, '')}">${INSURANCE_COMPANIES[0].callCenter}</a>
+          </div>
+          <div class="contact-item">
+            <span>팩스</span>
+            <span>${INSURANCE_COMPANIES[0].fax}</span>
+          </div>
+          <div class="contact-item">
+            <span>공시실</span>
+            <a href="${INSURANCE_COMPANIES[0].termsUrl}" target="_blank">바로가기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  function createCard(company) {
+    const faxDisplay = company.fax === "콜센터 전화 접수" ? "콜센터접수" : company.fax;
+    
+    return `
+      <div class="insurance-card small">
+        <div class="insurance-logo small">${company.company}</div>
+        <div class="insurance-info small">
+          <div class="insurance-contact small">
+            <div class="contact-item small">
+              <span>콜센터</span>
+              <a href="tel:${company.callCenter.replace(/-/g, '')}">${company.callCenter}</a>
+            </div>
+            <div class="contact-item small">
+              <span>팩스</span>
+              <span>${faxDisplay}</span>
+            </div>
+            <div class="contact-item small">
+              <span>공시실</span>
+              <a href="${company.termsUrl}" target="_blank">바로가기</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  const damageCards = damageInsurance.map(createCard).join('');
+  const lifeCards = lifeInsurance.map(createCard).join('');
+  const mutualCards = mutualAid.map(createCard).join('');
+  
+  insuranceList.innerHTML = `
+    ${hanwhaCard}
+    <div class="insurance-category">
+      <h3>손해보험</h3>
+      <div class="insurance-grid">${damageCards}</div>
+    </div>
+    <div class="insurance-category">
+      <h3>생명보험</h3>
+      <div class="insurance-grid">${lifeCards}</div>
+    </div>
+    <div class="insurance-category">
+      <h3>공제</h3>
+      <div class="insurance-grid">${mutualCards}</div>
+    </div>
+  `;
+}
+
+function logout() {
+  if (currentUser) {
+    localStorage.removeItem('hwg_current_user');
+    localStorage.removeItem('hwg_is_admin');
+    currentUser = null;
+    isAdminUser = false;
+    screenHistory.length = 0;
+    document.getElementById("userInfoHeader").style.display = "none";
+    navigateToScreen('login');
+    document.getElementById("empno").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("searchInput").value = "";
+    document.getElementById("results").innerHTML = "";
+  }
+}
+
+function normalize(str){
+  return String(str || "").toLowerCase().replace(/[\s·,\-\.]/g, "");
+}
+
+function search(){
+  const query = document.getElementById("searchInput").value.trim();
+  const results = document.getElementById("results");
+  const searchMessage = document.getElementById("searchMessage");
+  const backBtn = document.getElementById("backBtn");
+ 
+  if(!query){
+    searchMessage.style.display = "none";
+    results.innerHTML = "";
+    backBtn.style.display = "none";
+    return;
+  }
+
+  if(!diseases.length) {
+    searchMessage.innerHTML = '<div class="error">질병 데이터가 로드되지 않았습니다.</div>';
+    searchMessage.style.display = "block";
+    results.innerHTML = "";
+    backBtn.style.display = "none";
+    return;
+  }
+
+  const tokens = query.split(/[\s·,\-\.]+/).filter(Boolean).map(normalize);
+ 
+  const matched = diseases.filter(d => {
+    const name = normalize(d.name);
+   
+    if(tokens.every(token => name.includes(token))) {
+      return true;
+    }
+   
+    if(tokens.length === 1) {
+      const token = tokens[0];
+      if(token.length >= 3) {
+        for(let i = 2; i <= token.length - 2; i++) {
+          const left = token.substring(0, i);
+          const right = token.substring(i);
+         
+          if(left.length >= 2 && right.length >= 2) {
+            const leftPos = name.indexOf(left);
+            const rightPos = name.indexOf(right);
+           
+            if(leftPos >= 0 && rightPos >= 0 && leftPos < rightPos) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+   
+    return false;
+  });
+
+  if(!matched.length){
+    searchMessage.innerHTML = '<div class="hint">검색 결과가 없습니다.</div>';
+    searchMessage.style.display = "block";
+    results.innerHTML = "";
+    backBtn.style.display = "block";
+    return;
+  }
+
+  searchMessage.style.display = "none";
+  backBtn.style.display = "block";
+
+  results.innerHTML = matched.map(d => `
+    <div class="result-card">
+      <div class="result-title">${d.name}</div>
+      <div class="result-sub">인수기준: ${d.acceptance || "-"}</div>
+      <div class="result-sub">시그니처355: ${d.signature355 || "-"}</div>
+      <table class="info-table">
+        <tr><th>치료일수</th><th>수술여부</th><th>재발여부</th></tr>
+        <tr>
+          <td>${d.treatmentDays || "-"}</td>
+          <td>${d.surgery || "-"}</td>
+          <td>${d.recurrence || "-"}</td>
+        </tr>
+      </table>
+      <div class="restrictions">제한사항: ${d.restrictions || "없음"}</div>
+    </div>
+  `).join('');
+}
+
+function goBack() {
+  const searchInput = document.getElementById("searchInput");
+  const results = document.getElementById("results");
+  const searchMessage = document.getElementById("searchMessage");
+  const backBtn = document.getElementById("backBtn");
+  
+  searchInput.value = "";
+  results.innerHTML = "";
+  searchMessage.style.display = "none";
+  backBtn.style.display = "none";
+}
+
+// 페이지 로드 시 자동 로그인 체크를 먼저 수행
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.location.hash) {
+    history.replaceState({ screen: 'login' }, '', window.location.pathname);
+  }
+  
+  // 자동 로그인 체크를 먼저 수행
+  checkAutoLogin();
+  
+  // 그 다음 데이터 로드
+  loadAllData();
+ 
+  document.getElementById('loginBtn').addEventListener('click', login);
+  document.getElementById('empno').addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      document.getElementById('password').focus();
+    }
+  });
+  document.getElementById('password').addEventListener('keydown', e => {
+    if(e.key === 'Enter') login();
+  });
+
+  document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
+  document.getElementById('contactMenuBtn').addEventListener('click', showContactScreen);
+  document.getElementById('limitMenuBtn').addEventListener('click', showLimitScreen);
+  document.getElementById('logoutBtnHeader').addEventListener('click', logout);
+  document.getElementById('searchBtn').addEventListener('click', search);
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter') search();
+  });
+  document.getElementById('backBtn').addEventListener('click', goBack);
+  document.getElementById('installBtn').addEventListener('click', () => {
+    alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
+  });
+
+  document.getElementById('productSelect').addEventListener('change', function() {
+    updatePlanSelect(this.value);
+  });
+  
+  document.getElementById('planSelect').addEventListener('change', function() {
+    const productSelect = document.getElementById("productSelect");
+    if (this.value && productSelect.value) {
+      updateAgeSelect(productSelect.value, this.value);
+    } else {
+      const ageSelectRow = document.getElementById("ageSelectRow");
+      const limitResults = document.getElementById("limitResults");
+      ageSelectRow.style.display = "none";
+      limitResults.innerHTML = "";
+    }
+  });
+  
+  document.getElementById('ageSelect').addEventListener('change', function() {
+    const productSelect = document.getElementById("productSelect");
+    const planSelect = document.getElementById("planSelect");
+    if (this.value && productSelect.value && planSelect.value) {
+      searchLimitsAuto(productSelect.value, planSelect.value, this.value);
+    }
+  });
+  
+  document.getElementById('limitBackBtn').addEventListener('click', goBackFromLimit);
+  
+  document.querySelector('.close').addEventListener('click', closeNoteModal);
+  document.getElementById('noteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeNoteModal();
+    }
+  });
+});
+</script>
+
 </body>
 </html>
