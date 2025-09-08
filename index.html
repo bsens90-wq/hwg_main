@@ -329,7 +329,7 @@
       padding-bottom:8px;
     }
 
-    /* 인수한도 기능 추가 스타일 - 개선된 스타일 */
+    /* 인수한도 기능 개선된 스타일 */
     .limit-table-container {
       position: relative;
       overflow: auto;
@@ -340,20 +340,20 @@
     }
     
     .limit-table{
-      width: auto;
-      min-width: 100%;
+      width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      font-size: 16px; /* 폰트 크기 증가 */
+      font-size: 14px;
       background: white;
     }
     
     .limit-table th, .limit-table td{
       border: 1px solid var(--border);
-      padding: 12px 8px; /* 패딩 증가 */
+      padding: 8px 4px;
       text-align: center;
       vertical-align: middle;
       background: white;
+      word-break: break-word;
     }
     
     .limit-table thead th {
@@ -363,6 +363,7 @@
       font-weight: 600;
       z-index: 10;
       border-bottom: 2px solid var(--hanwha);
+      font-size: 12px;
     }
     
     .limit-table .coverage-name{
@@ -370,11 +371,14 @@
       left: 0;
       text-align: left;
       font-weight: 600;
-      min-width: 30px; /* 너비 증가 */
-      word-break: break-word;
+      width: 25%;
+      min-width: 120px;
+      max-width: 140px;
       background: white;
       z-index: 5;
       border-right: 2px solid var(--hanwha);
+      font-size: 12px;
+      line-height: 1.3;
     }
     
     .limit-table thead .coverage-name {
@@ -382,15 +386,36 @@
       background: var(--bg);
     }
     
+    .limit-table .detail-btn{
+      position: sticky;
+      left: 0;
+      width: 15%;
+      min-width: 60px;
+      max-width: 80px;
+      background: white;
+      z-index: 5;
+      border-right: 1px solid var(--hanwha);
+    }
+    
+    .limit-table thead .detail-btn {
+      z-index: 15;
+      background: var(--bg);
+    }
+    
     .limit-table .age-group{
-      min-width: 20px; /* 너비 증가 */
-      font-size: 14px;
+      width: 15%;
+      min-width: 70px;
+      max-width: 90px;
+      font-size: 11px;
     }
     
     .limit-table .amount{
       font-weight: 600;
       color: var(--hanwha);
-      min-width: 20px; /* 너비 증가 */
+      width: 15%;
+      min-width: 70px;
+      max-width: 90px;
+      font-size: 12px;
     }
 
     .product-plan-info {
@@ -455,34 +480,68 @@
       color:var(--text);
     }
 
-    /* 모바일 최적화 */
+    /* 모바일 최적화 - 개선된 반응형 */
     @media (max-width: 768px) {
       .limit-table{
-        font-size:14px;
+        font-size:12px;
       }
       .limit-table th, .limit-table td{
-        padding:8px 4px;
+        padding:6px 2px;
       }
       .limit-table .coverage-name{
-        min-width:140px;
-        font-size:13px;
+        width: 30%;
+        min-width: 100px;
+        max-width: 120px;
+        font-size: 11px;
+      }
+      .limit-table .detail-btn{
+        width: 15%;
+        min-width: 50px;
+        max-width: 60px;
       }
       .limit-table .age-group{
-        min-width:80px;
-        font-size:12px;
+        width: 13.75%;
+        min-width: 50px;
+        max-width: 65px;
+        font-size: 10px;
+      }
+      .limit-table .amount{
+        width: 13.75%;
+        min-width: 50px;
+        max-width: 65px;
+        font-size: 11px;
+      }
+      .limit-table thead th {
+        font-size: 10px;
       }
       .container-wide{
         max-width:100%;
-        padding:0 10px;
+        padding:0 5px;
       }
       .card{
         max-width:100%;
-        margin:0 10px;
+        margin:0 5px;
+        padding: 15px;
       }
       .product-plan-info {
-        margin: -20px -10px 20px -10px;
+        margin: -15px -15px 15px -15px;
         padding: 10px 15px;
       }
+      .result-title {
+        font-size: 16px;
+      }
+    }
+
+    /* 추가된 스타일 - 자동 선택 안내 */
+    .auto-select-info {
+      background: rgba(255,127,0,0.1);
+      border: 1px solid var(--hanwha);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 1rem;
+      font-size: 14px;
+      color: var(--hanwha);
+      text-align: center;
     }
   </style>
 </head>
@@ -580,20 +639,23 @@
     <div class="card container-wide">
       <h2 style="margin-bottom:1rem;">상품 및 플랜 선택</h2>
       
+      <div class="auto-select-info">
+        상품 선택 시 자동으로 플랜이 표시되며, 플랜 선택 시 자동으로 인수한도가 조회됩니다.
+      </div>
+      
       <div class="row">
         <select id="productSelect">
           <option value="">상품을 선택하세요</option>
         </select>
       </div>
       
-      <div class="row">
-        <select id="planSelect" disabled>
+      <div class="row" id="planRow" style="display:none;">
+        <select id="planSelect">
           <option value="">플랜을 선택하세요</option>
         </select>
       </div>
       
-      <button id="limitSearchBtn" disabled>인수한도 조회</button>
-      <button id="limitBackBtn" class="secondary" style="margin-top:8px;">뒤로가기</button>
+      <button id="limitBackBtn" class="secondary">뒤로가기</button>
       
       <div id="limitResults" class="results"></div>
       <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
@@ -683,7 +745,7 @@ function extractProductsAndPlans() {
   return { products: Array.from(products), plans };
 }
 
-// 인수한도 테이블 생성 함수
+// 인수한도 테이블 생성 함수 - 개선된 반응형 버전
 function generateLimitTable(selectedProduct, selectedPlan) {
   const filteredData = limitData.filter(item => 
     item.product === selectedProduct && item.plan === selectedPlan
@@ -719,7 +781,7 @@ function generateLimitTable(selectedProduct, selectedPlan) {
       <table class="limit-table">
         <thead>
           <tr>
-            <th class="detail-btn">상세조회</th>
+            <th class="detail-btn">상세</th>
             <th class="coverage-name">담보명</th>
             ${sortedAgeGroups.map(age => `<th class="age-group">${age}</th>`).join('')}
           </tr>
@@ -730,17 +792,16 @@ function generateLimitTable(selectedProduct, selectedPlan) {
   coverageGroups.forEach((items, coverage) => {
     tableHTML += '<tr>';
     
-    // 상세조회 버튼을 첫 번째 컬럼으로 이동
+    // 상세조회 버튼
     const hasNote = items.some(item => item.note && item.note.trim());
     if (hasNote) {
       const noteContent = items.find(item => item.note && item.note.trim())?.note || '';
-      // HTML 특수문자와 줄바꿈 처리를 개선
       const cleanNote = noteContent
         .replace(/\\/g, '\\\\')
         .replace(/'/g, "\\'")
         .replace(/"/g, '\\"')
         .replace(/\r?\n/g, '\\n');
-      tableHTML += `<td class="detail-btn"><button class="small" onclick="showNoteModal(\`${coverage}\`, \`${cleanNote}\`)">상세조회</button></td>`;
+      tableHTML += `<td class="detail-btn"><button class="small" onclick="showNoteModal(\`${coverage}\`, \`${cleanNote}\`)">상세</button></td>`;
     } else {
       tableHTML += '<td class="detail-btn">-</td>';
     }
@@ -765,14 +826,11 @@ function generateLimitTable(selectedProduct, selectedPlan) {
 function formatAmount(amount) {
   if (!amount || amount === 0) return '-';
   
-  // 숫자를 천단위 콤마로 포맷팅
   const formattedNumber = amount.toLocaleString();
   return formattedNumber + '만';
 }
 
-
 function showNoteModal(coverage, note) {
-  // 이스케이프된 문자열을 원래대로 복원
   const restoredNote = note
     .replace(/\\n/g, '\n')
     .replace(/\\"/g, '"')
@@ -846,15 +904,16 @@ function navigateToScreen(screen, addToHistory = true) {
   }
 }
 
+// 개선된 인수한도 화면 초기화 함수
 function initializeLimitScreen() {
   const productSelect = document.getElementById("productSelect");
   const planSelect = document.getElementById("planSelect");
+  const planRow = document.getElementById("planRow");
   const limitResults = document.getElementById("limitResults");
   
   productSelect.selectedIndex = 0;
   planSelect.selectedIndex = 0;
-  planSelect.disabled = true;
-  document.getElementById("limitSearchBtn").disabled = true;
+  planRow.style.display = "none";
   limitResults.innerHTML = "";
   
   updateProductSelect();
@@ -876,13 +935,20 @@ function updateProductSelect() {
   });
 }
 
+// 개선된 플랜 선택 업데이트 함수
 function updatePlanSelect(selectedProduct) {
   const { plans } = extractProductsAndPlans();
   const planSelect = document.getElementById("planSelect");
+  const planRow = document.getElementById("planRow");
+  const limitResults = document.getElementById("limitResults");
   
+  // 기존 플랜 옵션 제거
   while (planSelect.options.length > 1) {
     planSelect.remove(1);
   }
+  
+  // 결과 초기화
+  limitResults.innerHTML = "";
   
   if (selectedProduct && plans.has(selectedProduct)) {
     const productPlans = Array.from(plans.get(selectedProduct));
@@ -892,23 +958,18 @@ function updatePlanSelect(selectedProduct) {
       option.textContent = plan;
       planSelect.appendChild(option);
     });
-    planSelect.disabled = false;
+    
+    // 플랜 선택창 표시
+    planRow.style.display = "block";
+    planSelect.selectedIndex = 0;
   } else {
-    planSelect.disabled = true;
+    // 플랜 선택창 숨김
+    planRow.style.display = "none";
   }
-  
-  updateLimitSearchButton();
 }
 
-function updateLimitSearchButton() {
-  const productSelect = document.getElementById("productSelect");
-  const planSelect = document.getElementById("planSelect");
-  const limitSearchBtn = document.getElementById("limitSearchBtn");
-  
-  limitSearchBtn.disabled = !(productSelect.value && planSelect.value);
-}
-
-function searchLimits() {
+// 개선된 인수한도 자동 조회 함수
+function autoSearchLimits() {
   const productSelect = document.getElementById("productSelect");
   const planSelect = document.getElementById("planSelect");
   const limitResults = document.getElementById("limitResults");
@@ -917,7 +978,7 @@ function searchLimits() {
   const selectedPlan = planSelect.value;
   
   if (!selectedProduct || !selectedPlan) {
-    limitResults.innerHTML = '<div class="error">상품과 플랜을 모두 선택해주세요.</div>';
+    limitResults.innerHTML = '';
     return;
   }
   
@@ -985,7 +1046,6 @@ function checkAutoLogin() {
   if (savedUser) {
     currentUser = savedUser;
     isAdminUser = savedIsAdmin;
-    // 자동 로그인 시 바로 메뉴 화면으로 이동
     showLoginSuccess();
   } else {
     const hash = window.location.hash.substring(1);
@@ -1261,10 +1321,7 @@ document.addEventListener('DOMContentLoaded', () => {
     history.replaceState({ screen: 'login' }, '', window.location.pathname);
   }
   
-  // 자동 로그인 체크를 먼저 수행
   checkAutoLogin();
-  
-  // 그 다음 데이터 로드
   loadAllData();
  
   document.getElementById('loginBtn').addEventListener('click', login);
@@ -1290,15 +1347,15 @@ document.addEventListener('DOMContentLoaded', () => {
     alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
   });
 
+  // 개선된 이벤트 리스너 - 자동 조회 기능
   document.getElementById('productSelect').addEventListener('change', function() {
     updatePlanSelect(this.value);
   });
   
   document.getElementById('planSelect').addEventListener('change', function() {
-    updateLimitSearchButton();
+    autoSearchLimits();
   });
   
-  document.getElementById('limitSearchBtn').addEventListener('click', searchLimits);
   document.getElementById('limitBackBtn').addEventListener('click', goBackFromLimit);
   
   document.querySelector('.close').addEventListener('click', closeNoteModal);
