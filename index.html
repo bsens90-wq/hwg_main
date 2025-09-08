@@ -327,8 +327,8 @@
     <div class="header-left"></div>
     <div class="header-center">
       <div class="logo-container" onclick="goHome()">
-        <div class="logo-main">THE-RA</div>
-        <div class="logo-sub">뭐더라, 어딨더라...</div>
+        <div class="logo-main">머드라</div>
+        <div class="logo-sub">뭐더라.., 어딨더라..</div>
       </div>
     </div>
     <div class="header-right">
@@ -341,7 +341,7 @@
 
   <!-- 로그인 화면 -->
   <section id="loginScreen" class="screen">
-    <div class="app-title">한화손보 유병자 인수 가이드</div>
+    <div class="app-title">뭐더라..? 어딨더라..? 할 땐? </div> 머드라! </div>
     <div class="card">
       <h2>로그인</h2>
       <div class="row">
@@ -349,7 +349,7 @@
       </div>
       <div class="row">
         <input id="password" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
-        <div class="hint">코드는 사전 승인된 기관에 부여됩니다.</div>
+        <div class="hint">사전 승인된 기관만 로그인 가능합니다. </div>
       </div>
       <button id="loginBtn">로그인</button>
       <button id="installBtn" class="secondary">홈화면에 추가</button>
@@ -361,18 +361,18 @@
 
   <!-- 메뉴 화면 -->
   <section id="menuScreen" class="screen" style="display:none;">
-    <div class="app-title">한화손보 유병자 인수 가이드</div>
+    <div class="app-title">뭐더라..? 어딨더라..? 할 땐? </div> 머드라! </div>
     <div class="card">
       <h2 style="margin-bottom:1.5rem;">메뉴 선택</h2>
       
       <button id="diseaseMenuBtn" style="margin-bottom:1rem;">
-        <span style="font-size:18px; display:block; margin-bottom:4px;">🔍 한화손보 SI 즉시인수 질환</span>
-        <span style="font-size:13px; opacity:0.8;">질병명으로 인수기준 검색</span>
+        <span style="font-size:18px; display:block; margin-bottom:4px;"> 한화손보 SI 즉시 인수 질환</span>
+
       </button>
       
       <button id="contactMenuBtn" style="margin-bottom:1rem;">
-        <span style="font-size:18px; display:block; margin-bottom:4px;">📞 회사별 콜센터, 청구팩스 번호</span>
-        <span style="font-size:13px; opacity:0.8;">보험회사 연락처 정보</span>
+        <span style="font-size:18px; display:block; margin-bottom:4px;"> 콜센터, 보험금 청구 팩스</span>
+
       </button>
       
       <div class="meta" style="margin-top:2rem;">Copyright 2025 하세봉 all rights reserved.</div>
@@ -381,7 +381,7 @@
 
   <!-- 검색 화면 -->
   <section id="searchScreen" class="screen" style="display:none;">
-    <div class="app-title">한화손보 SI 즉시인수 질환</div>
+    <div class="app-title">한화손보 SI 즉시 인수 질환</div>
     <div class="card container-narrow">
       <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
       <div class="row">
@@ -399,7 +399,7 @@
 
   <!-- 연락처 화면 -->
   <section id="contactScreen" class="screen" style="display:none;">
-    <div class="app-title">회사별 콜센터, 청구팩스 번호</div>
+    <div class="app-title">콜센터, 보험금 청구 팩스</div>
     <div class="card container-narrow">
       <div class="insurance-section">
         <div id="insuranceListContact"></div>
@@ -641,17 +641,14 @@ function showInsuranceContactsInContactScreen() {
       <div class="insurance-info">
         <div class="insurance-contact">
           <div class="contact-item">
-            <span>📞</span>
             <span>콜센터</span>
             <a href="tel:${INSURANCE_COMPANIES[0].callCenter.replace(/-/g, '')}">${INSURANCE_COMPANIES[0].callCenter}</a>
           </div>
           <div class="contact-item">
-            <span>📄</span>
-            <span>보험금청구</span>
+            <span>팩스</span>
             <span>${INSURANCE_COMPANIES[0].fax}</span>
           </div>
           <div class="contact-item">
-            <span>📚</span>
             <span>공시실</span>
             <a href="${INSURANCE_COMPANIES[0].termsUrl}" target="_blank">바로가기</a>
           </div>
@@ -669,17 +666,14 @@ function showInsuranceContactsInContactScreen() {
         <div class="insurance-info small">
           <div class="insurance-contact small">
             <div class="contact-item small">
-              <span>📞</span>
               <span>콜센터</span>
               <a href="tel:${company.callCenter.replace(/-/g, '')}">${company.callCenter}</a>
             </div>
             <div class="contact-item small">
-              <span>📄</span>
-              <span>보험금청구</span>
+              <span>팩스</span>
               <span>${faxDisplay}</span>
             </div>
             <div class="contact-item small">
-              <span>📚</span>
               <span>공시실</span>
               <a href="${company.termsUrl}" target="_blank">바로가기</a>
             </div>
