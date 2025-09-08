@@ -893,6 +893,11 @@ function goBack() {
 
 // 이벤트 리스너
 document.addEventListener('DOMContentLoaded', () => {
+  // 초기 히스토리 상태 설정
+  if (window.location.hash) {
+    history.replaceState({ screen: 'login' }, '', window.location.pathname);
+  }
+  
   Promise.all([loadAllData()]).then(() => {
     checkAutoLogin();
   });
