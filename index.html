@@ -709,10 +709,11 @@ function generateLimitTable(selectedProduct, selectedPlan) {
 
 function formatAmount(amount) {
   if (!amount || amount === 0) return '-';
-  if (amount >= 10000) {
-    return (amount / 10000) + '만원';
-  }
-  return amount.toLocaleString() + '원';
+  
+  // 숫자를 천단위 콤마로 포맷팅
+  const formattedNumber = amount.toLocaleString();
+  return formattedNumber + '만';
+}
 }
 
 function showNoteModal(coverage, note) {
