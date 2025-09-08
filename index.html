@@ -1319,7 +1319,20 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('planSelect').addEventListener('change', function() {
     const productSelect = document.getElementById("productSelect");
     if (this.value && productSelect.value) {
-      searchLimitsAuto(productSelect.value, this.value);
+      updateAgeSelect(productSelect.value, this.value);
+    } else {
+      const ageSelectRow = document.getElementById("ageSelectRow");
+      const limitResults = document.getElementById("limitResults");
+      ageSelectRow.style.display = "none";
+      limitResults.innerHTML = "";
+    }
+  });
+  
+  document.getElementById('ageSelect').addEventListener('change', function() {
+    const productSelect = document.getElementById("productSelect");
+    const planSelect = document.getElementById("planSelect");
+    if (this.value && productSelect.value && planSelect.value) {
+      searchLimitsAuto(productSelect.value, planSelect.value, this.value);
     }
   });
   
