@@ -31,9 +31,25 @@
       z-index: 1000;
       background: var(--bg);
       border-bottom: 2px solid #ccc;
-      padding: 8px 0;
-      text-align: center;
+      padding: 8px 20px;
       box-shadow: 0 2px 4px rgba(0,0,0,.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .header-left {
+      flex: 1;
+    }
+    
+    .header-center {
+      flex: 1;
+      text-align: center;
+    }
+    
+    .header-right {
+      flex: 1;
+      text-align: right;
     }
     
     .logo-container {
@@ -72,6 +88,36 @@
     
     .logo-container:hover .logo-sub {
       opacity: 1;
+    }
+    
+    .user-info-header {
+      background: rgba(255,127,0,0.1);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--hanwha);
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .user-info-header button {
+      padding: 3px 8px;
+      font-size: 11px;
+      margin: 0;
+      width: auto;
+      min-width: 50px;
+      background: #28a745;
+      border-radius: 12px;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    
+    .user-info-header button:hover {
+      background: #218838;
     }
     
     .screen{
@@ -177,27 +223,6 @@
       color:var(--muted);
       text-align:center;
     }
-    .user-info{
-      position:fixed;
-      top:250px;
-      right:10px;
-      background:rgba(255,127,0,0.1);
-      padding:8px 12px;
-      border-radius:20px;
-      font-size:12px;
-      color:var(--hanwha);
-      font-weight:600;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .user-info button{
-      padding:4px 8px;
-      font-size:11px;
-      margin:0;
-      width:auto;
-      min-width:50px;
-    }
     
     .insurance-section{
       margin-top:1.5rem;
@@ -299,9 +324,18 @@
 </head>
 <body>
   <div class="header-fixed">
-    <div class="logo-container" onclick="goHome()">
-      <div class="logo-main">THE-RA</div>
-      <div class="logo-sub">뭐더라, 어딨더라...</div>
+    <div class="header-left"></div>
+    <div class="header-center">
+      <div class="logo-container" onclick="goHome()">
+        <div class="logo-main">THE-RA</div>
+        <div class="logo-sub">뭐더라, 어딨더라...</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div id="userInfoHeader" class="user-info-header">
+        <span id="userTextHeader"></span>
+        <button id="logoutBtnHeader">로그아웃</button>
+      </div>
     </div>
   </div>
 
@@ -319,7 +353,7 @@
       </div>
       <button id="loginBtn">로그인</button>
       <button id="installBtn" class="secondary">홈화면에 추가</button>
-      <div id="loginMsg" class="error" role="alert" aria-live="polite"></div>
+      <div id="loginMsg" class="error"></div>
       <div class="meta" id="empMeta"></div>
       <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
     </div>
@@ -327,10 +361,6 @@
 
   <!-- 메뉴 화면 -->
   <section id="menuScreen" class="screen" style="display:none;">
-    <div class="user-info" id="userInfo">
-      <span id="userText"></span>
-      <button id="logoutBtn" class="logout">로그아웃</button>
-    </div>
     <div class="app-title">한화손보 유병자 인수 가이드</div>
     <div class="card">
       <h2 style="margin-bottom:1.5rem;">메뉴 선택</h2>
@@ -351,11 +381,6 @@
 
   <!-- 검색 화면 -->
   <section id="searchScreen" class="screen" style="display:none;">
-    <div class="user-info">
-      <span id="userTextSearch"></span>
-      <button id="homeBtn" class="secondary" style="margin-right:8px;">홈</button>
-      <button id="logoutBtnSearch" class="logout">로그아웃</button>
-    </div>
     <div class="app-title">한화손보 SI 즉시인수 질환</div>
     <div class="card container-narrow">
       <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
@@ -364,7 +389,7 @@
       </div>
       <div id="searchMessage" class="hint" style="margin-bottom:1rem; display:none;"></div>
       
-      <button id="searchBtn" title="검색">검색</button>
+      <button id="searchBtn">검색</button>
       <button id="backBtn" class="secondary" style="display:none; margin-top:8px;">뒤로가기</button>
       
       <div class="results" id="results"></div>
@@ -374,11 +399,6 @@
 
   <!-- 연락처 화면 -->
   <section id="contactScreen" class="screen" style="display:none;">
-    <div class="user-info">
-      <span id="userTextContact"></span>
-      <button id="homeBtnContact" class="secondary" style="margin-right:8px;">홈</button>
-      <button id="logoutBtnContact" class="logout">로그아웃</button>
-    </div>
     <div class="app-title">회사별 콜센터, 청구팩스 번호</div>
     <div class="card container-narrow">
       <div class="insurance-section">
@@ -390,176 +410,113 @@
   </section>
 
 <script>
-// 전역 변수
 let employees = [];
 let diseases = [];
 let currentUser = null;
 let isAdminUser = false;
+let currentScreen = 'login';
+const screenHistory = [];
 
-// 데이터 URL
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
 
-// 관리자 계정 정보
 const ADMIN_ACCOUNT = {
   empno: "8091768",
   password: "dcw8091"
 };
 
-// 보험회사 데이터
 const INSURANCE_COMPANIES = [
-  {
-    "company": "한화손해보험",
-    "callCenter": "1566-8000",
-    "fax": "0502-779-1004",
-    "termsUrl": "https://www.hwgeneralins.com/notice/ir/product-ing01.do"
-  },
-  {
-    "company": "삼성화재",
-    "callCenter": "1588-5114", 
-    "fax": "0505-162-0872",
-    "termsUrl": "https://www.samsungfire.com/vh/page/VH.HPIF0103.do"
-  },
-  {
-    "company": "메리츠화재",
-    "callCenter": "1566-7711", 
-    "fax": "0505-021-3400",
-    "termsUrl": "https://www.meritzfire.com/disclosure/product-announcement/product-list.do#!/"
-  },
-  {
-    "company": "DB손해보험",
-    "callCenter": "1588-0100", 
-    "fax": "0505-181-4862",
-    "termsUrl": "https://www.idbins.com/FWMAIV1534.do"
-  },
-  {
-    "company": "KB손해보험",
-    "callCenter": "1544-0114", 
-    "fax": "0505-136-6500",
-    "termsUrl": "https://www.kbinsure.co.kr/CG802030001.ec"
-  },
-  {
-    "company": "현대해상",
-    "callCenter": "1588-5656", 
-    "fax": "0507-774-6060",
-    "termsUrl": "https://www.hi.co.kr/serviceAction.do?view=bin/PA/03/HHPA03010M#none"
-  },
-  {
-    "company": "롯데손해보험",
-    "callCenter": "1588-3344", 
-    "fax": "0507-333-9999",
-    "termsUrl": "https://www.lotteins.co.kr/web/C/D/H/cdh190.jsp"
-  },
-  {
-    "company": "흥국화재",
-    "callCenter": "1688-1688", 
-    "fax": "0504-800-0700",
-    "termsUrl": "https://www.heungkukfire.co.kr/FRW/announce/insGoodsGongsiSale.do"
-  },
-  {
-    "company": "하나손해보험",
-    "callCenter": "1566-3000", 
-    "fax": "0505-170-0765",
-    "termsUrl": "https://www.hanainsure.co.kr/w/disclosure/product/saleProduct"
-  },
-  {
-    "company": "NH농협손해보험",
-    "callCenter": "1644-9000", 
-    "fax": "0505-060-7000",
-    "termsUrl": "https://www.nhfire.co.kr/announce/productAnnounce/retrieveInsuranceProductsAnnounce.nhfire"
-  },
-  {
-    "company": "라이나손해보험",
-    "callCenter": "1566-5800", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"
-  },
-  {
-    "company": "AIG손해보험",
-    "callCenter": "1544-2792", 
-    "fax": "02-2011-4607",
-    "termsUrl": "https://www.aig.co.kr/wo/dpwot001.html?menuId=MS702"
-  },
-  {
-    "company": "한화생명",
-    "callCenter": "1588-6363", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://www.hanwhalife.com/main/disclosure/goods/disclosurenotice/DF_GDDN000_P10000.do?MENU_ID1=DF_GDGL000"
-  },
-  {
-    "company": "동양생명",
-    "callCenter": "1577-1004", 
-    "fax": "02-3289-4516",
-    "termsUrl": "https://pbano.myangel.co.kr/paging/WE_AC_WEPAAP020100L"
-  },
-  {
-    "company": "교보생명",
-    "callCenter": "1588-1001", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://www.kyobo.com/dgt/web/product-official/all-product/search"
-  },
-  {
-    "company": "삼성생명",
-    "callCenter": "1588-3114", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://www.samsunglife.com/individual/products/disclosure/sales/PDO-PRPRI010110M"
-  },
-  {
-    "company": "라이나생명",
-    "callCenter": "1588-0058", 
-    "fax": "02-6944-1200",
-    "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"
-  },
-  {
-    "company": "KDB생명",
-    "callCenter": "1588-4040", 
-    "fax": "02-2669-6500",
-    "termsUrl": "https://www.kdblife.co.kr/ajax.do?scrId=HDLMA002M02P"
-  },
-  {
-    "company": "MG새마을금고",
-    "callCenter": "1599-9010", 
-    "fax": "02-3016-7674",
-    "termsUrl": "https://insure.kfcc.co.kr/#/PGE_IHJ_00003"
-  },
-  {
-    "company": "더케이",
-    "callCenter": "1577-3993", 
-    "fax": "02-3278-9696",
-    "termsUrl": "https://www.ktcu.or.kr/PPW-FIC-800101"
-  },
-  {
-    "company": "우체국",
-    "callCenter": "1599-0100", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://mall.epostbank.go.kr/IPPSKE0000.do"
-  },
-  {
-    "company": "수협공제",
-    "callCenter": "1588-4119", 
-    "fax": "콜센터 전화 접수",
-    "termsUrl": "https://www.suhyup-bank.com/"
-  }
+  {"company": "한화손해보험", "callCenter": "1566-8000", "fax": "0502-779-1004", "termsUrl": "https://www.hwgeneralins.com/notice/ir/product-ing01.do"},
+  {"company": "삼성화재", "callCenter": "1588-5114", "fax": "0505-162-0872", "termsUrl": "https://www.samsungfire.com/vh/page/VH.HPIF0103.do"},
+  {"company": "메리츠화재", "callCenter": "1566-7711", "fax": "0505-021-3400", "termsUrl": "https://www.meritzfire.com/disclosure/product-announcement/product-list.do#!/"},
+  {"company": "DB손해보험", "callCenter": "1588-0100", "fax": "0505-181-4862", "termsUrl": "https://www.idbins.com/FWMAIV1534.do"},
+  {"company": "KB손해보험", "callCenter": "1544-0114", "fax": "0505-136-6500", "termsUrl": "https://www.kbinsure.co.kr/CG802030001.ec"},
+  {"company": "현대해상", "callCenter": "1588-5656", "fax": "0507-774-6060", "termsUrl": "https://www.hi.co.kr/serviceAction.do?view=bin/PA/03/HHPA03010M#none"},
+  {"company": "롯데손해보험", "callCenter": "1588-3344", "fax": "0507-333-9999", "termsUrl": "https://www.lotteins.co.kr/web/C/D/H/cdh190.jsp"},
+  {"company": "흥국화재", "callCenter": "1688-1688", "fax": "0504-800-0700", "termsUrl": "https://www.heungkukfire.co.kr/FRW/announce/insGoodsGongsiSale.do"},
+  {"company": "하나손해보험", "callCenter": "1566-3000", "fax": "0505-170-0765", "termsUrl": "https://www.hanainsure.co.kr/w/disclosure/product/saleProduct"},
+  {"company": "NH농협손해보험", "callCenter": "1644-9000", "fax": "0505-060-7000", "termsUrl": "https://www.nhfire.co.kr/announce/productAnnounce/retrieveInsuranceProductsAnnounce.nhfire"},
+  {"company": "라이나손해보험", "callCenter": "1566-5800", "fax": "콜센터 전화 접수", "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"},
+  {"company": "AIG손해보험", "callCenter": "1544-2792", "fax": "02-2011-4607", "termsUrl": "https://www.aig.co.kr/wo/dpwot001.html?menuId=MS702"},
+  {"company": "한화생명", "callCenter": "1588-6363", "fax": "콜센터 전화 접수", "termsUrl": "https://www.hanwhalife.com/main/disclosure/goods/disclosurenotice/DF_GDDN000_P10000.do?MENU_ID1=DF_GDGL000"},
+  {"company": "동양생명", "callCenter": "1577-1004", "fax": "02-3289-4516", "termsUrl": "https://pbano.myangel.co.kr/paging/WE_AC_WEPAAP020100L"},
+  {"company": "교보생명", "callCenter": "1588-1001", "fax": "콜센터 전화 접수", "termsUrl": "https://www.kyobo.com/dgt/web/product-official/all-product/search"},
+  {"company": "삼성생명", "callCenter": "1588-3114", "fax": "콜센터 전화 접수", "termsUrl": "https://www.samsunglife.com/individual/products/disclosure/sales/PDO-PRPRI010110M"},
+  {"company": "라이나생명", "callCenter": "1588-0058", "fax": "02-6944-1200", "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"},
+  {"company": "KDB생명", "callCenter": "1588-4040", "fax": "02-2669-6500", "termsUrl": "https://www.kdblife.co.kr/ajax.do?scrId=HDLMA002M02P"},
+  {"company": "MG새마을금고", "callCenter": "1599-9010", "fax": "02-3016-7674", "termsUrl": "https://insure.kfcc.co.kr/#/PGE_IHJ_00003"},
+  {"company": "더케이", "callCenter": "1577-3993", "fax": "02-3278-9696", "termsUrl": "https://www.ktcu.or.kr/PPW-FIC-800101"},
+  {"company": "우체국", "callCenter": "1599-0100", "fax": "콜센터 전화 접수", "termsUrl": "https://mall.epostbank.go.kr/IPPSKE0000.do"},
+  {"company": "수협공제", "callCenter": "1588-4119", "fax": "콜센터 전화 접수", "termsUrl": "https://www.suhyup-bank.com/"}
 ];
 
-// JSON 로더
+function pushHistory(screen) {
+  screenHistory.push(currentScreen);
+  currentScreen = screen;
+  if (screen !== 'login') {
+    history.pushState({ screen: screen }, '', `#${screen}`);
+  }
+}
+
+window.addEventListener('popstate', function(event) {
+  if (event.state && event.state.screen) {
+    navigateToScreen(event.state.screen, false);
+  } else if (currentUser) {
+    navigateToScreen('menu', false);
+  } else {
+    navigateToScreen('login', false);
+  }
+});
+
+function navigateToScreen(screen, addToHistory = true) {
+  if (addToHistory && screen !== currentScreen) {
+    pushHistory(screen);
+  } else {
+    currentScreen = screen;
+  }
+  
+  hideAllScreens();
+  
+  switch(screen) {
+    case 'login':
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("userInfoHeader").style.display = "none";
+      break;
+    case 'menu':
+      document.getElementById("menuScreen").style.display = "flex";
+      if (currentUser) {
+        document.getElementById("userInfoHeader").style.display = "inline-flex";
+        document.getElementById("userTextHeader").textContent = `${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
+      }
+      break;
+    case 'search':
+      document.getElementById("searchScreen").style.display = "flex";
+      document.getElementById("searchInput").focus();
+      document.getElementById("searchInput").value = "";
+      document.getElementById("results").innerHTML = "";
+      document.getElementById("searchMessage").style.display = "none";
+      document.getElementById("backBtn").style.display = "none";
+      break;
+    case 'contact':
+      document.getElementById("contactScreen").style.display = "flex";
+      showInsuranceContactsInContactScreen();
+      break;
+  }
+}
+
 async function loadJsonFlexible(url){
   const res = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
   if(!res.ok) throw new Error("네트워크 오류: " + res.status);
- 
   const text = await res.text();
   const cleaned = text.replace(/^\uFEFF/, "");
   let json = JSON.parse(cleaned);
-
   if(json && typeof json === "object" && !Array.isArray(json) && Array.isArray(json.data)){
     json = json.data;
   }
   if(!Array.isArray(json)) throw new Error("JSON이 배열이 아닙니다.");
- 
   return json;
 }
 
-// 데이터 로드
 async function loadAllData(){
   try{
     const [emp, dis] = await Promise.all([
@@ -582,16 +539,13 @@ async function loadAllData(){
       restrictions: String(d.restrictions || "")
     })).filter(d => d.name);
 
-    document.getElementById("empMeta").textContent =
-      `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건`;
-
+    document.getElementById("empMeta").textContent = `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건`;
   }catch(err){
     console.error("데이터 로드 실패:", err);
     document.getElementById("loginMsg").textContent = "데이터 로드 실패";
   }
 }
 
-// 자동 로그인 체크
 function checkAutoLogin() {
   const savedUser = localStorage.getItem('hwg_current_user');
   const savedIsAdmin = localStorage.getItem('hwg_is_admin') === 'true';
@@ -600,10 +554,15 @@ function checkAutoLogin() {
     currentUser = savedUser;
     isAdminUser = savedIsAdmin;
     showLoginSuccess();
+  } else {
+    const hash = window.location.hash.substring(1);
+    if (hash && ['menu', 'search', 'contact'].includes(hash)) {
+      window.location.hash = '';
+    }
+    navigateToScreen('login', false);
   }
 }
 
-// 로그인
 function login(){
   const empno = document.getElementById("empno").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -614,14 +573,11 @@ function login(){
     return;
   }
 
-  // 관리자 계정 확인
   if (empno === ADMIN_ACCOUNT.empno && password === ADMIN_ACCOUNT.password) {
     currentUser = empno;
     isAdminUser = true;
-    
     localStorage.setItem('hwg_current_user', empno);
     localStorage.setItem('hwg_is_admin', 'true');
-    
     showLoginSuccess();
     msg.textContent = "";
     return;
@@ -637,10 +593,8 @@ function login(){
   if(user){
     currentUser = empno;
     isAdminUser = false;
-    
     localStorage.setItem('hwg_current_user', empno);
     localStorage.removeItem('hwg_is_admin');
-   
     showLoginSuccess();
     msg.textContent = "";
   }else{
@@ -648,7 +602,6 @@ function login(){
   }
 }
 
-// 화면 관리 함수들
 function hideAllScreens() {
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("menuScreen").style.display = "none";
@@ -657,47 +610,27 @@ function hideAllScreens() {
 }
 
 function showLoginSuccess() {
-  hideAllScreens();
-  document.getElementById("menuScreen").style.display = "flex";
-  document.getElementById("userText").textContent = `로그인: ${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
+  navigateToScreen('menu');
 }
 
 function goHome() {
   if (currentUser) {
-    hideAllScreens();
-    document.getElementById("menuScreen").style.display = "flex";
-    document.getElementById("userText").textContent = `로그인: ${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
+    navigateToScreen('menu');
   } else {
-    hideAllScreens();
-    document.getElementById("loginScreen").style.display = "flex";
+    navigateToScreen('login');
   }
 }
 
 function showDiseaseScreen() {
-  hideAllScreens();
-  document.getElementById("searchScreen").style.display = "flex";
-  document.getElementById("userTextSearch").textContent = `로그인: ${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
-  document.getElementById("searchInput").focus();
-  
-  document.getElementById("searchInput").value = "";
-  document.getElementById("results").innerHTML = "";
-  const searchMessage = document.getElementById("searchMessage");
-  const backBtn = document.getElementById("backBtn");
-  if (searchMessage) searchMessage.style.display = "none";
-  if (backBtn) backBtn.style.display = "none";
+  navigateToScreen('search');
 }
 
 function showContactScreen() {
-  hideAllScreens();
-  document.getElementById("contactScreen").style.display = "flex";
-  document.getElementById("userTextContact").textContent = `로그인: ${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
-  
-  showInsuranceContactsInContactScreen();
+  navigateToScreen('contact');
 }
 
 function showInsuranceContactsInContactScreen() {
   const insuranceList = document.getElementById("insuranceListContact");
-  
   const damageInsurance = INSURANCE_COMPANIES.slice(1, 12);
   const lifeInsurance = INSURANCE_COMPANIES.slice(12, 18);
   const mutualAid = INSURANCE_COMPANIES.slice(18, 22);
@@ -720,7 +653,7 @@ function showInsuranceContactsInContactScreen() {
           <div class="contact-item">
             <span>📚</span>
             <span>공시실</span>
-            <a href="${INSURANCE_COMPANIES[0].termsUrl}" target="_blank" rel="noopener">바로가기</a>
+            <a href="${INSURANCE_COMPANIES[0].termsUrl}" target="_blank">바로가기</a>
           </div>
         </div>
       </div>
@@ -748,7 +681,7 @@ function showInsuranceContactsInContactScreen() {
             <div class="contact-item small">
               <span>📚</span>
               <span>공시실</span>
-              <a href="${company.termsUrl}" target="_blank" rel="noopener">바로가기</a>
+              <a href="${company.termsUrl}" target="_blank">바로가기</a>
             </div>
           </div>
         </div>
@@ -783,10 +716,9 @@ function logout() {
     localStorage.removeItem('hwg_is_admin');
     currentUser = null;
     isAdminUser = false;
-    
-    hideAllScreens();
-    document.getElementById("loginScreen").style.display = "flex";
-    
+    screenHistory.length = 0;
+    document.getElementById("userInfoHeader").style.display = "none";
+    navigateToScreen('login');
     document.getElementById("empno").value = "";
     document.getElementById("password").value = "";
     document.getElementById("searchInput").value = "";
@@ -891,9 +823,7 @@ function goBack() {
   backBtn.style.display = "none";
 }
 
-// 이벤트 리스너
 document.addEventListener('DOMContentLoaded', () => {
-  // 초기 히스토리 상태 설정
   if (window.location.hash) {
     history.replaceState({ screen: 'login' }, '', window.location.pathname);
   }
@@ -914,16 +844,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
   document.getElementById('contactMenuBtn').addEventListener('click', showContactScreen);
-
   document.getElementById('logoutBtnHeader').addEventListener('click', logout);
- 
   document.getElementById('searchBtn').addEventListener('click', search);
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if(e.key === 'Enter') search();
   });
-  
   document.getElementById('backBtn').addEventListener('click', goBack);
- 
   document.getElementById('installBtn').addEventListener('click', () => {
     alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
   });
