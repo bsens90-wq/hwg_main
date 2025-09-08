@@ -719,9 +719,9 @@ function generateLimitTable(selectedProduct, selectedPlan) {
       <table class="limit-table">
         <thead>
           <tr>
+            <th class="detail-btn">상세조회</th>
             <th class="coverage-name">담보명</th>
             ${sortedAgeGroups.map(age => `<th class="age-group">${age}</th>`).join('')}
-            <th class="age-group">상세조회</th>
           </tr>
         </thead>
         <tbody>
@@ -729,16 +729,8 @@ function generateLimitTable(selectedProduct, selectedPlan) {
   
   coverageGroups.forEach((items, coverage) => {
     tableHTML += '<tr>';
-    tableHTML += `<td class="coverage-name">${coverage}</td>`;
     
-    sortedAgeGroups.forEach(ageGroup => {
-      const matchingItem = items.find(item => 
-        `${item.minAge}세~${item.maxAge}세` === ageGroup
-      );
-      const amount = matchingItem ? formatAmount(matchingItem.amount) : '-';
-      tableHTML += `<td class="amount">${amount}</td>`;
-    });
-    
+    // 상세조회 버튼을 첫 번째 컬럼으로 이동
     const hasNote = items.some(item => item.note && item.note.trim());
     if (hasNote) {
       const noteContent = items.find(item => item.note && item.note.trim())?.note || '';
@@ -748,10 +740,20 @@ function generateLimitTable(selectedProduct, selectedPlan) {
         .replace(/'/g, "\\'")
         .replace(/"/g, '\\"')
         .replace(/\r?\n/g, '\\n');
-      tableHTML += `<td><button class="small" onclick="showNoteModal(\`${coverage}\`, \`${cleanNote}\`)">상세조회</button></td>`;
+      tableHTML += `<td class="detail-btn"><button class="small" onclick="showNoteModal(\`${coverage}\`, \`${cleanNote}\`)">상세조회</button></td>`;
     } else {
-      tableHTML += '<td>-</td>';
+      tableHTML += '<td class="detail-btn">-</td>';
     }
+    
+    tableHTML += `<td class="coverage-name">${coverage}</td>`;
+    
+    sortedAgeGroups.forEach(ageGroup => {
+      const matchingItem = items.find(item => 
+        `${item.minAge}세~${item.maxAge}세` === ageGroup
+      );
+      const amount = matchingItem ? formatAmount(matchingItem.amount) : '-';
+      tableHTML += `<td class="amount">${amount}</td>`;
+    });
     
     tableHTML += '</tr>';
   });
