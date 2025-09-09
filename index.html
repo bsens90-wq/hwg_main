@@ -231,6 +231,37 @@
       color:var(--muted);
       text-align:center;
     }
+
+    /* 통합 인수 가이드 전용 스타일 */
+    .guide-table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:.5rem;
+      font-size:14px;
+    }
+    .guide-table th,.guide-table td{
+      border:1px solid var(--border);
+      padding:10px 8px;
+      text-align:left;
+      vertical-align:top;
+    }
+    .guide-table th{
+      background:#f8f9fa;
+      font-weight:700;
+      text-align:center;
+      width:20%;
+    }
+    .guide-table .type-col{
+      font-weight:600;
+      color:var(--hanwha);
+      text-align:center;
+      width:20%;
+    }
+    .guide-table .content-col{
+      width:80%;
+      white-space:pre-line;
+      line-height:1.4;
+    }
     
     .insurance-section{
       margin-top:1.5rem;
@@ -511,6 +542,10 @@
         margin: -20px -10px 20px -10px;
         padding: 10px 15px;
       }
+      .guide-table th, .guide-table td{
+        padding:8px 4px;
+        font-size:12px;
+      }
     }
   </style>
 </head>
@@ -556,7 +591,12 @@
     <div class="card">
       <h2 style="margin-bottom:1.5rem;">메뉴 선택</h2>
       
-      <button id="diseaseMenuBtn" style="margin-bottom:1rem;">
+      <button id="guideMenuBtn" style="margin-bottom:1rem;">
+        <span style="font-size:18px; display:block; margin-bottom:4px;">통합 인수 가이드</span>
+        <span style="font-size:14px; opacity:0.8;">(건강고지/일반고지/간편고지)</span>
+      </button>
+      
+      <button id="diseaseMenuBtn" style="margin-bottom:1rem; display:none;">
         <span style="font-size:18px; display:block; margin-bottom:4px;">한화손보 SI 즉시 인수 질환</span>
       </button>
       
@@ -569,6 +609,24 @@
       </button>
       
       <div class="meta" style="margin-top:2rem;">Copyright 2025 하세봉 all rights reserved.</div>
+    </div>
+  </section>
+
+  <!-- 통합 인수 가이드 검색 화면 -->
+  <section id="guideScreen" class="screen" style="display:none;">
+    <div class="app-title">통합 인수 가이드 (건강고지/일반고지/간편고지)</div>
+    <div class="card container-narrow">
+      <h2 style="margin-bottom:.5rem;">질병명 검색</h2>
+      <div class="row">
+        <input id="guideSearchInput" type="text" placeholder="예시: 용종, 골절, 당뇨 등">
+      </div>
+      <div id="guideSearchMessage" class="hint" style="margin-bottom:1rem; display:none;"></div>
+      
+      <button id="guideSearchBtn">검색</button>
+      <button id="guideBackBtn" class="secondary" style="display:none; margin-top:8px;">뒤로가기</button>
+      
+      <div class="results" id="guideResults"></div>
+      <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
     </div>
   </section>
 
@@ -647,6 +705,7 @@
 <script>
 let employees = [];
 let diseases = [];
+let guideData = [];
 let limitData = [];
 let currentUser = null;
 let isAdminUser = false;
@@ -655,6 +714,7 @@ const screenHistory = [];
 
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
+const GUIDE_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/udw_dcw.json";
 
 const ADMIN_ACCOUNT = {
   empno: "8091768",
@@ -700,6 +760,16 @@ async function loadLimitData() {
     }
   } catch(err) {
     console.error("인수한도 데이터 로드 실패:", err);
+  }
+}
+
+// 통합 인수 가이드 데이터 로드 함수
+async function loadGuideData() {
+  try {
+    guideData = await loadJsonFlexible(GUIDE_URL);
+    console.log("통합 인수 가이드 데이터 로드 완료:", guideData.length + "건");
+  } catch(err) {
+    console.error("통합 인수 가이드 데이터 로드 실패:", err);
   }
 }
 
@@ -910,10 +980,19 @@ function navigateToScreen(screen, addToHistory = true) {
       break;
     case 'menu':
       document.getElementById("menuScreen").style.display = "flex";
+      updateMenuVisibility();
       if (currentUser) {
         document.getElementById("userInfoHeader").style.display = "inline-flex";
         document.getElementById("userTextHeader").textContent = `${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
       }
+      break;
+    case 'guide':
+      document.getElementById("guideScreen").style.display = "flex";
+      document.getElementById("guideSearchInput").focus();
+      document.getElementById("guideSearchInput").value = "";
+      document.getElementById("guideResults").innerHTML = "";
+      document.getElementById("guideSearchMessage").style.display = "none";
+      document.getElementById("guideBackBtn").style.display = "none";
       break;
     case 'search':
       document.getElementById("searchScreen").style.display = "flex";
@@ -931,6 +1010,16 @@ function navigateToScreen(screen, addToHistory = true) {
       document.getElementById("limitScreen").style.display = "flex";
       initializeLimitScreen();
       break;
+  }
+}
+
+function updateMenuVisibility() {
+  const diseaseMenuBtn = document.getElementById("diseaseMenuBtn");
+  
+  if (isAdminUser) {
+    diseaseMenuBtn.style.display = "block";
+  } else {
+    diseaseMenuBtn.style.display = "none";
   }
 }
 
@@ -1147,9 +1236,10 @@ async function loadJsonFlexible(url){
 
 async function loadAllData(){
   try{
-    const [emp, dis] = await Promise.all([
+    const [emp, dis, guide] = await Promise.all([
       loadJsonFlexible(EMP_URL),
-      loadJsonFlexible(DIS_URL)
+      loadJsonFlexible(DIS_URL),
+      loadJsonFlexible(GUIDE_URL)
     ]);
 
     employees = emp.map(e => ({
@@ -1167,9 +1257,17 @@ async function loadAllData(){
       restrictions: String(d.restrictions || "")
     })).filter(d => d.name);
 
+    guideData = guide.map(g => ({
+      name: String(g.DSAS_CSFNM || "").trim(),
+      explanation: String(g.DSAS_EXPL || "").trim(),
+      healthType: String(g.UD_HTH || ""),
+      generalType: String(g.UD_GEN || ""),
+      simpleType: String(g.UD_SI || "")
+    })).filter(g => g.name || g.explanation);
+
     await loadLimitData();
 
-    document.getElementById("empMeta").textContent = `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건`;
+    document.getElementById("empMeta").textContent = `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건 • 통합가이드 ${guideData.length}건`;
   }catch(err){
     console.error("데이터 로드 실패:", err);
     document.getElementById("loginMsg").textContent = "데이터 로드 실패";
@@ -1187,7 +1285,7 @@ function checkAutoLogin() {
     showLoginSuccess();
   } else {
     const hash = window.location.hash.substring(1);
-    if (hash && ['menu', 'search', 'contact', 'limit'].includes(hash)) {
+    if (hash && ['menu', 'guide', 'search', 'contact', 'limit'].includes(hash)) {
       window.location.hash = '';
     }
     navigateToScreen('login', false);
@@ -1236,6 +1334,7 @@ function login(){
 function hideAllScreens() {
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("menuScreen").style.display = "none";
+  document.getElementById("guideScreen").style.display = "none";
   document.getElementById("searchScreen").style.display = "none";
   document.getElementById("contactScreen").style.display = "none";
   document.getElementById("limitScreen").style.display = "none";
@@ -1251,6 +1350,10 @@ function goHome() {
   } else {
     navigateToScreen('login');
   }
+}
+
+function showGuideScreen() {
+  navigateToScreen('guide');
 }
 
 function showDiseaseScreen() {
@@ -1351,13 +1454,120 @@ function logout() {
     navigateToScreen('login');
     document.getElementById("empno").value = "";
     document.getElementById("password").value = "";
+    document.getElementById("guideSearchInput").value = "";
     document.getElementById("searchInput").value = "";
+    document.getElementById("guideResults").innerHTML = "";
     document.getElementById("results").innerHTML = "";
   }
 }
 
 function normalize(str){
   return String(str || "").toLowerCase().replace(/[\s·,\-\.]/g, "");
+}
+
+// 통합 인수 가이드 검색 함수
+function searchGuide(){
+  const query = document.getElementById("guideSearchInput").value.trim();
+  const results = document.getElementById("guideResults");
+  const searchMessage = document.getElementById("guideSearchMessage");
+  const backBtn = document.getElementById("guideBackBtn");
+ 
+  if(!query){
+    searchMessage.style.display = "none";
+    results.innerHTML = "";
+    backBtn.style.display = "none";
+    return;
+  }
+
+  if(!guideData.length) {
+    searchMessage.innerHTML = '<div class="error">통합 인수 가이드 데이터가 로드되지 않았습니다.</div>';
+    searchMessage.style.display = "block";
+    results.innerHTML = "";
+    backBtn.style.display = "none";
+    return;
+  }
+
+  const tokens = query.split(/[\s·,\-\.]+/).filter(Boolean).map(normalize);
+ 
+  const matched = guideData.filter(g => {
+    const name = normalize(g.name);
+    const explanation = normalize(g.explanation);
+   
+    // 질병명(DSAS_CSFNM)에서 검색
+    if(tokens.every(token => name.includes(token))) {
+      return true;
+    }
+    
+    // 설명(DSAS_EXPL)에서 검색
+    if(tokens.every(token => explanation.includes(token))) {
+      return true;
+    }
+   
+    if(tokens.length === 1) {
+      const token = tokens[0];
+      if(token.length >= 3) {
+        // 질병명에서 부분 매칭
+        for(let i = 2; i <= token.length - 2; i++) {
+          const left = token.substring(0, i);
+          const right = token.substring(i);
+         
+          if(left.length >= 2 && right.length >= 2) {
+            const leftPos = name.indexOf(left);
+            const rightPos = name.indexOf(right);
+           
+            if(leftPos >= 0 && rightPos >= 0 && leftPos < rightPos) {
+              return true;
+            }
+            
+            // 설명에서도 부분 매칭
+            const leftPosExpl = explanation.indexOf(left);
+            const rightPosExpl = explanation.indexOf(right);
+           
+            if(leftPosExpl >= 0 && rightPosExpl >= 0 && leftPosExpl < rightPosExpl) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+   
+    return false;
+  });
+
+  if(!matched.length){
+    searchMessage.innerHTML = '<div class="hint">검색 결과가 없습니다.</div>';
+    searchMessage.style.display = "block";
+    results.innerHTML = "";
+    backBtn.style.display = "block";
+    return;
+  }
+
+  searchMessage.style.display = "none";
+  backBtn.style.display = "block";
+
+  results.innerHTML = matched.map(g => `
+    <div class="result-card">
+      <div class="result-title">${g.name}</div>
+      <table class="guide-table">
+        <tr>
+          <th>고지유형</th>
+          <th>심사기준</th>
+        </tr>
+        <tr>
+          <td class="type-col">건강고지형</td>
+          <td class="content-col">${g.healthType || "-"}</td>
+        </tr>
+        <tr>
+          <td class="type-col">일반고지형</td>
+          <td class="content-col">${g.generalType || "-"}</td>
+        </tr>
+        <tr>
+          <td class="type-col">간편고지형</td>
+          <td class="content-col">${g.simpleType || "-"}</td>
+        </tr>
+      </table>
+    </div>
+  `).join('');
 }
 
 function search(){
@@ -1453,6 +1663,18 @@ function goBack() {
   backBtn.style.display = "none";
 }
 
+function goBackFromGuide() {
+  const guideSearchInput = document.getElementById("guideSearchInput");
+  const guideResults = document.getElementById("guideResults");
+  const guideSearchMessage = document.getElementById("guideSearchMessage");
+  const guideBackBtn = document.getElementById("guideBackBtn");
+  
+  guideSearchInput.value = "";
+  guideResults.innerHTML = "";
+  guideSearchMessage.style.display = "none";
+  guideBackBtn.style.display = "none";
+}
+
 // 페이지 로드 시 자동 로그인 체크를 먼저 수행
 document.addEventListener('DOMContentLoaded', () => {
   if (window.location.hash) {
@@ -1475,10 +1697,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.key === 'Enter') login();
   });
 
+  document.getElementById('guideMenuBtn').addEventListener('click', showGuideScreen);
   document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
   document.getElementById('contactMenuBtn').addEventListener('click', showContactScreen);
   document.getElementById('limitMenuBtn').addEventListener('click', showLimitScreen);
   document.getElementById('logoutBtnHeader').addEventListener('click', logout);
+  document.getElementById('guideSearchBtn').addEventListener('click', searchGuide);
+  document.getElementById('guideSearchInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter') searchGuide();
+  });
+  document.getElementById('guideBackBtn').addEventListener('click', goBackFromGuide);
   document.getElementById('searchBtn').addEventListener('click', search);
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if(e.key === 'Enter') search();
