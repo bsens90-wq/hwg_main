@@ -1469,13 +1469,19 @@ function showInsuranceContactsInContactScreen() {
   const lifeInsurance = INSURANCE_COMPANIES.slice(12, 18);
   const mutualAid = INSURANCE_COMPANIES.slice(18, 22);
   
+  // 회사명을 CSS 클래스명으로 변환하는 함수
+  function getCompanyClass(companyName) {
+    return companyName.replace(/[^a-zA-Z가-힣]/g, '').toLowerCase();
+  }
+  
   // 한화손해보험을 포함한 손해보험 섹션에 포함
   function createCard(company) {
     const faxDisplay = company.fax === "콜센터 전화 접수" ? "콜센터 접수" : company.fax;
+    const companyClass = getCompanyClass(company.company);
     
     return `
       <div class="insurance-card small">
-        <div class="insurance-logo small">${company.company}</div>
+        <div class="insurance-logo small ${companyClass}">${company.company}</div>
         <div class="insurance-info">
           <div class="contact-button-group">
             <button class="contact-button" onclick="handleContactButton('call', '${company.callCenter}', '${company.company}')">
