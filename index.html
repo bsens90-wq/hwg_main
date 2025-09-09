@@ -809,13 +809,22 @@ function showContactPopup(event, number, type) {
   event.stopPropagation();
   
   const popup = document.getElementById('contactPopup');
+  const callOption = document.getElementById('callOption');
+  
   currentContactNumber = number;
   currentContactType = type;
+  
+  // 전화걸기 버튼 표시/숨김 설정
+  if (type === 'call') {
+    callOption.style.display = 'block';
+  } else {
+    callOption.style.display = 'none';
+  }
   
   // 팝업 위치 계산
   const rect = event.target.getBoundingClientRect();
   const popupWidth = 140;
-  const popupHeight = 120;
+  const popupHeight = type === 'call' ? 120 : 80; // 전화걸기 버튼 유무에 따라 높이 조정
   
   let left = rect.left + (rect.width / 2) - (popupWidth / 2);
   let top = rect.bottom + 5;
