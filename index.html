@@ -1556,22 +1556,45 @@ function showInsuranceContactsInContactScreen() {
   const lifeInsurance = INSURANCE_COMPANIES.slice(12, 18);
   const mutualAid = INSURANCE_COMPANIES.slice(18, 22);
   
+  // 회사별 로고 URL 매핑
+  const logoUrls = {
+    "한화손해보험": "https://www.hwgeneralins.com/static/pc/images/common/logo.png",
+    "삼성화재": "https://www.samsungfire.com/static/common/images/common/header_logo.png",
+    "메리츠화재": "https://www.meritzfire.com/atchFile/logo/pc/meritz_logo.png",
+    "DB손해보험": "https://www.idbins.com/images/common/logo.png",
+    "KB손해보험": "https://www.kbinsure.co.kr/images/common/logo.png",
+    "현대해상": "https://www.hi.co.kr/images/common/logo.png",
+    "롯데손해보험": "https://www.lotteins.co.kr/image/common/logo.png",
+    "흥국화재": "https://www.heungkukfire.co.kr/images/common/logo.png",
+    "하나손해보험": "https://www.hanainsure.co.kr/images/common/logo.png",
+    "NH농협손해보험": "https://www.nhfire.co.kr/images/common/logo.png",
+    "라이나손해보험": "https://www.lina.co.kr/images/common/logo.png",
+    "AIG손해보험": "https://www.aig.co.kr/images/common/logo.png",
+    "한화생명": "https://www.hanwhalife.com/images/common/logo.png",
+    "동양생명": "https://www.myangel.co.kr/images/common/logo.png",
+    "교보생명": "https://www.kyobo.com/images/common/logo.png",
+    "삼성생명": "https://www.samsunglife.com/images/common/logo.png",
+    "라이나생명": "https://www.lina.co.kr/images/common/logo.png",
+    "KDB생명": "https://www.kdblife.co.kr/images/common/logo.png",
+    "MG새마을금고": "https://insure.kfcc.co.kr/images/common/logo.png",
+    "더케이": "https://www.ktcu.or.kr/images/common/logo.png",
+    "우체국": "https://mall.epostbank.go.kr/images/common/logo.png",
+    "수협공제": "https://www.suhyup-bank.com/images/common/logo.png"
+  };
+  
   const hanwhaCard = `
     <div class="insurance-card hanwha">
-      <div class="insurance-logo">${INSURANCE_COMPANIES[0].company}</div>
+      <div class="insurance-logo" style="background-image: url('${logoUrls[INSURANCE_COMPANIES[0].company] || ''}');">${logoUrls[INSURANCE_COMPANIES[0].company] ? '' : INSURANCE_COMPANIES[0].company}</div>
       <div class="insurance-info">
         <div class="insurance-contact">
           <div class="contact-item">
-            <span>콜센터</span>
-            <span class="contact-number" onclick="showContactPopup(event, '${INSURANCE_COMPANIES[0].callCenter}', 'call')">${INSURANCE_COMPANIES[0].callCenter}</span>
+            <button class="contact-number-btn" onclick="showContactPopup(event, '${INSURANCE_COMPANIES[0].callCenter}', 'call')">${INSURANCE_COMPANIES[0].callCenter}</button>
           </div>
           <div class="contact-item">
-            <span>팩스</span>
-            <span class="contact-number" onclick="showContactPopup(event, '${INSURANCE_COMPANIES[0].fax}', 'fax')">${INSURANCE_COMPANIES[0].fax}</span>
+            <button class="contact-number-btn fax-btn" onclick="showContactPopup(event, '${INSURANCE_COMPANIES[0].fax}', 'fax')">${INSURANCE_COMPANIES[0].fax}</button>
           </div>
           <div class="contact-item">
-            <span>공시실</span>
-            <a href="${INSURANCE_COMPANIES[0].termsUrl}" target="_blank">바로가기</a>
+            <a href="${INSURANCE_COMPANIES[0].termsUrl}" target="_blank">공시실 바로가기</a>
           </div>
         </div>
       </div>
@@ -1580,23 +1603,17 @@ function showInsuranceContactsInContactScreen() {
   
   function createCard(company) {
     const faxDisplay = company.fax === "콜센터 전화 접수" ? "콜센터접수" : company.fax;
+    const logoUrl = logoUrls[company.company] || '';
     
     return `
       <div class="insurance-card small">
-        <div class="insurance-logo small">${company.company}</div>
+        <div class="insurance-logo small" style="background-image: url('${logoUrl}');">${logoUrl ? '' : company.company}</div>
         <div class="insurance-info small">
           <div class="insurance-contact small">
-            <div class="contact-item small">
-              <span>콜센터</span>
-              <span class="contact-number" onclick="showContactPopup(event, '${company.callCenter}', 'call')">${company.callCenter}</span>
-            </div>
-            <div class="contact-item small">
-              <span>팩스</span>
-              <span class="contact-number" onclick="showContactPopup(event, '${company.fax}', 'fax')">${faxDisplay}</span>
-            </div>
-            <div class="contact-item small">
-              <span>공시실</span>
-              <a href="${company.termsUrl}" target="_blank">바로가기</a>
+            <button class="contact-number-btn" onclick="showContactPopup(event, '${company.callCenter}', 'call')">${company.callCenter}</button>
+            <button class="contact-number-btn fax-btn" onclick="showContactPopup(event, '${company.fax}', 'fax')">${faxDisplay}</button>
+            <div style="margin-top: 8px;">
+              <a href="${company.termsUrl}" target="_blank">공시실 바로가기</a>
             </div>
           </div>
         </div>
