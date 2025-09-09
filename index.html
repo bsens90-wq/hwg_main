@@ -1520,26 +1520,7 @@ function showInsuranceContactsInContactScreen() {
   const lifeInsurance = INSURANCE_COMPANIES.slice(12, 18);
   const mutualAid = INSURANCE_COMPANIES.slice(18, 22);
   
-  // 한화손보 특별 카드
-  const hanwhaCard = `
-    <div class="insurance-card hanwha">
-      <div class="insurance-logo">${INSURANCE_COMPANIES[0].company}</div>
-      <div class="insurance-info">
-        <div class="contact-button-group">
-          <button class="contact-button call" onclick="handleContactButton('call', '${INSURANCE_COMPANIES[0].callCenter}', '${INSURANCE_COMPANIES[0].company}')">
-            📞 ${INSURANCE_COMPANIES[0].callCenter}
-          </button>
-          <button class="contact-button fax" onclick="handleContactButton('fax', '${INSURANCE_COMPANIES[0].fax}', '${INSURANCE_COMPANIES[0].company}')">
-            📠 ${INSURANCE_COMPANIES[0].fax}
-          </button>
-          <button class="contact-button terms" onclick="handleContactButton('terms', '${INSURANCE_COMPANIES[0].termsUrl}', '${INSURANCE_COMPANIES[0].company}')">
-            🔗 공시실 바로가기
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-  
+  // 한화손보를 손해보험 섹션에 포함
   function createCard(company) {
     const faxDisplay = company.fax === "콜센터 전화 접수" ? "콜센터 접수" : company.fax;
     
@@ -1548,14 +1529,14 @@ function showInsuranceContactsInContactScreen() {
         <div class="insurance-logo small">${company.company}</div>
         <div class="insurance-info">
           <div class="contact-button-group">
-            <button class="contact-button call" onclick="handleContactButton('call', '${company.callCenter}', '${company.company}')">
-              📞 ${company.callCenter}
+            <button class="contact-button" onclick="handleContactButton('call', '${company.callCenter}', '${company.company}')">
+              ${company.callCenter}
             </button>
-            <button class="contact-button fax" onclick="handleContactButton('fax', '${company.fax}', '${company.company}')">
-              📠 ${faxDisplay}
+            <button class="contact-button" onclick="handleContactButton('fax', '${company.fax}', '${company.company}')">
+              ${faxDisplay}
             </button>
-            <button class="contact-button terms" onclick="handleContactButton('terms', '${company.termsUrl}', '${company.company}')">
-              🔗 공시실
+            <button class="contact-button" onclick="handleContactButton('terms', '${company.termsUrl}', '${company.company}')">
+              공시실 바로가기
             </button>
           </div>
         </div>
@@ -1563,12 +1544,13 @@ function showInsuranceContactsInContactScreen() {
     `;
   }
   
-  const damageCards = damageInsurance.map(createCard).join('');
+  // 한화손해보험을 포함한 손해보험 카드들 생성
+  const allDamageInsurance = [INSURANCE_COMPANIES[0], ...damageInsurance];
+  const damageCards = allDamageInsurance.map(createCard).join('');
   const lifeCards = lifeInsurance.map(createCard).join('');
   const mutualCards = mutualAid.map(createCard).join('');
   
   insuranceList.innerHTML = `
-    ${hanwhaCard}
     <div class="insurance-category">
       <h3>손해보험</h3>
       <div class="insurance-grid">${damageCards}</div>
