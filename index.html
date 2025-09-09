@@ -266,18 +266,6 @@
     .insurance-section{
       margin-top:1.5rem;
     }
-    .insurance-card.hanwha{
-      background:#fff;
-      border:3px solid var(--hanwha);
-      border-radius:14px;
-      padding:20px;
-      box-shadow:0 4px 12px rgba(255,127,0,0.15);
-      margin-bottom:16px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:15px;
-    }
     
     /* 개선된 연락처 카드 스타일 - 1열 그리드 */
     .insurance-grid{
@@ -331,7 +319,7 @@
     .contact-button-group {
       display:flex;
       flex-direction:column;
-      gap:8px;
+      gap:4px;
       width:100%;
       max-width:280px;
     }
@@ -349,46 +337,13 @@
       align-items:center;
       justify-content:center;
       gap:8px;
+      background:#e9ecef;
+      color:#333;
     }
     
-    .contact-button.call {
-      background:#28a745;
-      color:white;
-    }
-    
-    .contact-button.call:hover {
-      background:#218838;
+    .contact-button:hover {
+      background:#dee2e6;
       transform:translateY(-2px);
-    }
-    
-    .contact-button.fax {
-      background:#007bff;
-      color:white;
-    }
-    
-    .contact-button.fax:hover {
-      background:#0056b3;
-      transform:translateY(-2px);
-    }
-    
-    .contact-button.terms {
-      background:#6c757d;
-      color:white;
-    }
-    
-    .contact-button.terms:hover {
-      background:#545b62;
-      transform:translateY(-2px);
-    }
-    
-    /* 한화손보 특별 스타일 */
-    .insurance-card.hanwha .contact-button-group {
-      max-width:320px;
-    }
-    
-    .insurance-card.hanwha .contact-button {
-      padding:14px 24px;
-      font-size:17px;
     }
     
     .insurance-category h3{
@@ -597,16 +552,12 @@
       
       .contact-button-group {
         max-width:100%;
+        gap:3px;
       }
       
       .contact-button {
         font-size:15px;
         padding:11px 18px;
-      }
-      
-      .insurance-card.hanwha .contact-button {
-        font-size:16px;
-        padding:13px 22px;
       }
     }
   </style>
@@ -839,14 +790,34 @@ async function loadGuideData() {
 // 연락처 버튼 클릭 이벤트 핸들러
 function handleContactButton(type, value, company) {
   if (type === 'call') {
-    // 전화걸기
-    window.location.href = `tel:${value.replace(/-/g, '')}`;
+    // 콜센터 번호 처리 (클립보드 복사)
+    handlePhoneButton(value, company);
   } else if (type === 'fax') {
-    // 팩스 번호 처리 (클립보드 복사 및 옵션 제공)
+    // 팩스 번호 처리 (클립보드 복사)
     handleFaxButton(value, company);
   } else if (type === 'terms') {
     // 공시실 새 창으로 열기
     window.open(value, '_blank');
+  }
+}
+
+// 콜센터 번호 버튼 처리 함수
+function handlePhoneButton(phoneNumber, company) {
+  const shareText = `${company} 콜센터 연락처: ${phoneNumber}`;
+  
+  // 클립보드 API 지원 확인
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(shareText).then(() => {
+      // 성공적으로 복사된 경우 간단한 알림만 표시
+      alert(`${shareText}\n\n클립보드에 복사되었습니다.`);
+    }).catch(err => {
+      // 클립보드 복사 실패 시 대체 방법
+      console.error('클립보드 복사 실패:', err);
+      fallbackCopyText(shareText);
+    });
+  } else {
+    // 클립보드 API를 지원하지 않는 경우 대체 방법
+    fallbackCopyText(shareText);
   }
 }
 
@@ -857,43 +828,21 @@ function handleFaxButton(faxNumber, company) {
     return;
   }
   
+  const shareText = `${company} 보험금 청구 팩스번호: ${faxNumber}`;
+  
   // 클립보드 API 지원 확인
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(faxNumber).then(() => {
-      // 성공적으로 복사된 경우
-      const options = [
-        '1. 클립보드에 복사됨',
-        '2. 다른 앱으로 공유하기',
-        '3. 취소'
-      ];
-      
-      // 간단한 확인 대화상자로 옵션 제공
-      const choice = confirm(`팩스번호: ${faxNumber}\n\n클립보드에 복사되었습니다.\n다른 앱으로 공유하시겠습니까?`);
-      
-      if (choice) {
-        // Web Share API 지원 확인
-        if (navigator.share) {
-          navigator.share({
-            title: `${company} 팩스번호`,
-            text: `${company} 팩스번호: ${faxNumber}`
-          }).catch(err => {
-            console.log('공유 취소됨:', err);
-          });
-        } else {
-          // Web Share API를 지원하지 않는 경우 대체 방법
-          const shareText = `${company} 팩스번호: ${faxNumber}`;
-          const shareUrl = `mailto:?subject=${encodeURIComponent(company + ' 팩스번호')}&body=${encodeURIComponent(shareText)}`;
-          window.open(shareUrl);
-        }
-      }
+    navigator.clipboard.writeText(shareText).then(() => {
+      // 성공적으로 복사된 경우 간단한 알림만 표시
+      alert(`${shareText}\n\n클립보드에 복사되었습니다.`);
     }).catch(err => {
       // 클립보드 복사 실패 시 대체 방법
       console.error('클립보드 복사 실패:', err);
-      fallbackCopyText(faxNumber);
+      fallbackCopyText(shareText);
     });
   } else {
     // 클립보드 API를 지원하지 않는 경우 대체 방법
-    fallbackCopyText(faxNumber);
+    fallbackCopyText(shareText);
   }
 }
 
@@ -909,10 +858,10 @@ function fallbackCopyText(text) {
   
   try {
     document.execCommand('copy');
-    alert(`팩스번호가 복사되었습니다: ${text}`);
+    alert(`복사되었습니다: ${text}`);
   } catch (err) {
     console.error('복사 실패:', err);
-    alert(`팩스번호: ${text}`);
+    alert(`내용: ${text}`);
   }
   
   document.body.removeChild(textArea);
@@ -1520,7 +1469,7 @@ function showInsuranceContactsInContactScreen() {
   const lifeInsurance = INSURANCE_COMPANIES.slice(12, 18);
   const mutualAid = INSURANCE_COMPANIES.slice(18, 22);
   
-  // 한화손보를 손해보험 섹션에 포함
+  // 한화손해보험을 포함한 손해보험 섹션에 포함
   function createCard(company) {
     const faxDisplay = company.fax === "콜센터 전화 접수" ? "콜센터 접수" : company.fax;
     
