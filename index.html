@@ -274,26 +274,29 @@
       box-shadow:0 4px 12px rgba(255,127,0,0.15);
       margin-bottom:16px;
       display:flex;
+      flex-direction:column;
       align-items:center;
-      gap:20px;
+      gap:15px;
     }
+    
+    /* 개선된 연락처 카드 스타일 - 1열 그리드 */
     .insurance-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
+      display:flex;
+      flex-direction:column;
       gap:12px;
     }
     .insurance-card.small{
       background:#fff;
       border:1px solid var(--border);
       border-radius:12px;
-      padding:12px;
+      padding:16px;
       box-shadow:0 2px 6px rgba(0,0,0,.04);
       display:flex;
       flex-direction:column;
       align-items:center;
       text-align:center;
-      min-height:130px;
     }
+    
     .insurance-logo{
       width:120px;
       height:40px;
@@ -307,57 +310,85 @@
       font-size:16px;
       color:#333;
       font-weight:600;
+      margin-bottom:15px;
     }
     .insurance-logo.small{
-      width:80px;
-      height:30px;
-      margin-bottom:8px;
-      font-size:12px;
-    }
-    .insurance-info{
-      flex:1;
-    }
-    .insurance-info.small{
-      width:100%;
-    }
-    .insurance-contact{
-      display:flex;
-      gap:16px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .insurance-contact.small{
-      flex-direction:column;
-      gap:4px;
-      align-items:center;
-    }
-    .contact-item{
-      display:flex;
-      align-items:center;
-      gap:8px;
+      width:200px;
+      height:35px;
+      margin-bottom:15px;
       font-size:16px;
     }
-    .contact-item.small{
-      font-size:13px;
-      gap:6px;
+    
+    .insurance-info{
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
     }
-    .contact-item a{
-      color:var(--hanwha);
-      text-decoration:none;
-      font-weight:600;
-      cursor: pointer;
+    
+    /* 개선된 연락처 버튼 스타일 */
+    .contact-button-group {
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      width:100%;
+      max-width:280px;
     }
-    .contact-item a:hover{
-      text-decoration:underline;
+    
+    .contact-button {
+      padding:12px 20px;
+      border:none;
+      border-radius:10px;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+      transition:all 0.2s ease;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
     }
-    .contact-item .contact-number{
-      color:var(--hanwha);
-      text-decoration:none;
-      font-weight:600;
-      cursor: pointer;
+    
+    .contact-button.call {
+      background:#28a745;
+      color:white;
     }
-    .contact-item .contact-number:hover{
-      text-decoration:underline;
+    
+    .contact-button.call:hover {
+      background:#218838;
+      transform:translateY(-2px);
+    }
+    
+    .contact-button.fax {
+      background:#007bff;
+      color:white;
+    }
+    
+    .contact-button.fax:hover {
+      background:#0056b3;
+      transform:translateY(-2px);
+    }
+    
+    .contact-button.terms {
+      background:#6c757d;
+      color:white;
+    }
+    
+    .contact-button.terms:hover {
+      background:#545b62;
+      transform:translateY(-2px);
+    }
+    
+    /* 한화손보 특별 스타일 */
+    .insurance-card.hanwha .contact-button-group {
+      max-width:320px;
+    }
+    
+    .insurance-card.hanwha .contact-button {
+      padding:14px 24px;
+      font-size:17px;
     }
     
     .insurance-category h3{
@@ -518,40 +549,6 @@
       color:var(--text);
     }
 
-    /* 연락처 선택 팝업 스타일 */
-    .contact-popup {
-      position: fixed;
-      z-index: 3000;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      padding: 8px 0;
-      min-width: 140px;
-      display: none;
-    }
-
-    .contact-popup-item {
-      display: block;
-      width: 100%;
-      padding: 10px 16px;
-      border: none;
-      background: none;
-      text-align: left;
-      font-size: 14px;
-      color: var(--text);
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .contact-popup-item:hover {
-      background-color: #f5f5f5;
-    }
-
-    .contact-popup-item:active {
-      background-color: #e5e5e5;
-    }
-
     /* 모바일 최적화 */
     @media (max-width: 768px) {
       .limit-table{
@@ -589,6 +586,27 @@
       .guide-table th, .guide-table td{
         padding:8px 4px;
         font-size:12px;
+      }
+      
+      /* 모바일 연락처 버튼 최적화 */
+      .insurance-logo.small{
+        width:100%;
+        max-width:250px;
+        font-size:15px;
+      }
+      
+      .contact-button-group {
+        max-width:100%;
+      }
+      
+      .contact-button {
+        font-size:15px;
+        padding:11px 18px;
+      }
+      
+      .insurance-card.hanwha .contact-button {
+        font-size:16px;
+        padding:13px 22px;
       }
     }
   </style>
@@ -747,13 +765,6 @@
     </div>
   </div>
 
-  <!-- 연락처 선택 팝업 -->
-  <div id="contactPopup" class="contact-popup">
-    <button class="contact-popup-item" onclick="handleContactAction('call')">전화걸기</button>
-    <button class="contact-popup-item" onclick="handleContactAction('copy')">복사하기</button>
-    <button class="contact-popup-item" onclick="handleContactAction('share')">공유하기</button>
-  </div>
-
 <script>
 let employees = [];
 let diseases = [];
@@ -763,8 +774,6 @@ let currentUser = null;
 let isAdminUser = false;
 let currentScreen = 'login';
 const screenHistory = [];
-let currentContactNumber = '';
-let currentContactType = '';
 
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
@@ -803,134 +812,6 @@ const INSURANCE_COMPANIES = [
 // 인수한도 데이터 로드 함수
 const LIMIT_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/limits.json";
 
-// 연락처 팝업 관련 함수들
-function showContactPopup(event, number, type) {
-  event.preventDefault();
-  event.stopPropagation();
-  
-  const popup = document.getElementById('contactPopup');
-  const callOption = document.getElementById('callOption');
-  
-  currentContactNumber = number;
-  currentContactType = type;
-  
-  // 전화걸기 버튼 표시/숨김 설정
-  if (type === 'call') {
-    callOption.style.display = 'block';
-  } else {
-    callOption.style.display = 'none';
-  }
-  
-  // 팝업 위치 계산
-  const rect = event.target.getBoundingClientRect();
-  const popupWidth = 140;
-  const popupHeight = type === 'call' ? 120 : 80; // 전화걸기 버튼 유무에 따라 높이 조정
-  
-  let left = rect.left + (rect.width / 2) - (popupWidth / 2);
-  let top = rect.bottom + 5;
-  
-  // 화면 경계 체크
-  if (left < 10) left = 10;
-  if (left + popupWidth > window.innerWidth - 10) {
-    left = window.innerWidth - popupWidth - 10;
-  }
-  if (top + popupHeight > window.innerHeight - 10) {
-    top = rect.top - popupHeight - 5;
-  }
-  
-  popup.style.left = left + 'px';
-  popup.style.top = top + 'px';
-  popup.style.display = 'block';
-}
-
-function hideContactPopup() {
-  document.getElementById('contactPopup').style.display = 'none';
-  currentContactNumber = '';
-  currentContactType = '';
-}
-
-function handleContactAction(action) {
-  const number = currentContactNumber;
-  
-  if (!number) {
-    hideContactPopup();
-    return;
-  }
-  
-  switch(action) {
-    case 'call':
-      // 기존 전화걸기 기능 (키패드 화면으로 이동)
-      window.location.href = `tel:${number.replace(/-/g, '')}`;
-      break;
-      
-    case 'copy':
-      // 클립보드에 복사
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(number).then(() => {
-          alert(`${number}이(가) 복사되었습니다.`);
-        }).catch(err => {
-          console.error('복사 실패:', err);
-          fallbackCopy(number);
-        });
-      } else {
-        fallbackCopy(number);
-      }
-      break;
-      
-    case 'share':
-      // 공유하기
-      if (navigator.share) {
-        navigator.share({
-          title: currentContactType === 'call' ? '콜센터 번호' : '팩스 번호',
-          text: `${currentContactType === 'call' ? '콜센터' : '팩스'}: ${number}`
-        }).catch(err => {
-          console.error('공유 실패:', err);
-          fallbackShare(number);
-        });
-      } else {
-        fallbackShare(number);
-      }
-      break;
-  }
-  
-  hideContactPopup();
-}
-
-function fallbackCopy(text) {
-  // 구형 브라우저를 위한 복사 기능
-  const textArea = document.createElement('textarea');
-  textArea.value = text;
-  textArea.style.position = 'fixed';
-  textArea.style.left = '-9999px';
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-  
-  try {
-    const successful = document.execCommand('copy');
-    if (successful) {
-      alert(`${text}이(가) 복사되었습니다.`);
-    } else {
-      alert('복사에 실패했습니다.');
-    }
-  } catch (err) {
-    console.error('복사 실패:', err);
-    alert('복사에 실패했습니다.');
-  }
-  
-  document.body.removeChild(textArea);
-}
-
-function fallbackShare(number) {
-  // 공유 기능이 지원되지 않는 경우 대체 방법
-  const message = `${currentContactType === 'call' ? '콜센터' : '팩스'}: ${number}`;
-  
-  // SMS로 공유
-  if (confirm('문자메시지로 공유하시겠습니까?')) {
-    window.location.href = `sms:?body=${encodeURIComponent(message)}`;
-  }
-}
-
 async function loadLimitData() {
   try {
     limitData = await loadJsonFlexible(LIMIT_URL);
@@ -953,6 +834,88 @@ async function loadGuideData() {
   } catch(err) {
     console.error("통합 인수 가이드 데이터 로드 실패:", err);
   }
+}
+
+// 연락처 버튼 클릭 이벤트 핸들러
+function handleContactButton(type, value, company) {
+  if (type === 'call') {
+    // 전화걸기
+    window.location.href = `tel:${value.replace(/-/g, '')}`;
+  } else if (type === 'fax') {
+    // 팩스 번호 처리 (클립보드 복사 및 옵션 제공)
+    handleFaxButton(value, company);
+  } else if (type === 'terms') {
+    // 공시실 새 창으로 열기
+    window.open(value, '_blank');
+  }
+}
+
+// 팩스 버튼 처리 함수
+function handleFaxButton(faxNumber, company) {
+  if (faxNumber === "콜센터 전화 접수") {
+    alert(`${company}은 팩스 접수가 불가하며, 콜센터로 전화 접수만 가능합니다.`);
+    return;
+  }
+  
+  // 클립보드 API 지원 확인
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(faxNumber).then(() => {
+      // 성공적으로 복사된 경우
+      const options = [
+        '1. 클립보드에 복사됨',
+        '2. 다른 앱으로 공유하기',
+        '3. 취소'
+      ];
+      
+      // 간단한 확인 대화상자로 옵션 제공
+      const choice = confirm(`팩스번호: ${faxNumber}\n\n클립보드에 복사되었습니다.\n다른 앱으로 공유하시겠습니까?`);
+      
+      if (choice) {
+        // Web Share API 지원 확인
+        if (navigator.share) {
+          navigator.share({
+            title: `${company} 팩스번호`,
+            text: `${company} 팩스번호: ${faxNumber}`
+          }).catch(err => {
+            console.log('공유 취소됨:', err);
+          });
+        } else {
+          // Web Share API를 지원하지 않는 경우 대체 방법
+          const shareText = `${company} 팩스번호: ${faxNumber}`;
+          const shareUrl = `mailto:?subject=${encodeURIComponent(company + ' 팩스번호')}&body=${encodeURIComponent(shareText)}`;
+          window.open(shareUrl);
+        }
+      }
+    }).catch(err => {
+      // 클립보드 복사 실패 시 대체 방법
+      console.error('클립보드 복사 실패:', err);
+      fallbackCopyText(faxNumber);
+    });
+  } else {
+    // 클립보드 API를 지원하지 않는 경우 대체 방법
+    fallbackCopyText(faxNumber);
+  }
+}
+
+// 클립보드 복사 대체 함수
+function fallbackCopyText(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.opacity = '0';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  
+  try {
+    document.execCommand('copy');
+    alert(`팩스번호가 복사되었습니다: ${text}`);
+  } catch (err) {
+    console.error('복사 실패:', err);
+    alert(`팩스번호: ${text}`);
+  }
+  
+  document.body.removeChild(textArea);
 }
 
 // 상품과 플랜 목록 추출 함수
@@ -1550,71 +1513,50 @@ function showLimitScreen() {
   navigateToScreen('limit');
 }
 
+// 개선된 연락처 화면 표시 함수
 function showInsuranceContactsInContactScreen() {
   const insuranceList = document.getElementById("insuranceListContact");
   const damageInsurance = INSURANCE_COMPANIES.slice(1, 12);
   const lifeInsurance = INSURANCE_COMPANIES.slice(12, 18);
   const mutualAid = INSURANCE_COMPANIES.slice(18, 22);
   
-  // 회사별 로고 URL 매핑
-  const logoUrls = {
-    "한화손해보험": "https://www.hwgeneralins.com/static/pc/images/common/logo.png",
-    "삼성화재": "https://www.samsungfire.com/static/common/images/common/header_logo.png",
-    "메리츠화재": "https://www.meritzfire.com/atchFile/logo/pc/meritz_logo.png",
-    "DB손해보험": "https://www.idbins.com/images/common/logo.png",
-    "KB손해보험": "https://www.kbinsure.co.kr/images/common/logo.png",
-    "현대해상": "https://www.hi.co.kr/images/common/logo.png",
-    "롯데손해보험": "https://www.lotteins.co.kr/image/common/logo.png",
-    "흥국화재": "https://www.heungkukfire.co.kr/images/common/logo.png",
-    "하나손해보험": "https://www.hanainsure.co.kr/images/common/logo.png",
-    "NH농협손해보험": "https://www.nhfire.co.kr/images/common/logo.png",
-    "라이나손해보험": "https://www.lina.co.kr/images/common/logo.png",
-    "AIG손해보험": "https://www.aig.co.kr/images/common/logo.png",
-    "한화생명": "https://www.hanwhalife.com/images/common/logo.png",
-    "동양생명": "https://www.myangel.co.kr/images/common/logo.png",
-    "교보생명": "https://www.kyobo.com/images/common/logo.png",
-    "삼성생명": "https://www.samsunglife.com/images/common/logo.png",
-    "라이나생명": "https://www.lina.co.kr/images/common/logo.png",
-    "KDB생명": "https://www.kdblife.co.kr/images/common/logo.png",
-    "MG새마을금고": "https://insure.kfcc.co.kr/images/common/logo.png",
-    "더케이": "https://www.ktcu.or.kr/images/common/logo.png",
-    "우체국": "https://mall.epostbank.go.kr/images/common/logo.png",
-    "수협공제": "https://www.suhyup-bank.com/images/common/logo.png"
-  };
-  
+  // 한화손보 특별 카드
   const hanwhaCard = `
     <div class="insurance-card hanwha">
-      <div class="insurance-logo" style="background-image: url('${logoUrls[INSURANCE_COMPANIES[0].company] || ''}');">${logoUrls[INSURANCE_COMPANIES[0].company] ? '' : INSURANCE_COMPANIES[0].company}</div>
+      <div class="insurance-logo">${INSURANCE_COMPANIES[0].company}</div>
       <div class="insurance-info">
-        <div class="insurance-contact">
-          <div class="contact-item">
-            <button class="contact-number-btn" onclick="showContactPopup(event, '${INSURANCE_COMPANIES[0].callCenter}', 'call')">${INSURANCE_COMPANIES[0].callCenter}</button>
-          </div>
-          <div class="contact-item">
-            <button class="contact-number-btn fax-btn" onclick="showContactPopup(event, '${INSURANCE_COMPANIES[0].fax}', 'fax')">${INSURANCE_COMPANIES[0].fax}</button>
-          </div>
-          <div class="contact-item">
-            <a href="${INSURANCE_COMPANIES[0].termsUrl}" target="_blank">공시실 바로가기</a>
-          </div>
+        <div class="contact-button-group">
+          <button class="contact-button call" onclick="handleContactButton('call', '${INSURANCE_COMPANIES[0].callCenter}', '${INSURANCE_COMPANIES[0].company}')">
+            📞 ${INSURANCE_COMPANIES[0].callCenter}
+          </button>
+          <button class="contact-button fax" onclick="handleContactButton('fax', '${INSURANCE_COMPANIES[0].fax}', '${INSURANCE_COMPANIES[0].company}')">
+            📠 ${INSURANCE_COMPANIES[0].fax}
+          </button>
+          <button class="contact-button terms" onclick="handleContactButton('terms', '${INSURANCE_COMPANIES[0].termsUrl}', '${INSURANCE_COMPANIES[0].company}')">
+            🔗 공시실 바로가기
+          </button>
         </div>
       </div>
     </div>
   `;
   
   function createCard(company) {
-    const faxDisplay = company.fax === "콜센터 전화 접수" ? "콜센터접수" : company.fax;
-    const logoUrl = logoUrls[company.company] || '';
+    const faxDisplay = company.fax === "콜센터 전화 접수" ? "콜센터 접수" : company.fax;
     
     return `
       <div class="insurance-card small">
-        <div class="insurance-logo small" style="background-image: url('${logoUrl}');">${logoUrl ? '' : company.company}</div>
-        <div class="insurance-info small">
-          <div class="insurance-contact small">
-            <button class="contact-number-btn" onclick="showContactPopup(event, '${company.callCenter}', 'call')">${company.callCenter}</button>
-            <button class="contact-number-btn fax-btn" onclick="showContactPopup(event, '${company.fax}', 'fax')">${faxDisplay}</button>
-            <div style="margin-top: 8px;">
-              <a href="${company.termsUrl}" target="_blank">공시실 바로가기</a>
-            </div>
+        <div class="insurance-logo small">${company.company}</div>
+        <div class="insurance-info">
+          <div class="contact-button-group">
+            <button class="contact-button call" onclick="handleContactButton('call', '${company.callCenter}', '${company.company}')">
+              📞 ${company.callCenter}
+            </button>
+            <button class="contact-button fax" onclick="handleContactButton('fax', '${company.fax}', '${company.company}')">
+              📠 ${faxDisplay}
+            </button>
+            <button class="contact-button terms" onclick="handleContactButton('terms', '${company.termsUrl}', '${company.company}')">
+              🔗 공시실
+            </button>
           </div>
         </div>
       </div>
@@ -1945,14 +1887,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('noteModal').addEventListener('click', function(e) {
     if (e.target === this) {
       closeNoteModal();
-    }
-  });
-
-  // 팝업 외부 클릭시 닫기
-  document.addEventListener('click', function(e) {
-    const popup = document.getElementById('contactPopup');
-    if (popup.style.display === 'block' && !popup.contains(e.target)) {
-      hideContactPopup();
     }
   });
 });
