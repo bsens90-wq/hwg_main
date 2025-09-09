@@ -795,18 +795,18 @@ const INSURANCE_COMPANIES = [
   {"company": "흥국화재", "callCenter": "1688-1688", "fax": "0504-800-0700", "termsUrl": "https://www.heungkukfire.co.kr/FRW/announce/insGoodsGongsiSale.do"},
   {"company": "하나손해보험", "callCenter": "1566-3000", "fax": "0505-170-0765", "termsUrl": "https://www.hanainsure.co.kr/w/disclosure/product/saleProduct"},
   {"company": "NH농협손해보험", "callCenter": "1644-9000", "fax": "0505-060-7000", "termsUrl": "https://www.nhfire.co.kr/announce/productAnnounce/retrieveInsuranceProductsAnnounce.nhfire"},
-  {"company": "라이나손해보험", "callCenter": "1566-5800", "fax": "콜센터 전화 접수", "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"},
+  {"company": "라이나손해보험", "callCenter": "1566-5800", "fax": "-", "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"},
   {"company": "AIG손해보험", "callCenter": "1544-2792", "fax": "02-2011-4607", "termsUrl": "https://www.aig.co.kr/wo/dpwot001.html?menuId=MS702"},
-  {"company": "한화생명", "callCenter": "1588-6363", "fax": "콜센터 전화 접수", "termsUrl": "https://www.hanwhalife.com/main/disclosure/goods/disclosurenotice/DF_GDDN000_P10000.do?MENU_ID1=DF_GDGL000"},
+  {"company": "한화생명", "callCenter": "1588-6363", "fax": "-", "termsUrl": "https://www.hanwhalife.com/main/disclosure/goods/disclosurenotice/DF_GDDN000_P10000.do?MENU_ID1=DF_GDGL000"},
   {"company": "동양생명", "callCenter": "1577-1004", "fax": "02-3289-4516", "termsUrl": "https://pbano.myangel.co.kr/paging/WE_AC_WEPAAP020100L"},
-  {"company": "교보생명", "callCenter": "1588-1001", "fax": "콜센터 전화 접수", "termsUrl": "https://www.kyobo.com/dgt/web/product-official/all-product/search"},
-  {"company": "삼성생명", "callCenter": "1588-3114", "fax": "콜센터 전화 접수", "termsUrl": "https://www.samsunglife.com/individual/products/disclosure/sales/PDO-PRPRI010110M"},
+  {"company": "교보생명", "callCenter": "1588-1001", "fax": "-", "termsUrl": "https://www.kyobo.com/dgt/web/product-official/all-product/search"},
+  {"company": "삼성생명", "callCenter": "1588-3114", "fax": "-", "termsUrl": "https://www.samsunglife.com/individual/products/disclosure/sales/PDO-PRPRI010110M"},
   {"company": "라이나생명", "callCenter": "1588-0058", "fax": "02-6944-1200", "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"},
   {"company": "KDB생명", "callCenter": "1588-4040", "fax": "02-2669-6500", "termsUrl": "https://www.kdblife.co.kr/ajax.do?scrId=HDLMA002M02P"},
   {"company": "MG새마을금고", "callCenter": "1599-9010", "fax": "02-3016-7674", "termsUrl": "https://insure.kfcc.co.kr/#/PGE_IHJ_00003"},
   {"company": "더케이", "callCenter": "1577-3993", "fax": "02-3278-9696", "termsUrl": "https://www.ktcu.or.kr/PPW-FIC-800101"},
-  {"company": "우체국", "callCenter": "1599-0100", "fax": "콜센터 전화 접수", "termsUrl": "https://mall.epostbank.go.kr/IPPSKE0000.do"},
-  {"company": "수협공제", "callCenter": "1588-4119", "fax": "콜센터 전화 접수", "termsUrl": "https://www.suhyup-bank.com/"}
+  {"company": "우체국", "callCenter": "1599-0100", "fax": "-", "termsUrl": "https://mall.epostbank.go.kr/IPPSKE0000.do"},
+  {"company": "수협공제", "callCenter": "1588-4119", "fax": "-", "termsUrl": "https://www.suhyup-bank.com/"}
 ];
 
 // 인수한도 데이터 로드 함수
@@ -839,8 +839,8 @@ async function loadGuideData() {
 // 연락처 버튼 클릭 이벤트 핸들러
 function handleContactButton(type, value, company) {
   if (type === 'call') {
-    // 전화걸기
-    window.location.href = `tel:${value.replace(/-/g, '')}`;
+     // 콜센터 번호 처리 (클립보드 복사 및 옵션 제공)
+    handlecallButton(value, company);
   } else if (type === 'fax') {
     // 팩스 번호 처리 (클립보드 복사 및 옵션 제공)
     handleFaxButton(value, company);
@@ -850,73 +850,15 @@ function handleContactButton(type, value, company) {
   }
 }
 
+  
 // 팩스 버튼 처리 함수
 function handleFaxButton(faxNumber, company) {
-  if (faxNumber === "콜센터 전화 접수") {
-    alert(`${company}은 팩스 접수가 불가하며, 콜센터로 전화 접수만 가능합니다.`);
+  if (faxNumber === "-") {
+    alert(`${company} 팩스 접수는 콜센터 문의 바람`);
     return;
   }
   
-  // 클립보드 API 지원 확인
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(faxNumber).then(() => {
-      // 성공적으로 복사된 경우
-      const options = [
-        '1. 클립보드에 복사됨',
-        '2. 다른 앱으로 공유하기',
-        '3. 취소'
-      ];
-      
-      // 간단한 확인 대화상자로 옵션 제공
-      const choice = confirm(`팩스번호: ${faxNumber}\n\n클립보드에 복사되었습니다.\n다른 앱으로 공유하시겠습니까?`);
-      
-      if (choice) {
-        // Web Share API 지원 확인
-        if (navigator.share) {
-          navigator.share({
-            title: `${company} 팩스번호`,
-            text: `${company} 팩스번호: ${faxNumber}`
-          }).catch(err => {
-            console.log('공유 취소됨:', err);
-          });
-        } else {
-          // Web Share API를 지원하지 않는 경우 대체 방법
-          const shareText = `${company} 팩스번호: ${faxNumber}`;
-          const shareUrl = `mailto:?subject=${encodeURIComponent(company + ' 팩스번호')}&body=${encodeURIComponent(shareText)}`;
-          window.open(shareUrl);
-        }
-      }
-    }).catch(err => {
-      // 클립보드 복사 실패 시 대체 방법
-      console.error('클립보드 복사 실패:', err);
-      fallbackCopyText(faxNumber);
-    });
-  } else {
-    // 클립보드 API를 지원하지 않는 경우 대체 방법
-    fallbackCopyText(faxNumber);
-  }
-}
 
-// 클립보드 복사 대체 함수
-function fallbackCopyText(text) {
-  const textArea = document.createElement('textarea');
-  textArea.value = text;
-  textArea.style.position = 'fixed';
-  textArea.style.opacity = '0';
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-  
-  try {
-    document.execCommand('copy');
-    alert(`팩스번호가 복사되었습니다: ${text}`);
-  } catch (err) {
-    console.error('복사 실패:', err);
-    alert(`팩스번호: ${text}`);
-  }
-  
-  document.body.removeChild(textArea);
-}
 
 // 상품과 플랜 목록 추출 함수
 function extractProductsAndPlans() {
