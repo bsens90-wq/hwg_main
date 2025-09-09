@@ -345,8 +345,18 @@
       color:var(--hanwha);
       text-decoration:none;
       font-weight:600;
+      cursor: pointer;
     }
     .contact-item a:hover{
+      text-decoration:underline;
+    }
+    .contact-item .contact-number{
+      color:var(--hanwha);
+      text-decoration:none;
+      font-weight:600;
+      cursor: pointer;
+    }
+    .contact-item .contact-number:hover{
       text-decoration:underline;
     }
     
@@ -506,6 +516,40 @@
       white-space:pre-line;
       line-height:1.6;
       color:var(--text);
+    }
+
+    /* 연락처 선택 팝업 스타일 */
+    .contact-popup {
+      position: fixed;
+      z-index: 3000;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      padding: 8px 0;
+      min-width: 140px;
+      display: none;
+    }
+
+    .contact-popup-item {
+      display: block;
+      width: 100%;
+      padding: 10px 16px;
+      border: none;
+      background: none;
+      text-align: left;
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .contact-popup-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .contact-popup-item:active {
+      background-color: #e5e5e5;
     }
 
     /* 모바일 최적화 */
@@ -703,6 +747,13 @@
     </div>
   </div>
 
+  <!-- 연락처 선택 팝업 -->
+  <div id="contactPopup" class="contact-popup">
+    <button class="contact-popup-item" onclick="handleContactAction('call')">전화걸기</button>
+    <button class="contact-popup-item" onclick="handleContactAction('copy')">복사하기</button>
+    <button class="contact-popup-item" onclick="handleContactAction('share')">공유하기</button>
+  </div>
+
 <script>
 let employees = [];
 let diseases = [];
@@ -712,6 +763,8 @@ let currentUser = null;
 let isAdminUser = false;
 let currentScreen = 'login';
 const screenHistory = [];
+let currentContactNumber = '';
+let currentContactType = '';
 
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
@@ -749,6 +802,125 @@ const INSURANCE_COMPANIES = [
 
 // 인수한도 데이터 로드 함수
 const LIMIT_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/limits.json";
+
+// 연락처 팝업 관련 함수들
+function showContactPopup(event, number, type) {
+  event.preventDefault();
+  event.stopPropagation();
+  
+  const popup = document.getElementById('contactPopup');
+  currentContactNumber = number;
+  currentContactType = type;
+  
+  // 팝업 위치 계산
+  const rect = event.target.getBoundingClientRect();
+  const popupWidth = 140;
+  const popupHeight = 120;
+  
+  let left = rect.left + (rect.width / 2) - (popupWidth / 2);
+  let top = rect.bottom + 5;
+  
+  // 화면 경계 체크
+  if (left < 10) left = 10;
+  if (left + popupWidth > window.innerWidth - 10) {
+    left = window.innerWidth - popupWidth - 10;
+  }
+  if (top + popupHeight > window.innerHeight - 10) {
+    top = rect.top - popupHeight - 5;
+  }
+  
+  popup.style.left = left + 'px';
+  popup.style.top = top + 'px';
+  popup.style.display = 'block';
+}
+
+function hideContactPopup() {
+  document.getElementById('contactPopup').style.display = 'none';
+  currentContactNumber = '';
+  currentContactType = '';
+}
+
+function handleContactAction(action) {
+  const number = currentContactNumber;
+  
+  if (!number) {
+    hideContactPopup();
+    return;
+  }
+  
+  switch(action) {
+    case 'call':
+      // 기존 전화걸기 기능 (키패드 화면으로 이동)
+      window.location.href = `tel:${number.replace(/-/g, '')}`;
+      break;
+      
+    case 'copy':
+      // 클립보드에 복사
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(number).then(() => {
+          alert(`${number}이(가) 복사되었습니다.`);
+        }).catch(err => {
+          console.error('복사 실패:', err);
+          fallbackCopy(number);
+        });
+      } else {
+        fallbackCopy(number);
+      }
+      break;
+      
+    case 'share':
+      // 공유하기
+      if (navigator.share) {
+        navigator.share({
+          title: currentContactType === 'call' ? '콜센터 번호' : '팩스 번호',
+          text: `${currentContactType === 'call' ? '콜센터' : '팩스'}: ${number}`
+        }).catch(err => {
+          console.error('공유 실패:', err);
+          fallbackShare(number);
+        });
+      } else {
+        fallbackShare(number);
+      }
+      break;
+  }
+  
+  hideContactPopup();
+}
+
+function fallbackCopy(text) {
+  // 구형 브라우저를 위한 복사 기능
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-9999px';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  
+  try {
+    const successful = document.execCommand('copy');
+    if (successful) {
+      alert(`${text}이(가) 복사되었습니다.`);
+    } else {
+      alert('복사에 실패했습니다.');
+    }
+  } catch (err) {
+    console.error('복사 실패:', err);
+    alert('복사에 실패했습니다.');
+  }
+  
+  document.body.removeChild(textArea);
+}
+
+function fallbackShare(number) {
+  // 공유 기능이 지원되지 않는 경우 대체 방법
+  const message = `${currentContactType === 'call' ? '콜센터' : '팩스'}: ${number}`;
+  
+  // SMS로 공유
+  if (confirm('문자메시지로 공유하시겠습니까?')) {
+    window.location.href = `sms:?body=${encodeURIComponent(message)}`;
+  }
+}
 
 async function loadLimitData() {
   try {
@@ -1382,11 +1554,11 @@ function showInsuranceContactsInContactScreen() {
         <div class="insurance-contact">
           <div class="contact-item">
             <span>콜센터</span>
-            <a href="tel:${INSURANCE_COMPANIES[0].callCenter.replace(/-/g, '')}">${INSURANCE_COMPANIES[0].callCenter}</a>
+            <span class="contact-number" onclick="showContactPopup(event, '${INSURANCE_COMPANIES[0].callCenter}', 'call')">${INSURANCE_COMPANIES[0].callCenter}</span>
           </div>
           <div class="contact-item">
             <span>팩스</span>
-            <span>${INSURANCE_COMPANIES[0].fax}</span>
+            <span class="contact-number" onclick="showContactPopup(event, '${INSURANCE_COMPANIES[0].fax}', 'fax')">${INSURANCE_COMPANIES[0].fax}</span>
           </div>
           <div class="contact-item">
             <span>공시실</span>
@@ -1407,11 +1579,11 @@ function showInsuranceContactsInContactScreen() {
           <div class="insurance-contact small">
             <div class="contact-item small">
               <span>콜센터</span>
-              <a href="tel:${company.callCenter.replace(/-/g, '')}">${company.callCenter}</a>
+              <span class="contact-number" onclick="showContactPopup(event, '${company.callCenter}', 'call')">${company.callCenter}</span>
             </div>
             <div class="contact-item small">
               <span>팩스</span>
-              <span>${faxDisplay}</span>
+              <span class="contact-number" onclick="showContactPopup(event, '${company.fax}', 'fax')">${faxDisplay}</span>
             </div>
             <div class="contact-item small">
               <span>공시실</span>
@@ -1747,6 +1919,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('noteModal').addEventListener('click', function(e) {
     if (e.target === this) {
       closeNoteModal();
+    }
+  });
+
+  // 팝업 외부 클릭시 닫기
+  document.addEventListener('click', function(e) {
+    const popup = document.getElementById('contactPopup');
+    if (popup.style.display === 'block' && !popup.contains(e.target)) {
+      hideContactPopup();
     }
   });
 });
