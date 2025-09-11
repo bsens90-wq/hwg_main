@@ -943,8 +943,8 @@ function createVideoCard(video) {
   `;
 }
 
-// 비디오 화면 표시 함수
-function showVideoScreen() {
+// 비디오 화면 표시 함수 (이름 변경)
+function displayVideoScreen() {
   const videoGrid = document.getElementById('videoGrid');
   videoGrid.innerHTML = VIDEO_DATA.map(video => createVideoCard(video)).join('');
 }
@@ -1272,9 +1272,9 @@ function navigateToScreen(screen, addToHistory = true) {
       initializeLimitScreen();
       break;
 
-      case 'video':
+case 'video':
   document.getElementById("videoScreen").style.display = "flex";
-  showVideoScreen();
+  displayVideoScreen(); // 함수명 변경
   break;
   }
 }
