@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>생각 안 날 땐? 머드라!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,">
   <style>
     :root{
       --hanwha:#ff7f00;
@@ -559,6 +560,17 @@
         font-size:15px;
         padding:11px 18px;
       }
+
+      /* 모바일 비디오 카드 최적화 */
+.video-thumbnail {
+  height: 180px;
+}
+
+.video-play-icon {
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+}
     }
 
 .insurance-logo.hanwha {
@@ -567,6 +579,81 @@
   background-repeat: no-repeat;
   background-position: center;
   color: transparent; /* 텍스트 숨김 */
+}
+
+    /* 유튜브 비디오 카드 스타일 */
+.video-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 1rem;
+}
+
+.video-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.video-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,.1);
+}
+
+.video-thumbnail {
+  width: 100%;
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: #f0f0f0;
+}
+
+.video-play-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 0, 0, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+}
+
+.video-play-icon::after {
+  content: '▶';
+  margin-left: 3px;
+}
+
+.video-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.video-date {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.video-description {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
 }
 
   </style>
@@ -629,6 +716,10 @@
       <button id="limitMenuBtn" style="margin-bottom:1rem;">
         <span style="font-size:18px; display:block; margin-bottom:4px;">상품별/플랜별 인수한도</span>
       </button>
+
+      <button id="videoMenuBtn" style="margin-bottom:1rem;">
+      <span style="font-size:18px; display:block; margin-bottom:4px;">오늘의 10분 정보미팅 다시보기</span>
+      </button>
       
       <div class="meta" style="margin-top:2rem;">Copyright 2025 하세봉 all rights reserved.</div>
     </div>
@@ -667,6 +758,8 @@
       <button id="backBtn" class="secondary" style="display:none; margin-top:8px;">뒤로가기</button>
       
       <div class="results" id="results"></div>
+
+      <button id="contactBackBtn" class="secondary" style="margin-top:20px;">뒤로가기</button>
       <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
     </div>
   </section>
@@ -725,6 +818,21 @@
     </div>
   </div>
 
+  <!-- 유튜브 비디오 화면 -->
+<section id="videoScreen" class="screen" style="display:none;">
+  <div class="app-title">오늘의 10분 정보미팅 다시보기</div>
+  <div class="card container-narrow">
+    <h2 style="margin-bottom:1rem;">최신 영상 목록</h2>
+    
+    <div class="video-grid" id="videoGrid">
+      <!-- 비디오 카드들이 여기에 동적으로 추가됩니다 -->
+    </div>
+    
+    <button id="videoBackBtn" class="secondary" style="margin-top:20px;">뒤로가기</button>
+    <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+  </div>
+</section>
+
 <script>
 let employees = [];
 let diseases = [];
@@ -743,6 +851,16 @@ const ADMIN_ACCOUNT = {
   empno: "8091768",
   password: "dcw8091"
 };
+
+  // 유튜브 비디오 데이터 (여기서 직접 수정 가능)
+const VIDEO_DATA = [
+  {
+    url: "https://youtu.be/okm0Pm3a14w",
+    title: "315로 가입했던 내가 355라고?",
+    date: "2025-09-11",
+    description: "즉시 인수 경증질환을 활용한 고객 터치방법!"
+  }
+];
 
 const INSURANCE_COMPANIES = [
   {"company": "한화손해보험", "callCenter": "1566-8000", "fax": "0502-779-1004", "termsUrl": "https://www.hwgeneralins.com/notice/ir/product-ing01.do"},
@@ -794,6 +912,46 @@ async function loadGuideData() {
   } catch(err) {
     console.error("통합 인수 가이드 데이터 로드 실패:", err);
   }
+}
+
+  // YouTube 비디오 ID 추출 함수
+function extractVideoId(url) {
+  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+}
+
+// YouTube 썸네일 URL 생성 함수
+function getYouTubeThumbnail(videoId) {
+  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+}
+
+// 비디오 카드 생성 함수
+function createVideoCard(video) {
+  const videoId = extractVideoId(video.url);
+  const thumbnailUrl = videoId ? getYouTubeThumbnail(videoId) : '';
+  
+  return `
+    <div class="video-card" onclick="openVideo('${video.url}')">
+      <div class="video-thumbnail" style="background-image: url('${thumbnailUrl}')">
+        <div class="video-play-icon"></div>
+      </div>
+      <div class="video-title">${video.title}</div>
+      <div class="video-date">${video.date}</div>
+      <div class="video-description">${video.description}</div>
+    </div>
+  `;
+}
+
+// 비디오 화면 표시 함수
+function showVideoScreen() {
+  const videoGrid = document.getElementById('videoGrid');
+  videoGrid.innerHTML = VIDEO_DATA.map(video => createVideoCard(video)).join('');
+}
+
+// 비디오 열기 함수
+function openVideo(url) {
+  window.open(url, '_blank');
 }
 
 // 연락처 버튼 클릭 이벤트 핸들러
@@ -1113,6 +1271,11 @@ function navigateToScreen(screen, addToHistory = true) {
       document.getElementById("limitScreen").style.display = "flex";
       initializeLimitScreen();
       break;
+
+      case 'video':
+  document.getElementById("videoScreen").style.display = "flex";
+  showVideoScreen();
+  break;
   }
 }
 
@@ -1388,7 +1551,7 @@ function checkAutoLogin() {
     showLoginSuccess();
   } else {
     const hash = window.location.hash.substring(1);
-    if (hash && ['menu', 'guide', 'search', 'contact', 'limit'].includes(hash)) {
+    if (hash && ['menu', 'guide', 'search', 'contact', 'limit','video'].includes(hash)) {
       window.location.hash = '';
     }
     navigateToScreen('login', false);
@@ -1441,6 +1604,7 @@ function hideAllScreens() {
   document.getElementById("searchScreen").style.display = "none";
   document.getElementById("contactScreen").style.display = "none";
   document.getElementById("limitScreen").style.display = "none";
+  document.getElementById("videoScreen").style.display = "none";
 }
 
 function showLoginSuccess() {
@@ -1471,6 +1635,18 @@ function showLimitScreen() {
   navigateToScreen('limit');
 }
 
+function showVideoScreen() {
+  navigateToScreen('video');
+}
+
+function goBackFromContact() {
+  navigateToScreen('menu');
+}
+
+function goBackFromVideo() {
+  navigateToScreen('menu');
+}
+  
 // 개선된 연락처 화면 표시 함수
 function showInsuranceContactsInContactScreen() {
   const insuranceList = document.getElementById("insuranceListContact");
@@ -1788,6 +1964,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
   document.getElementById('contactMenuBtn').addEventListener('click', showContactScreen);
   document.getElementById('limitMenuBtn').addEventListener('click', showLimitScreen);
+  document.getElementById('videoMenuBtn').addEventListener('click', showVideoScreen);
   document.getElementById('logoutBtnHeader').addEventListener('click', logout);
   document.getElementById('guideSearchBtn').addEventListener('click', searchGuide);
   document.getElementById('guideSearchInput').addEventListener('keydown', e => {
@@ -1799,6 +1976,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.key === 'Enter') search();
   });
   document.getElementById('backBtn').addEventListener('click', goBack);
+  document.getElementById('contactBackBtn').addEventListener('click', goBackFromContact);
+document.getElementById('videoBackBtn').addEventListener('click', goBackFromVideo);
   document.getElementById('installBtn').addEventListener('click', () => {
     alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
   });
