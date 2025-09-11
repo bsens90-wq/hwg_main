@@ -703,7 +703,6 @@
 
       <button id="meetingMenuBtn" style="margin-bottom:1rem;">
         <span style="font-size:18px; display:block; margin-bottom:4px;">10분 정보미팅</span>
-        <span style="font-size:14px; opacity:0.8;">(교육 동영상)</span>
       </button>
       
       <div class="meta" style="margin-top:2rem;">Copyright 2025 하세봉 all rights reserved.</div>
@@ -847,7 +846,7 @@ const VIDEO_DATA = [
   {
     id: "iyV2bWkbUgI",
     title: "10분 정보미팅 샘플 동영상",
-    description: "클릭하면 유튜브에서 재생됩니다.",
+    description: "샘플 교육 동영상입니다. 클릭하면 유튜브에서 재생됩니다.",
     url: "https://youtu.be/iyV2bWkbUgI?si=KiNgvVYFfexTXMyq",
     thumbnail: "https://img.youtube.com/vi/iyV2bWkbUgI/maxresdefault.jpg"
   }
@@ -1152,73 +1151,139 @@ document.addEventListener('DOMContentLoaded', function() {
   loadData();
 
   // 로그인 버튼
-  document.getElementById('loginBtn').addEventListener('click', handleLogin);
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginBtn) {
+    loginBtn.addEventListener('click', handleLogin);
+  }
   
   // 로그아웃 버튼
-  document.getElementById('logoutBtnHeader').addEventListener('click', logout);
+  const logoutBtnHeader = document.getElementById('logoutBtnHeader');
+  if (logoutBtnHeader) {
+    logoutBtnHeader.addEventListener('click', logout);
+  }
 
   // 메뉴 버튼들
-  document.getElementById('guideMenuBtn').addEventListener('click', () => {
-    showScreen('guideScreen');
-  });
+  const guideMenuBtn = document.getElementById('guideMenuBtn');
+  if (guideMenuBtn) {
+    guideMenuBtn.addEventListener('click', () => {
+      showScreen('guideScreen');
+    });
+  }
 
-  document.getElementById('diseaseMenuBtn').addEventListener('click', () => {
-    showScreen('searchScreen');
-  });
+  const diseaseMenuBtn = document.getElementById('diseaseMenuBtn');
+  if (diseaseMenuBtn) {
+    diseaseMenuBtn.addEventListener('click', () => {
+      showScreen('searchScreen');
+    });
+  }
 
-  document.getElementById('contactMenuBtn').addEventListener('click', () => {
-    renderContactScreen();
-    showScreen('contactScreen');
-  });
+  const contactMenuBtn = document.getElementById('contactMenuBtn');
+  if (contactMenuBtn) {
+    contactMenuBtn.addEventListener('click', () => {
+      renderContactScreen();
+      showScreen('contactScreen');
+    });
+  }
 
-  document.getElementById('limitMenuBtn').addEventListener('click', () => {
-    showScreen('limitScreen');
-  });
+  const limitMenuBtn = document.getElementById('limitMenuBtn');
+  if (limitMenuBtn) {
+    limitMenuBtn.addEventListener('click', () => {
+      showScreen('limitScreen');
+    });
+  }
 
-  document.getElementById('meetingMenuBtn').addEventListener('click', () => {
-    renderMeetingScreen();
-    showScreen('meetingScreen');
-  });
+  const meetingMenuBtn = document.getElementById('meetingMenuBtn');
+  if (meetingMenuBtn) {
+    meetingMenuBtn.addEventListener('click', () => {
+      renderMeetingScreen();
+      showScreen('meetingScreen');
+    });
+  }
 
   // 검색 버튼들
-  document.getElementById('guideSearchBtn').addEventListener('click', handleGuideSearch);
-  document.getElementById('searchBtn').addEventListener('click', handleDiseaseSearch);
+  const guideSearchBtn = document.getElementById('guideSearchBtn');
+  if (guideSearchBtn) {
+    guideSearchBtn.addEventListener('click', handleGuideSearch);
+  }
+
+  const searchBtn = document.getElementById('searchBtn');
+  if (searchBtn) {
+    searchBtn.addEventListener('click', handleDiseaseSearch);
+  }
 
   // 뒤로가기 버튼들
-  document.getElementById('guideBackBtn').addEventListener('click', () => showScreen('menuScreen'));
-  document.getElementById('backBtn').addEventListener('click', () => showScreen('menuScreen'));
-  document.getElementById('limitBackBtn').addEventListener('click', () => showScreen('menuScreen'));
-  document.getElementById('meetingBackBtn').addEventListener('click', () => showScreen('menuScreen'));
+  const guideBackBtn = document.getElementById('guideBackBtn');
+  if (guideBackBtn) {
+    guideBackBtn.addEventListener('click', () => showScreen('menuScreen'));
+  }
+
+  const backBtn = document.getElementById('backBtn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => showScreen('menuScreen'));
+  }
+
+  const contactBackBtn = document.getElementById('contactBackBtn');
+  if (contactBackBtn) {
+    contactBackBtn.addEventListener('click', () => showScreen('menuScreen'));
+  }
+
+  const limitBackBtn = document.getElementById('limitBackBtn');
+  if (limitBackBtn) {
+    limitBackBtn.addEventListener('click', () => showScreen('menuScreen'));
+  }
+
+  const meetingBackBtn = document.getElementById('meetingBackBtn');
+  if (meetingBackBtn) {
+    meetingBackBtn.addEventListener('click', () => showScreen('menuScreen'));
+  }
 
   // 엔터키 이벤트
-  document.getElementById('empno').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      document.getElementById('password').focus();
-    }
-  });
+  const empnoInput = document.getElementById('empno');
+  if (empnoInput) {
+    empnoInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        const passwordInput = document.getElementById('password');
+        if (passwordInput) {
+          passwordInput.focus();
+        }
+      }
+    });
+  }
 
-  document.getElementById('password').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      handleLogin();
-    }
-  });
+  const passwordInput = document.getElementById('password');
+  if (passwordInput) {
+    passwordInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        handleLogin();
+      }
+    });
+  }
 
-  document.getElementById('guideSearchInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      handleGuideSearch();
-    }
-  });
+  const guideSearchInput = document.getElementById('guideSearchInput');
+  if (guideSearchInput) {
+    guideSearchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        handleGuideSearch();
+      }
+    });
+  }
 
-  document.getElementById('searchInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      handleDiseaseSearch();
-    }
-  });
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        handleDiseaseSearch();
+      }
+    });
+  }
 
   // PWA 설치 버튼
-  document.getElementById('installBtn').addEventListener('click', function() {
-    alert('홈화면에 추가하려면 브라우저 메뉴에서 "홈 화면에 추가" 옵션을 선택하세요.');
-  });
+  const installBtn = document.getElementById('installBtn');
+  if (installBtn) {
+    installBtn.addEventListener('click', function() {
+      alert('홈화면에 추가하려면 브라우저 메뉴에서 "홈 화면에 추가" 옵션을 선택하세요.');
+    });
+  }
 });
 
 // 서비스 워커 등록 (PWA) - sw.js 파일이 없으므로 주석 처리
