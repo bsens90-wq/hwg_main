@@ -504,14 +504,14 @@
       color:var(--text);
     }
 
-    /* 10분 정보미팅 스타일 */
+    /* 유튜브 비디오 카드 스타일 */
     .video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      display: flex;
+      flex-direction: column;
       gap: 20px;
       margin-top: 1rem;
     }
-
+    
     .video-card {
       background: #fff;
       border: 1px solid var(--border);
@@ -521,40 +521,62 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       cursor: pointer;
     }
-
+    
     .video-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      box-shadow: 0 4px 16px rgba(0,0,0,.1);
     }
-
+    
     .video-thumbnail {
       width: 100%;
-      height: 160px;
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       border-radius: 8px;
-      object-fit: cover;
       margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background-color: #f0f0f0;
     }
-
+    
+    .video-play-icon {
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 0, 0, 0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+    
+    .video-play-icon::after {
+      content: '▶';
+      margin-left: 3px;
+    }
+    
     .video-title {
       font-size: 16px;
       font-weight: 600;
       color: #333;
       margin-bottom: 8px;
-      line-height: 1.3;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      line-height: 1.4;
     }
-
+    
+    .video-date {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    
     .video-description {
       font-size: 14px;
-      color: var(--muted);
+      color: #666;
       line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
 
     /* 모바일 최적화 */
@@ -613,22 +635,15 @@
         padding:11px 18px;
       }
 
-      /* 모바일 비디오 그리드 */
-      .video-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-
+      /* 모바일 비디오 카드 최적화 */
       .video-thumbnail {
-        height: 140px;
+        height: 180px;
       }
-
-      .video-title {
-        font-size: 15px;
-      }
-
-      .video-description {
-        font-size: 13px;
+      
+      .video-play-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
       }
     }
 
@@ -701,9 +716,8 @@
         <span style="font-size:18px; display:block; margin-bottom:4px;">상품별/플랜별 인수한도</span>
       </button>
 
-      <button id="meetingMenuBtn" style="margin-bottom:1rem;">
-        <span style="font-size:18px; display:block; margin-bottom:4px;">10분 정보미팅</span>
-        <span style="font-size:14px; opacity:0.8;">(교육 동영상)</span>
+      <button id="videoMenuBtn" style="margin-bottom:1rem;">
+        <span style="font-size:18px; display:block; margin-bottom:4px;">오늘의 10분 정보미팅 다시보기</span>
       </button>
       
       <div class="meta" style="margin-top:2rem;">Copyright 2025 하세봉 all rights reserved.</div>
@@ -755,6 +769,7 @@
         <div id="insuranceListContact"></div>
       </div>
       
+      <button id="contactBackBtn" class="secondary" style="margin-top:20px;">뒤로가기</button>
       <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
     </div>
   </section>
@@ -790,18 +805,17 @@
     </div>
   </section>
 
-  <!-- 10분 정보미팅 화면 -->
-  <section id="meetingScreen" class="screen" style="display:none;">
-    <div class="app-title">10분 정보미팅</div>
-    <div class="card container-wide">
-      <h2 style="margin-bottom:1rem; text-align:center;">교육 동영상</h2>
+  <!-- 유튜브 비디오 화면 -->
+  <section id="videoScreen" class="screen" style="display:none;">
+    <div class="app-title">오늘의 10분 정보미팅 다시보기</div>
+    <div class="card container-narrow">
+      <h2 style="margin-bottom:1rem;">최신 영상 목록</h2>
       
       <div class="video-grid" id="videoGrid">
-        <!-- 동영상 목록이 여기에 동적으로 추가됩니다 -->
+        <!-- 비디오 카드들이 여기에 동적으로 추가됩니다 -->
       </div>
       
-      <button id="meetingBackBtn" class="secondary" style="margin-top:20px;">뒤로가기</button>
-      
+      <button id="videoBackBtn" class="secondary" style="margin-top:20px;">뒤로가기</button>
       <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
     </div>
   </section>
@@ -836,310 +850,91 @@ const ADMIN_ACCOUNT = {
   password: "dcw8091"
 };
 
+// 유튜브 비디오 데이터 (여기서 직접 수정 가능)
+const VIDEO_DATA = [
+  {
+    url: "https://youtu.be/okm0Pm3a14w",
+    title: "315로 가입한 내가 355라고?",
+    date: "2025-09-11",
+    description: "경증질환을 활용한 기가입자 터치법"
+  }
+];
+
 const INSURANCE_COMPANIES = [
   {"company": "한화손해보험", "callCenter": "1566-8000", "fax": "0502-779-1004", "termsUrl": "https://www.hwgeneralins.com/notice/ir/product-ing01.do"},
   {"company": "삼성화재", "callCenter": "1588-5114", "fax": "0505-162-0872", "termsUrl": "https://www.samsungfire.com/vh/page/VH.HPIF0103.do"},
-  {"company": "메리츠화재", "callCenter": "1566-7711", "fax": "0505-021-3400", "termsUrl": "https://www.meritzfire.com/disclosure/product-announcement/product-list.do#!/"}
+  {"company": "메리츠화재", "callCenter": "1566-7711", "fax": "0505-021-3400", "termsUrl": "https://www.meritzfire.com/disclosure/product-announcement/product-list.do#!/"},
+  {"company": "DB손해보험", "callCenter": "1588-0100", "fax": "0505-181-4862", "termsUrl": "https://www.idbins.com/FWMAIV1534.do"},
+  {"company": "KB손해보험", "callCenter": "1544-0114", "fax": "0505-136-6500", "termsUrl": "https://www.kbinsure.co.kr/CG802030001.ec"},
+  {"company": "현대해상", "callCenter": "1588-5656", "fax": "0507-774-6060", "termsUrl": "https://www.hi.co.kr/serviceAction.do?view=bin/PA/03/HHPA03010M#none"},
+  {"company": "롯데손해보험", "callCenter": "1588-3344", "fax": "0507-333-9999", "termsUrl": "https://www.lotteins.co.kr/web/C/D/H/cdh190.jsp"},
+  {"company": "흥국화재", "callCenter": "1688-1688", "fax": "0504-800-0700", "termsUrl": "https://www.heungkukfire.co.kr/FRW/announce/insGoodsGongsiSale.do"},
+  {"company": "하나손해보험", "callCenter": "1566-3000", "fax": "0505-170-0765", "termsUrl": "https://www.hanainsure.co.kr/w/disclosure/product/saleProduct"},
+  {"company": "NH농협손해보험", "callCenter": "1644-9000", "fax": "0505-060-7000", "termsUrl": "https://www.nhfire.co.kr/announce/productAnnounce/retrieveInsuranceProductsAnnounce.nhfire"},
+  {"company": "라이나손해보험", "callCenter": "1566-5800", "fax": "콜센터 전화 접수", "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"},
+  {"company": "AIG손해보험", "callCenter": "1544-2792", "fax": "02-2011-4607", "termsUrl": "https://www.aig.co.kr/wo/dpwot001.html?menuId=MS702"},
+  {"company": "한화생명", "callCenter": "1588-6363", "fax": "콜센터 전화 접수", "termsUrl": "https://www.hanwhalife.com/main/disclosure/goods/disclosurenotice/DF_GDDN000_P10000.do?MENU_ID1=DF_GDGL000"},
+  {"company": "동양생명", "callCenter": "1577-1004", "fax": "02-3289-4516", "termsUrl": "https://pbano.myangel.co.kr/paging/WE_AC_WEPAAP020100L"},
+  {"company": "교보생명", "callCenter": "1588-1001", "fax": "콜센터 전화 접수", "termsUrl": "https://www.kyobo.com/dgt/web/product-official/all-product/search"},
+  {"company": "삼성생명", "callCenter": "1588-3114", "fax": "콜센터 전화 접수", "termsUrl": "https://www.samsunglife.com/individual/products/disclosure/sales/PDO-PRPRI010110M"},
+  {"company": "라이나생명", "callCenter": "1588-0058", "fax": "02-6944-1200", "termsUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-on-sales?key=0%3FproductState%3D01&productKind=01"},
+  {"company": "KDB생명", "callCenter": "1588-4040", "fax": "02-2669-6500", "termsUrl": "https://www.kdblife.co.kr/ajax.do?scrId=HDLMA002M02P"},
+  {"company": "MG새마을금고", "callCenter": "1599-9010", "fax": "02-3016-7674", "termsUrl": "https://insure.kfcc.co.kr/#/PGE_IHJ_00003"},
+  {"company": "더케이", "callCenter": "1577-3993", "fax": "02-3278-9696", "termsUrl": "https://www.ktcu.or.kr/PPW-FIC-800101"},
+  {"company": "우체국", "callCenter": "1599-0100", "fax": "콜센터 전화 접수", "termsUrl": "https://mall.epostbank.go.kr/IPPSKE0000.do"},
+  {"company": "수협공제", "callCenter": "1588-4119", "fax": "콜센터 전화 접수", "termsUrl": "https://www.suhyup-bank.com/"}
 ];
 
-// 동영상 데이터
-const VIDEO_DATA = [
-  {
-    id: "iyV2bWkbUgI",
-    title: "10분 정보미팅 샘플 동영상",
-    description: "샘플 교육 동영상입니다. 클릭하면 유튜브에서 재생됩니다.",
-    url: "https://youtu.be/iyV2bWkbUgI?si=KiNgvVYFfexTXMyq",
-    thumbnail: "https://img.youtube.com/vi/iyV2bWkbUgI/maxresdefault.jpg"
+// 인수한도 데이터 로드 함수
+const LIMIT_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/limits.json";
+
+async function loadLimitData() {
+  try {
+    limitData = await loadJsonFlexible(LIMIT_URL);
+    console.log("인수한도 데이터 로드 완료:", limitData.length + "건");
+    
+    // 현재 인수한도 화면이 표시되어 있다면 상품 목록 업데이트
+    if (currentScreen === 'limit') {
+      updateProductSelect();
+    }
+  } catch(err) {
+    console.error("인수한도 데이터 로드 실패:", err);
   }
-];
+}
 
-// 유튜브 썸네일 URL 생성 함수
-function getYoutubeThumbnail(videoId) {
+// YouTube 비디오 ID 추출 함수
+function extractVideoId(url) {
+  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+}
+
+// YouTube 썸네일 URL 생성 함수
+function getYouTubeThumbnail(videoId) {
   return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 }
 
-// 유튜브 비디오 ID 추출 함수
-function extractYoutubeId(url) {
-  const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-  const match = url.match(regExp);
-  return (match && match[7].length == 11) ? match[7] : false;
-}
-
-// 모달 관련 이벤트 리스너
-document.addEventListener('DOMContentLoaded', function() {
-  const modal = document.getElementById('noteModal');
-  const closeBtn = document.querySelector('.close');
+// 비디오 카드 생성 함수
+function createVideoCard(video) {
+  const videoId = extractVideoId(video.url);
+  const thumbnailUrl = videoId ? getYouTubeThumbnail(videoId) : '';
   
-  if (closeBtn) {
-    closeBtn.onclick = function() {
-      modal.style.display = 'none';
-    };
-  }
-
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = 'none';
-    }
-  };
-});
-
-// 화면 전환 함수
-function showScreen(screenId) {
-  document.querySelectorAll('.screen').forEach(screen => {
-    screen.style.display = 'none';
-  });
-  
-  const targetScreen = document.getElementById(screenId);
-  if (targetScreen) {
-    targetScreen.style.display = 'flex';
-    currentScreen = screenId;
-  }
-}
-
-// 홈으로 이동
-function goHome() {
-  if (currentUser) {
-    showScreen('menuScreen');
-  } else {
-    showScreen('loginScreen');
-  }
-}
-
-// 로그아웃 함수
-function logout() {
-  currentUser = null;
-  isAdminUser = false;
-  document.getElementById('userInfoHeader').style.display = 'none';
-  showScreen('loginScreen');
-  document.getElementById('empno').value = '';
-  document.getElementById('password').value = '';
-  document.getElementById('loginMsg').textContent = '';
-}
-
-// 데이터 로드
-async function loadData() {
-  try {
-    const [empResponse, disResponse, guideResponse] = await Promise.all([
-      fetch(EMP_URL),
-      fetch(DIS_URL),
-      fetch(GUIDE_URL)
-    ]);
-
-    employees = await empResponse.json();
-    diseases = await disResponse.json();
-    guideData = await guideResponse.json();
-
-    document.getElementById('empMeta').textContent = `직원 DB: ${employees.length}명`;
-  } catch (error) {
-    console.error('데이터 로드 실패:', error);
-  }
-}
-
-// 로그인 처리
-async function handleLogin() {
-  const empno = document.getElementById('empno').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const loginMsg = document.getElementById('loginMsg');
-
-  if (!empno || !password) {
-    loginMsg.textContent = '코드와 비밀번호를 모두 입력하세요.';
-    return;
-  }
-
-  // 관리자 계정 확인
-  if (empno === ADMIN_ACCOUNT.empno && password === ADMIN_ACCOUNT.password) {
-    currentUser = { empno: empno, name: '관리자', department: '시스템' };
-    isAdminUser = true;
-    
-    document.getElementById('userTextHeader').textContent = `${currentUser.name}`;
-    document.getElementById('userInfoHeader').style.display = 'flex';
-    
-    // 관리자는 모든 메뉴 표시
-    document.getElementById('diseaseMenuBtn').style.display = 'block';
-    
-    showScreen('menuScreen');
-    loginMsg.textContent = '';
-    return;
-  }
-
-  // 일반 사용자 인증
-  const user = employees.find(emp => emp.empno === empno && emp.password === password);
-  
-  if (user) {
-    currentUser = user;
-    isAdminUser = false;
-    
-    document.getElementById('userTextHeader').textContent = `${user.name} (${user.department})`;
-    document.getElementById('userInfoHeader').style.display = 'flex';
-    
-    // 일반 사용자는 질환 검색 메뉴 숨김
-    document.getElementById('diseaseMenuBtn').style.display = 'none';
-    
-    showScreen('menuScreen');
-    loginMsg.textContent = '';
-  } else {
-    loginMsg.textContent = '인증에 실패했습니다. 코드와 비밀번호를 확인하세요.';
-  }
-}
-
-// 가이드 검색 처리
-function handleGuideSearch() {
-  const searchTerm = document.getElementById('guideSearchInput').value.trim();
-  const resultsDiv = document.getElementById('guideResults');
-  const messageDiv = document.getElementById('guideSearchMessage');
-  
-  if (!searchTerm) {
-    messageDiv.style.display = 'block';
-    messageDiv.textContent = '검색어를 입력하세요.';
-    resultsDiv.innerHTML = '';
-    return;
-  }
-
-  messageDiv.style.display = 'none';
-  
-  const results = guideData.filter(item => 
-    item.disease && item.disease.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (results.length === 0) {
-    resultsDiv.innerHTML = '<div class="result-card"><div class="result-title">검색 결과가 없습니다.</div></div>';
-    return;
-  }
-
-  let html = '';
-  results.forEach(result => {
-    html += `
-      <div class="result-card">
-        <div class="result-title">${result.disease}</div>
-        <table class="guide-table">
-          <tbody>
-            <tr>
-              <th>건강고지</th>
-              <td class="content-col">${result.health_declaration || '정보없음'}</td>
-            </tr>
-            <tr>
-              <th>일반고지</th>
-              <td class="content-col">${result.general_declaration || '정보없음'}</td>
-            </tr>
-            <tr>
-              <th>간편고지</th>
-              <td class="content-col">${result.simple_declaration || '정보없음'}</td>
-            </tr>
-          </tbody>
-        </table>
+  return `
+    <div class="video-card" onclick="openVideo('${video.url}')">
+      <div class="video-thumbnail" style="background-image: url('${thumbnailUrl}')">
+        <div class="video-play-icon"></div>
       </div>
-    `;
-  });
-
-  resultsDiv.innerHTML = html;
+      <div class="video-title">${video.title}</div>
+      <div class="video-date">${video.date}</div>
+      <div class="video-description">${video.description}</div>
+    </div>
+  `;
 }
 
-// 질병 검색 처리 (관리자 전용)
-function handleDiseaseSearch() {
-  const searchTerm = document.getElementById('searchInput').value.trim();
-  const resultsDiv = document.getElementById('results');
-  const messageDiv = document.getElementById('searchMessage');
-  
-  if (!searchTerm) {
-    messageDiv.style.display = 'block';
-    messageDiv.textContent = '검색어를 입력하세요.';
-    resultsDiv.innerHTML = '';
-    return;
-  }
-
-  messageDiv.style.display = 'none';
-  
-  const results = diseases.filter(disease => 
-    disease.name && disease.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (results.length === 0) {
-    resultsDiv.innerHTML = '<div class="result-card"><div class="result-title">검색 결과가 없습니다.</div></div>';
-    return;
-  }
-
-  let html = '';
-  results.forEach(result => {
-    html += `
-      <div class="result-card">
-        <div class="result-title">${result.name}</div>
-        <div class="result-sub">진단코드: ${result.code || '정보없음'}</div>
-        
-        <table class="info-table">
-          <thead>
-            <tr>
-              <th>조건</th>
-              <th>인수가능 여부</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>일반</td>
-              <td>${result.general || '정보없음'}</td>
-            </tr>
-            <tr>
-              <td>특별조건</td>
-              <td>${result.special || '정보없음'}</td>
-            </tr>
-          </tbody>
-        </table>
-        
-        ${result.restrictions ? `<div class="restrictions">${result.restrictions}</div>` : ''}
-      </div>
-    `;
-  });
-
-  resultsDiv.innerHTML = html;
-}
-
-// 연락처 화면 렌더링
-function renderContactScreen() {
-  const container = document.getElementById('insuranceListContact');
-  
-  let html = '<div class="insurance-grid">';
-  
-  INSURANCE_COMPANIES.forEach(company => {
-    html += `
-      <div class="insurance-card small">
-        <div class="insurance-logo small ${company.company === '한화손해보험' ? 'hanwha' : ''}">${company.company}</div>
-        <div class="insurance-info">
-          <div class="contact-button-group">
-            <button class="contact-button" onclick="window.open('tel:${company.callCenter}', '_self')">
-              📞 콜센터: ${company.callCenter}
-            </button>
-            <button class="contact-button" onclick="window.open('tel:${company.fax}', '_self')">
-              📠 보험금청구팩스: ${company.fax}
-            </button>
-            <button class="contact-button" onclick="window.open('${company.termsUrl}', '_blank')">
-              📋 약관 및 상품공시실
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-  
-  html += '</div>';
-  container.innerHTML = html;
-}
-
-// 10분 정보미팅 화면 렌더링
-function renderMeetingScreen() {
+// 비디오 화면 표시 함수
+function showVideoScreen() {
   const videoGrid = document.getElementById('videoGrid');
-  
-  let html = '';
-  VIDEO_DATA.forEach(video => {
-    html += `
-      <div class="video-card" onclick="openVideo('${video.url}')">
-        <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail" 
-             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjE2MCIgdmlld0JveD0iMCAwIDI4MCAxNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyODAiIGhlaWdodD0iMTYwIiBmaWxsPSIjZjBmMGYwIi8+Cjx0ZXh0IHg9IjE0MCIgeT0iODAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+64+Z7JeB7IOBIOuhnOuTnCDsi6TqsKg8L3RleHQ+Cjwvc3ZnPgo='">
-        <div class="video-title">${video.title}</div>
-        <div class="video-description">${video.description}</div>
-      </div>
-    `;
-  });
-  
-  videoGrid.innerHTML = html;
+  videoGrid.innerHTML = VIDEO_DATA.map(video => createVideoCard(video)).join('');
 }
 
 // 비디오 열기 함수
@@ -1147,159 +942,1074 @@ function openVideo(url) {
   window.open(url, '_blank');
 }
 
-// 이벤트 리스너 설정
-document.addEventListener('DOMContentLoaded', function() {
-  loadData();
+// 통합 인수 가이드 데이터 로드 함수
+async function loadGuideData() {
+  try {
+    guideData = await loadJsonFlexible(GUIDE_URL);
+    console.log("통합 인수 가이드 데이터 로드 완료:", guideData.length + "건");
+  } catch(err) {
+    console.error("통합 인수 가이드 데이터 로드 실패:", err);
+  }
+}
 
-  // 로그인 버튼
-  const loginBtn = document.getElementById('loginBtn');
-  if (loginBtn) {
-    loginBtn.addEventListener('click', handleLogin);
+// 연락처 버튼 클릭 이벤트 핸들러
+function handleContactButton(type, value, company) {
+  if (type === 'call') {
+    // 콜센터 번호 처리 (클립보드 복사)
+    handlePhoneButton(value, company);
+  } else if (type === 'fax') {
+    // 팩스 번호 처리 (클립보드 복사)
+    handleFaxButton(value, company);
+  } else if (type === 'terms') {
+    // 공시실 새 창으로 열기
+    window.open(value, '_blank');
+  }
+}
+
+// 콜센터 번호 버튼 처리 함수
+function handlePhoneButton(phoneNumber, company) {
+  const shareText = `${company} 콜센터 연락처: ${phoneNumber}`;
+  
+  // 클립보드 API 지원 확인
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(shareText).then(() => {
+      // 성공적으로 복사된 경우 간단한 알림만 표시
+      alert(`${shareText}\n\n클립보드에 복사되었습니다.`);
+    }).catch(err => {
+      // 클립보드 복사 실패 시 대체 방법
+      console.error('클립보드 복사 실패:', err);
+      fallbackCopyText(shareText);
+    });
+  } else {
+    // 클립보드 API를 지원하지 않는 경우 대체 방법
+    fallbackCopyText(shareText);
+  }
+}
+
+// 팩스 버튼 처리 함수
+function handleFaxButton(faxNumber, company) {
+  if (faxNumber === "콜센터 전화 접수") {
+    alert(`${company}은 팩스 접수가 불가하며, 콜센터로 전화 접수만 가능합니다.`);
+    return;
   }
   
-  // 로그아웃 버튼
-  const logoutBtnHeader = document.getElementById('logoutBtnHeader');
-  if (logoutBtnHeader) {
-    logoutBtnHeader.addEventListener('click', logout);
-  }
-
-  // 메뉴 버튼들
-  const guideMenuBtn = document.getElementById('guideMenuBtn');
-  if (guideMenuBtn) {
-    guideMenuBtn.addEventListener('click', () => {
-      showScreen('guideScreen');
+  const shareText = `${company} 보험금 청구 팩스번호: ${faxNumber}`;
+  
+  // 클립보드 API 지원 확인
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(shareText).then(() => {
+      // 성공적으로 복사된 경우 간단한 알림만 표시
+      alert(`${shareText}\n\n클립보드에 복사되었습니다.`);
+    }).catch(err => {
+      // 클립보드 복사 실패 시 대체 방법
+      console.error('클립보드 복사 실패:', err);
+      fallbackCopyText(shareText);
     });
+  } else {
+    // 클립보드 API를 지원하지 않는 경우 대체 방법
+    fallbackCopyText(shareText);
   }
+}
 
-  const diseaseMenuBtn = document.getElementById('diseaseMenuBtn');
-  if (diseaseMenuBtn) {
-    diseaseMenuBtn.addEventListener('click', () => {
-      showScreen('searchScreen');
-    });
+// 클립보드 복사 대체 함수
+function fallbackCopyText(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.opacity = '0';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  
+  try {
+    document.execCommand('copy');
+    alert(`복사되었습니다: ${text}`);
+  } catch (err) {
+    console.error('복사 실패:', err);
+    alert(`내용: ${text}`);
   }
+  
+  document.body.removeChild(textArea);
+}
 
-  const contactMenuBtn = document.getElementById('contactMenuBtn');
-  if (contactMenuBtn) {
-    contactMenuBtn.addEventListener('click', () => {
-      renderContactScreen();
-      showScreen('contactScreen');
-    });
+// 상품과 플랜 목록 추출 함수
+function extractProductsAndPlans() {
+  const products = new Set();
+  const plans = new Map();
+  
+  // limitData가 없으면 빈 결과 반환
+  if (!limitData || limitData.length === 0) {
+    return { products: [], plans: new Map() };
   }
-
-  const limitMenuBtn = document.getElementById('limitMenuBtn');
-  if (limitMenuBtn) {
-    limitMenuBtn.addEventListener('click', () => {
-      showScreen('limitScreen');
-    });
-  }
-
-  const meetingMenuBtn = document.getElementById('meetingMenuBtn');
-  if (meetingMenuBtn) {
-    meetingMenuBtn.addEventListener('click', () => {
-      renderMeetingScreen();
-      showScreen('meetingScreen');
-    });
-  }
-
-  // 검색 버튼들
-  const guideSearchBtn = document.getElementById('guideSearchBtn');
-  if (guideSearchBtn) {
-    guideSearchBtn.addEventListener('click', handleGuideSearch);
-  }
-
-  const searchBtn = document.getElementById('searchBtn');
-  if (searchBtn) {
-    searchBtn.addEventListener('click', handleDiseaseSearch);
-  }
-
-  // 뒤로가기 버튼들
-  const guideBackBtn = document.getElementById('guideBackBtn');
-  if (guideBackBtn) {
-    guideBackBtn.addEventListener('click', () => showScreen('menuScreen'));
-  }
-
-  const backBtn = document.getElementById('backBtn');
-  if (backBtn) {
-    backBtn.addEventListener('click', () => showScreen('menuScreen'));
-  }
-
-  const contactBackBtn = document.getElementById('contactBackBtn');
-  if (contactBackBtn) {
-    contactBackBtn.addEventListener('click', () => showScreen('menuScreen'));
-  }
-
-  const limitBackBtn = document.getElementById('limitBackBtn');
-  if (limitBackBtn) {
-    limitBackBtn.addEventListener('click', () => showScreen('menuScreen'));
-  }
-
-  const meetingBackBtn = document.getElementById('meetingBackBtn');
-  if (meetingBackBtn) {
-    meetingBackBtn.addEventListener('click', () => showScreen('menuScreen'));
-  }
-
-  // 엔터키 이벤트
-  const empnoInput = document.getElementById('empno');
-  if (empnoInput) {
-    empnoInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        const passwordInput = document.getElementById('password');
-        if (passwordInput) {
-          passwordInput.focus();
-        }
+  
+  limitData.forEach(item => {
+    if (item.product && item.plan) {
+      products.add(item.product);
+      
+      if (!plans.has(item.product)) {
+        plans.set(item.product, new Set());
       }
-    });
-  }
+      plans.get(item.product).add(item.plan);
+    }
+  });
+  
+  return { products: Array.from(products), plans };
+}
 
-  const passwordInput = document.getElementById('password');
-  if (passwordInput) {
-    passwordInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        handleLogin();
-      }
-    });
-  }
+// 연령구간 추출 함수
+function extractAgeRanges(selectedProduct, selectedPlan) {
+  const filteredData = limitData.filter(item => 
+    item.product === selectedProduct && item.plan === selectedPlan
+  );
+  
+  const ageRanges = new Set();
+  filteredData.forEach(item => {
+    ageRanges.add(`${item.minAge}세~${item.maxAge}세`);
+  });
+  
+  return Array.from(ageRanges).sort((a, b) => {
+    const ageA = parseInt(a.split('세')[0]);
+    const ageB = parseInt(b.split('세')[0]);
+    return ageA - ageB;
+  });
+}
 
-  const guideSearchInput = document.getElementById('guideSearchInput');
-  if (guideSearchInput) {
-    guideSearchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        handleGuideSearch();
-      }
-    });
+// 인수한도 테이블 생성 함수 (특정 연령구간만)
+function generateLimitTable(selectedProduct, selectedPlan, selectedAgeRange) {
+  const filteredData = limitData.filter(item => 
+    item.product === selectedProduct && 
+    item.plan === selectedPlan &&
+    `${item.minAge}세~${item.maxAge}세` === selectedAgeRange
+  );
+  
+  if (filteredData.length === 0) {
+    return '<div class="hint">해당 조건의 인수한도 데이터가 없습니다.</div>';
   }
+  
+  const coverageGroups = new Map();
+  filteredData.forEach(item => {
+    if (!coverageGroups.has(item.coverage)) {
+      coverageGroups.set(item.coverage, []);
+    }
+    coverageGroups.get(item.coverage).push(item);
+  });
+  
+  let tableHTML = `
+    <div class="product-plan-info">
+      <div class="result-title">${selectedProduct} - ${selectedPlan} (${selectedAgeRange})</div>
+      <div class="coverage-search-container">
+        <input id="coverageSearchInput" type="text" placeholder="담보명 검색..." style="margin-top:10px; font-size:14px;">
+      </div>
+    </div>
+    <div class="limit-table-container">
+      <table class="limit-table">
+        <thead>
+          <tr>
+            <th class="detail-btn">상세</th>
+            <th class="coverage-name">담보명</th>
+            <th class="amount">인수한도</th>
+          </tr>
+        </thead>
+        <tbody id="limitTableBody">
+  `;
+  
+  coverageGroups.forEach((items, coverage) => {
+    const item = items[0]; // 선택된 연령구간의 데이터
+    const hasNote = item.note && item.note.trim();
+    
+    tableHTML += `<tr class="coverage-row" data-coverage="${coverage.toLowerCase()}">`;
+    
+    if (hasNote) {
+      const cleanNote = item.note
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')
+        .replace(/\r?\n/g, '\\n');
+      tableHTML += `<td class="detail-btn"><button class="small" onclick="showNoteModal(\`${coverage}\`, \`${cleanNote}\`)">상세</button></td>`;
+    } else {
+      tableHTML += '<td class="detail-btn">-</td>';
+    }
+    
+    tableHTML += `<td class="coverage-name"><span class="coverage-clickable" onclick="showCoverageDetailModal('${selectedProduct}', '${selectedPlan}', '${coverage}')">${coverage}</span></td>`;
+    tableHTML += `<td class="amount">${formatAmount(item.amount)}</td>`;
+    tableHTML += '</tr>';
+  });
+  
+  tableHTML += '</tbody></table></div>';
+  return tableHTML;
+}
 
-  const searchInput = document.getElementById('searchInput');
-  if (searchInput) {
-    searchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        handleDiseaseSearch();
-      }
-    });
+function formatAmount(amount) {
+  if (!amount || amount === 0) return '-';
+  
+  // 숫자를 천단위 콤마로 포맷팅
+  const formattedNumber = amount.toLocaleString();
+  return formattedNumber + '만';
+}
+
+function showNoteModal(coverage, note) {
+  // 이스케이프된 문자열을 원래대로 복원
+  const restoredNote = note
+    .replace(/\\n/g, '\n')
+    .replace(/\\"/g, '"')
+    .replace(/\\'/g, "'")
+    .replace(/\\\\/g, '\\');
+    
+  document.getElementById('noteModalBody').textContent = restoredNote;
+  document.querySelector('.modal-title').textContent = `${coverage} - 비고 상세조회`;
+  document.getElementById('noteModal').style.display = 'block';
+}
+
+function showCoverageDetailModal(selectedProduct, selectedPlan, coverage) {
+  const filteredData = limitData.filter(item => 
+    item.product === selectedProduct && 
+    item.plan === selectedPlan &&
+    item.coverage === coverage
+  );
+  
+  if (filteredData.length === 0) {
+    return;
   }
+  
+  // 연령순으로 정렬
+  const sortedData = filteredData.sort((a, b) => a.minAge - b.minAge);
+  
+  let tableHTML = `
+    <table style="width:100%; border-collapse:collapse; margin-top:1rem;">
+      <thead>
+        <tr style="background:#f8f9fa;">
+          <th style="border:1px solid #e6e6e6; padding:8px; text-align:center;">연령</th>
+          <th style="border:1px solid #e6e6e6; padding:8px; text-align:center;">인수한도</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  
+  sortedData.forEach(item => {
+    tableHTML += `
+      <tr>
+        <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${item.minAge}세~${item.maxAge}세</td>
+        <td style="border:1px solid #e6e6e6; padding:8px; text-align:center; font-weight:600; color:#ff7f00;">${formatAmount(item.amount)}</td>
+      </tr>
+    `;
+  });
+  
+  tableHTML += '</tbody></table>';
+  
+  document.getElementById('noteModalBody').innerHTML = tableHTML;
+  document.querySelector('.modal-title').textContent = coverage;
+  document.getElementById('noteModal').style.display = 'block';
+}
 
-  // PWA 설치 버튼
-  const installBtn = document.getElementById('installBtn');
-  if (installBtn) {
-    installBtn.addEventListener('click', function() {
-      alert('홈화면에 추가하려면 브라우저 메뉴에서 "홈 화면에 추가" 옵션을 선택하세요.');
-    });
+function closeNoteModal() {
+  document.getElementById('noteModal').style.display = 'none';
+}
+
+function pushHistory(screen) {
+  screenHistory.push(currentScreen);
+  currentScreen = screen;
+  if (screen !== 'login') {
+    history.pushState({ screen: screen }, '', `#${screen}`);
+  }
+}
+
+window.addEventListener('popstate', function(event) {
+  if (event.state && event.state.screen) {
+    navigateToScreen(event.state.screen, false);
+  } else if (currentUser) {
+    navigateToScreen('menu', false);
+  } else {
+    navigateToScreen('login', false);
   }
 });
 
-// 서비스 워커 등록 (PWA) - sw.js 파일이 없으므로 주석 처리
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', function() {
-//     navigator.serviceWorker.register('/sw.js')
-//       .then(function(registration) {
-//         console.log('SW registered: ', registration);
-//       })
-//       .catch(function(registrationError) {
-//         console.log('SW registration failed: ', registrationError);
-//       });
-//   });
-// }
-</script>
+function navigateToScreen(screen, addToHistory = true) {
+  if (addToHistory && screen !== currentScreen) {
+    pushHistory(screen);
+  } else {
+    currentScreen = screen;
+  }
+  
+  hideAllScreens();
+  
+  switch(screen) {
+    case 'login':
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("userInfoHeader").style.display = "none";
+      break;
+    case 'menu':
+      document.getElementById("menuScreen").style.display = "flex";
+      updateMenuVisibility();
+      if (currentUser) {
+        document.getElementById("userInfoHeader").style.display = "inline-flex";
+        document.getElementById("userTextHeader").textContent = `${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
+      }
+      break;
+    case 'guide':
+      document.getElementById("guideScreen").style.display = "flex";
+      document.getElementById("guideSearchInput").focus();
+      document.getElementById("guideSearchInput").value = "";
+      document.getElementById("guideResults").innerHTML = "";
+      document.getElementById("guideSearchMessage").style.display = "none";
+      document.getElementById("guideBackBtn").style.display = "none";
+      break;
+    case 'search':
+      document.getElementById("searchScreen").style.display = "flex";
+      document.getElementById("searchInput").focus();
+      document.getElementById("searchInput").value = "";
+      document.getElementById("results").innerHTML = "";
+      document.getElementById("searchMessage").style.display = "none";
+      document.getElementById("backBtn").style.display = "none";
+      break;
+    case 'contact':
+      document.getElementById("contactScreen").style.display = "flex";
+      showInsuranceContactsInContactScreen();
+      break;
+    case 'limit':
+      document.getElementById("limitScreen").style.display = "flex";
+      initializeLimitScreen();
+      break;
+    case 'video':
+      document.getElementById("videoScreen").style.display = "flex";
+      showVideoScreen();
+      break;
+  }
+}
 
-</body>
-</html>
+function updateMenuVisibility() {
+  const diseaseMenuBtn = document.getElementById("diseaseMenuBtn");
+  
+  if (isAdminUser) {
+    diseaseMenuBtn.style.display = "block";
+  } else {
+    diseaseMenuBtn.style.display = "none";
+  }
+}
+
+function initializeLimitScreen() {
+  const productSelect = document.getElementById("productSelect");
+  const planSelect = document.getElementById("planSelect");
+  const ageSelectRow = document.getElementById("ageSelectRow");
+  const ageSelect = document.getElementById("ageSelect");
+  const limitResults = document.getElementById("limitResults");
+  
+  productSelect.selectedIndex = 0;
+  planSelect.selectedIndex = 0;
+  planSelect.disabled = true;
+  ageSelect.selectedIndex = 0;
+  ageSelect.disabled = true;
+  ageSelectRow.style.display = "none";
+  limitResults.innerHTML = "";
+  
+  // 데이터가 로드되었는지 확인 후 상품 목록 업데이트
+  if (limitData && limitData.length > 0) {
+    updateProductSelect();
+  } else {
+    // 데이터가 없으면 잠시 후 다시 시도
+    setTimeout(() => {
+      if (limitData && limitData.length > 0) {
+        updateProductSelect();
+      }
+    }, 500);
+  }
+}
+
+function updateProductSelect() {
+  const productSelect = document.getElementById("productSelect");
+  
+  // 기존 옵션들 제거 (첫 번째 기본 옵션 제외)
+  while (productSelect.options.length > 1) {
+    productSelect.remove(1);
+  }
+  
+  // limitData가 없으면 리턴
+  if (!limitData || limitData.length === 0) {
+    console.log("인수한도 데이터가 아직 로드되지 않았습니다.");
+    return;
+  }
+  
+  const { products } = extractProductsAndPlans();
+  
+  products.forEach(product => {
+    const option = document.createElement("option");
+    option.value = product;
+    option.textContent = product;
+    productSelect.appendChild(option);
+  });
+}
+
+function updatePlanSelect(selectedProduct) {
+  const { plans } = extractProductsAndPlans();
+  const planSelect = document.getElementById("planSelect");
+  const ageSelectRow = document.getElementById("ageSelectRow");
+  const ageSelect = document.getElementById("ageSelect");
+  const limitResults = document.getElementById("limitResults");
+  
+  // 플랜 셀렉트 초기화
+  while (planSelect.options.length > 1) {
+    planSelect.remove(1);
+  }
+  
+  // 연령구간 셀렉트 숨기기 및 초기화
+  ageSelectRow.style.display = "none";
+  ageSelect.disabled = true;
+  while (ageSelect.options.length > 1) {
+    ageSelect.remove(1);
+  }
+  
+  // 결과 초기화
+  limitResults.innerHTML = "";
+  
+  if (selectedProduct && plans.has(selectedProduct)) {
+    const productPlans = Array.from(plans.get(selectedProduct));
+    productPlans.forEach(plan => {
+      const option = document.createElement("option");
+      option.value = plan;
+      option.textContent = plan;
+      planSelect.appendChild(option);
+    });
+    planSelect.disabled = false;
+  } else {
+    planSelect.disabled = true;
+  }
+}
+
+function updateAgeSelect(selectedProduct, selectedPlan) {
+  const ageSelectRow = document.getElementById("ageSelectRow");
+  const ageSelect = document.getElementById("ageSelect");
+  const limitResults = document.getElementById("limitResults");
+  
+  // 연령구간 셀렉트 초기화
+  while (ageSelect.options.length > 1) {
+    ageSelect.remove(1);
+  }
+  
+  // 결과 초기화
+  limitResults.innerHTML = "";
+  
+  if (selectedProduct && selectedPlan) {
+    const ageRanges = extractAgeRanges(selectedProduct, selectedPlan);
+    
+    ageRanges.forEach(ageRange => {
+      const option = document.createElement("option");
+      option.value = ageRange;
+      option.textContent = ageRange;
+      ageSelect.appendChild(option);
+    });
+    
+    ageSelect.disabled = false;
+    ageSelectRow.style.display = "block";
+  } else {
+    ageSelect.disabled = true;
+    ageSelectRow.style.display = "none";
+  }
+}
+
+function searchLimitsAuto(selectedProduct, selectedPlan, selectedAgeRange) {
+  const limitResults = document.getElementById("limitResults");
+  
+  if (!selectedProduct || !selectedPlan || !selectedAgeRange) {
+    limitResults.innerHTML = '';
+    return;
+  }
+  
+  const tableHTML = generateLimitTable(selectedProduct, selectedPlan, selectedAgeRange);
+  
+  limitResults.innerHTML = `
+    <div class="result-card">
+      ${tableHTML}
+    </div>
+  `;
+  
+  // 담보 검색 기능 추가
+  setTimeout(() => {
+    const coverageSearchInput = document.getElementById('coverageSearchInput');
+    if (coverageSearchInput) {
+      coverageSearchInput.addEventListener('input', searchCoverage);
+    }
+  }, 100);
+}
+
+function searchCoverage() {
+  const query = document.getElementById('coverageSearchInput').value.trim();
+  const rows = document.querySelectorAll('.coverage-row');
+  
+  if (!query) {
+    rows.forEach(row => {
+      row.style.display = '';
+    });
+    return;
+  }
+  
+  const normalizedQuery = normalize(query);
+  const tokens = normalizedQuery.split(/[\s·,\-\.]+/).filter(Boolean);
+  
+  rows.forEach(row => {
+    const coverage = row.dataset.coverage;
+    const normalizedCoverage = normalize(coverage);
+    
+    let isMatch = false;
+    
+    // 모든 토큰이 포함되는지 확인
+    if (tokens.every(token => normalizedCoverage.includes(token))) {
+      isMatch = true;
+    }
+    
+    // 단일 토큰에 대한 부분 매칭 (3글자 이상일 때)
+    if (!isMatch && tokens.length === 1) {
+      const token = tokens[0];
+      if (token.length >= 3) {
+        for (let i = 2; i <= token.length - 2; i++) {
+          const left = token.substring(0, i);
+          const right = token.substring(i);
+          
+          if (left.length >= 2 && right.length >= 2) {
+            const leftPos = normalizedCoverage.indexOf(left);
+            const rightPos = normalizedCoverage.indexOf(right);
+            
+            if (leftPos >= 0 && rightPos >= 0 && leftPos < rightPos) {
+              isMatch = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+    
+    row.style.display = isMatch ? '' : 'none';
+  });
+}
+
+function goBackFromLimit() {
+  navigateToScreen('menu');
+}
+
+async function loadJsonFlexible(url){
+  const res = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
+  if(!res.ok) throw new Error("네트워크 오류: " + res.status);
+  const text = await res.text();
+  const cleaned = text.replace(/^\uFEFF/, "");
+  let json = JSON.parse(cleaned);
+  if(json && typeof json === "object" && !Array.isArray(json) && Array.isArray(json.data)){
+    json = json.data;
+  }
+  if(!Array.isArray(json)) throw new Error("JSON이 배열이 아닙니다.");
+  return json;
+}
+
+async function loadAllData(){
+  try{
+    const [emp, dis, guide] = await Promise.all([
+      loadJsonFlexible(EMP_URL),
+      loadJsonFlexible(DIS_URL),
+      loadJsonFlexible(GUIDE_URL)
+    ]);
+
+    employees = emp.map(e => ({
+      empno: String(e.empno || e.code || "").trim(),
+      password: String(e.password || "").trim()
+    })).filter(e => e.empno && e.password);
+
+    diseases = dis.map(d => ({
+      name: String(d.name || "").trim(),
+      acceptance: String(d.acceptance || ""),
+      signature355: String(d.signature355 || ""),
+      treatmentDays: String(d.treatmentDays || ""),
+      surgery: String(d.surgery || ""),
+      recurrence: String(d.recurrence || ""),
+      restrictions: String(d.restrictions || "")
+    })).filter(d => d.name);
+
+    guideData = guide.map(g => ({
+      name: String(g.DSAS_CSFNM || "").trim(),
+      explanation: String(g.DSAS_EXPL || "").trim(),
+      healthType: String(g.UD_HTH || ""),
+      generalType: String(g.UD_GEN || ""),
+      simpleType: String(g.UD_SI || "")
+    })).filter(g => g.name || g.explanation);
+
+    await loadLimitData();
+
+    document.getElementById("empMeta").textContent = `승인사번 ${employees.length}건 • 질병데이터 ${diseases.length}건 • 통합가이드 ${guideData.length}건`;
+  }catch(err){
+    console.error("데이터 로드 실패:", err);
+    document.getElementById("loginMsg").textContent = "데이터 로드 실패";
+  }
+}
+
+function checkAutoLogin() {
+  const savedUser = localStorage.getItem('hwg_current_user');
+  const savedIsAdmin = localStorage.getItem('hwg_is_admin') === 'true';
+  
+  if (savedUser) {
+    currentUser = savedUser;
+    isAdminUser = savedIsAdmin;
+    // 자동 로그인 시 바로 메뉴 화면으로 이동
+    showLoginSuccess();
+  } else {
+    const hash = window.location.hash.substring(1);
+    if (hash && ['menu', 'guide', 'search', 'contact', 'limit', 'video'].includes(hash)) {
+      window.location.hash = '';
+    }
+    navigateToScreen('login', false);
+  }
+}
+
+function login(){
+  const empno = document.getElementById("empno").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const msg = document.getElementById("loginMsg");
+
+  if(!empno || !password) {
+    msg.textContent = "코드와 비밀번호를 모두 입력해주세요.";
+    return;
+  }
+
+  if (empno === ADMIN_ACCOUNT.empno && password === ADMIN_ACCOUNT.password) {
+    currentUser = empno;
+    isAdminUser = true;
+    localStorage.setItem('hwg_current_user', empno);
+    localStorage.setItem('hwg_is_admin', 'true');
+    showLoginSuccess();
+    msg.textContent = "";
+    return;
+  }
+
+  if(!employees.length){
+    msg.textContent = "데이터가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.";
+    return;
+  }
+
+  const user = employees.find(u => u.empno === empno && u.password === password);
+ 
+  if(user){
+    currentUser = empno;
+    isAdminUser = false;
+    localStorage.setItem('hwg_current_user', empno);
+    localStorage.removeItem('hwg_is_admin');
+    showLoginSuccess();
+    msg.textContent = "";
+  }else{
+    msg.textContent = "코드 또는 비밀번호가 올바르지 않습니다.";
+  }
+}
+
+function hideAllScreens() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("menuScreen").style.display = "none";
+  document.getElementById("guideScreen").style.display = "none";
+  document.getElementById("searchScreen").style.display = "none";
+  document.getElementById("contactScreen").style.display = "none";
+  document.getElementById("limitScreen").style.display = "none";
+  document.getElementById("videoScreen").style.display = "none";
+}
+
+function showLoginSuccess() {
+  navigateToScreen('menu');
+}
+
+function goHome() {
+  if (currentUser) {
+    navigateToScreen('menu');
+  } else {
+    navigateToScreen('login');
+  }
+}
+
+function showGuideScreen() {
+  navigateToScreen('guide');
+}
+
+function showDiseaseScreen() {
+  navigateToScreen('search');
+}
+
+function showContactScreen() {
+  navigateToScreen('contact');
+}
+
+function showLimitScreen() {
+  navigateToScreen('limit');
+}
+
+function showVideoScreen() {
+  navigateToScreen('video');
+}
+
+function goBackFromContact() {
+  navigateToScreen('menu');
+}
+
+function goBackFromVideo() {
+  navigateToScreen('menu');
+}
+
+// 개선된 연락처 화면 표시 함수
+function showInsuranceContactsInContactScreen() {
+  const insuranceList = document.getElementById("insuranceListContact");
+  const damageInsurance = INSURANCE_COMPANIES.slice(1, 12);
+  const lifeInsurance = INSURANCE_COMPANIES.slice(12, 18);
+  const mutualAid = INSURANCE_COMPANIES.slice(18, 22);
+  
+  // 회사명을 CSS 클래스명으로 변환하는 함수
+  function getCompanyClass(companyName) {
+    return companyName.replace(/[^a-zA-Z가-힣]/g, '').toLowerCase();
+  }
+  
+  // 한화손해보험을 포함한 손해보험 섹션에 포함
+  function createCard(company) {
+    const faxDisplay = company.fax === "콜센터 전화 접수" ? "콜센터 접수" : company.fax;
+    const companyClass = getCompanyClass(company.company);
+    
+    return `
+      <div class="insurance-card small">
+        <div class="insurance-logo small ${companyClass}">${company.company}</div>
+        <div class="insurance-info">
+          <div class="contact-button-group">
+            <button class="contact-button" onclick="handleContactButton('call', '${company.callCenter}', '${company.company}')">
+              ${company.callCenter}
+            </button>
+            <button class="contact-button" onclick="handleContactButton('fax', '${company.fax}', '${company.company}')">
+              ${faxDisplay}
+            </button>
+            <button class="contact-button" onclick="handleContactButton('terms', '${company.termsUrl}', '${company.company}')">
+              공시실 바로가기
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // 한화손해보험을 포함한 손해보험 카드들 생성
+  const allDamageInsurance = [INSURANCE_COMPANIES[0], ...damageInsurance];
+  const damageCards = allDamageInsurance.map(createCard).join('');
+  const lifeCards = lifeInsurance.map(createCard).join('');
+  const mutualCards = mutualAid.map(createCard).join('');
+  
+  insuranceList.innerHTML = `
+    <div class="insurance-category">
+      <h3>손해보험</h3>
+      <div class="insurance-grid">${damageCards}</div>
+    </div>
+    <div class="insurance-category">
+      <h3>생명보험</h3>
+      <div class="insurance-grid">${lifeCards}</div>
+    </div>
+    <div class="insurance-category">
+      <h3>공제</h3>
+      <div class="insurance-grid">${mutualCards}</div>
+    </div>
+  `;
+}
+
+function logout() {
+  if (currentUser) {
+    localStorage.removeItem('hwg_current_user');
+    localStorage.removeItem('hwg_is_admin');
+    currentUser = null;
+    isAdminUser = false;
+    screenHistory.length = 0;
+    document.getElementById("userInfoHeader").style.display = "none";
+    navigateToScreen('login');
+    document.getElementById("empno").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("guideSearchInput").value = "";
+    document.getElementById("searchInput").value = "";
+    document.getElementById("guideResults").innerHTML = "";
+    document.getElementById("results").innerHTML = "";
+  }
+}
+
+function normalize(str){
+  return String(str || "").toLowerCase().replace(/[\s·,\-\.]/g, "");
+}
+
+// 통합 인수 가이드 검색 함수
+function searchGuide(){
+  const query = document.getElementById("guideSearchInput").value.trim();
+  const results = document.getElementById("guideResults");
+  const searchMessage = document.getElementById("guideSearchMessage");
+  const backBtn = document.getElementById("guideBackBtn");
+ 
+  if(!query){
+    searchMessage.style.display = "none";
+    results.innerHTML = "";
+    backBtn.style.display = "none";
+    return;
+  }
+
+  if(!guideData.length) {
+    searchMessage.innerHTML = '<div class="error">통합 인수 가이드 데이터가 로드되지 않았습니다.</div>';
+    searchMessage.style.display = "block";
+    results.innerHTML = "";
+    backBtn.style.display = "none";
+    return;
+  }
+
+  const tokens = query.split(/[\s·,\-\.]+/).filter(Boolean).map(normalize);
+ 
+  const matched = guideData.filter(g => {
+    const name = normalize(g.name);
+    const explanation = normalize(g.explanation);
+   
+    // 질병명(DSAS_CSFNM)에서 검색
+    if(tokens.every(token => name.includes(token))) {
+      return true;
+    }
+    
+    // 설명(DSAS_EXPL)에서 검색
+    if(tokens.every(token => explanation.includes(token))) {
+      return true;
+    }
+   
+    if(tokens.length === 1) {
+      const token = tokens[0];
+      if(token.length >= 3) {
+        // 질병명에서 부분 매칭
+        for(let i = 2; i <= token.length - 2; i++) {
+          const left = token.substring(0, i);
+          const right = token.substring(i);
+         
+          if(left.length >= 2 && right.length >= 2) {
+            const leftPos = name.indexOf(left);
+            const rightPos = name.indexOf(right);
+           
+            if(leftPos >= 0 && rightPos >= 0 && leftPos < rightPos) {
+              return true;
+            }
+            
+            // 설명에서도 부분 매칭
+            const leftPosExpl = explanation.indexOf(left);
+            const rightPosExpl = explanation.indexOf(right);
+           
+            if(leftPosExpl >= 0 && rightPosExpl >= 0 && leftPosExpl < rightPosExpl) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+   
+    return false;
+  });
+
+  if(!matched.length){
+    searchMessage.innerHTML = '<div class="hint">검색 결과가 없습니다.</div>';
+    searchMessage.style.display = "block";
+    results.innerHTML = "";
+    backBtn.style.display = "block";
+    return;
+  }
+
+  searchMessage.style.display = "none";
+  backBtn.style.display = "block";
+
+  results.innerHTML = matched.map(g => `
+    <div class="result-card">
+      <div class="result-title">${g.name}</div>
+      <table class="guide-table">
+        <tr>
+          <th>고지유형</th>
+          <th>심사기준</th>
+        </tr>
+        <tr>
+          <td class="type-col">건강고지형</td>
+          <td class="content-col">${g.healthType || "-"}</td>
+        </tr>
+        <tr>
+          <td class="type-col">일반고지형</td>
+          <td class="content-col">${g.generalType || "-"}</td>
+        </tr>
+        <tr>
+          <td class="type-col">간편고지형</td>
+          <td class="content-col">${g.simpleType || "-"}</td>
+        </tr>
+      </table>
+    </div>
+  `).join('');
+}
+
+function search(){
+  const query = document.getElementById("searchInput").value.trim();
+  const results = document.getElementById("results");
+  const searchMessage = document.getElementById("searchMessage");
+  const backBtn = document.getElementById("backBtn");
+ 
+  if(!query){
+    searchMessage.style.display = "none";
+    results.innerHTML = "";
+    backBtn.style.display = "none";
+    return;
+  }
+
+  if(!diseases.length) {
+    searchMessage.innerHTML = '<div class="error">질병 데이터가 로드되지 않았습니다.</div>';
+    searchMessage.style.display = "block";
+    results.innerHTML = "";
+    backBtn.style.display = "none";
+    return;
+  }
+
+  const tokens = query.split(/[\s·,\-\.]+/).filter(Boolean).map(normalize);
+ 
+  const matched = diseases.filter(d => {
+    const name = normalize(d.name);
+   
+    if(tokens.every(token => name.includes(token))) {
+      return true;
+    }
+   
+    if(tokens.length === 1) {
+      const token = tokens[0];
+      if(token.length >= 3) {
+        for(let i = 2; i <= token.length - 2; i++) {
+          const left = token.substring(0, i);
+          const right = token.substring(i);
+         
+          if(left.length >= 2 && right.length >= 2) {
+            const leftPos = name.indexOf(left);
+            const rightPos = name.indexOf(right);
+           
+            if(leftPos >= 0 && rightPos >= 0 && leftPos < rightPos) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+   
+    return false;
+  });
+
+  if(!matched.length){
+    searchMessage.innerHTML = '<div class="hint">검색 결과가 없습니다.</div>';
+    searchMessage.style.display = "block";
+    results.innerHTML = "";
+    backBtn.style.display = "block";
+    return;
+  }
+
+  searchMessage.style.display = "none";
+  backBtn.style.display = "block";
+
+  results.innerHTML = matched.map(d => `
+    <div class="result-card">
+      <div class="result-title">${d.name}</div>
+      <div class="result-sub">인수기준: ${d.acceptance || "-"}</div>
+      <div class="result-sub">시그니처355: ${d.signature355 || "-"}</div>
+      <table class="info-table">
+        <tr><th>치료일수</th><th>수술여부</th><th>재발여부</th></tr>
+        <tr>
+          <td>${d.treatmentDays || "-"}</td>
+          <td>${d.surgery || "-"}</td>
+          <td>${d.recurrence || "-"}</td>
+        </tr>
+      </table>
+      <div class="restrictions">제한사항: ${d.restrictions || "없음"}</div>
+    </div>
+  `).join('');
+}
+
+function goBack() {
+  const searchInput = document.getElementById("searchInput");
+  const results = document.getElementById("results");
+  const searchMessage = document.getElementById("searchMessage");
+  const backBtn = document.getElementById("backBtn");
+  
+  searchInput.value = "";
+  results.innerHTML = "";
+  searchMessage.style.display = "none";
+  backBtn.style.display = "none";
+}
+
+function goBackFromGuide() {
+  const guideSearchInput = document.getElementById("guideSearchInput");
+  const guideResults = document.getElementById("guideResults");
+  const guideSearchMessage = document.getElementById("guideSearchMessage");
+  const guideBackBtn = document.getElementById("guideBackBtn");
+  
+  guideSearchInput.value = "";
+  guideResults.innerHTML = "";
+  guideSearchMessage.style.display = "none";
+  guideBackBtn.style.display = "none";
+}
+
+// 페이지 로드 시 자동 로그인 체크를 먼저 수행
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.location.hash) {
+    history.replaceState({ screen: 'login' }, '', window.location.pathname);
+  }
+  
+  // 자동 로그인 체크를 먼저 수행
+  checkAutoLogin();
+  
+  // 그 다음 데이터 로드
+  loadAllData();
+ 
+  document.getElementById('loginBtn').addEventListener('click', login);
+  document.getElementById('empno').addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      document.getElementById('password').focus();
+    }
+  });
+  document.getElementById('password').addEventListener('keydown', e => {
+    if(e.key === 'Enter') login();
+  });
+
+  document.getElementById('guideMenuBtn').addEventListener('click', showGuideScreen);
+  document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
+  document.getElementById('contactMenuBtn').addEventListener('click', showContactScreen);
+  document.getElementById('limitMenuBtn').addEventListener('click', showLimitScreen);
+  document.getElementById('videoMenuBtn').addEventListener('click', showVideoScreen);
+  document.getElementById('logoutBtnHeader').addEventListener('click', logout);
+  document.getElementById('guideSearchBtn').addEventListener('click', searchGuide);
+  document.getElementById('guideSearchInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter') searchGuide();
+  });
+  document.getElementById('guideBackBtn').addEventListener('click', goBackFromGuide);
+  document.getElementById('searchBtn').addEventListener('click', search);
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter') search();
+  });
+  document.getElementById('backBtn').addEventListener('click', goBack);
+  document.getElementById('contactBackBtn').addEventListener('click', goBackFromContact);
+  document.getElementById('videoBackBtn').addEventListener('click', goBackFromVideo);
+  document.getElementById('installBtn').addEventListener('click', () => {
+    alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
+  });
+
+  document.getElementById('productSelect').addEventListener('change', function() {
+    updatePlanSelect(this.value);
+  });
+  
+  document.getElementById('planSelect').addEventListener('change', function() {
+    const productSelect = document.getElementById("productSelect");
+    if (this.value && productSelect.value) {
+      updateAgeSelect(productSelect.value, this.value);
+    } else {
+      const ageSelectRow = document.getElementById("ageSelectRow");
+      const limitResults = document.getElementById("limitResults");
+      ageSelectRow.style.display = "none";
+      limitResults.innerHTML = "";
+    }
+  });
+  
+  document.getElementById('ageSelect').addEventListener('change', function() {
+    const productSelect = document.getElementById("productSelect");
+    const planSelect = document.getElementById("planSelect");
+    if (this.value && productSelect.value && planSelect.value) {
+      searchLimitsAuto(productSelect.value, planSelect.value, this.value);
+    }
+  });
+  
+  document.getElementById('limitBackBtn').addEventListener('click', goBackFromLimit);
+  
+  document.querySelector('.close').addEventListener('click', closeNoteModal);
+  document.getElementById('noteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeNoteModal();
+    }
+  });
+});
+
