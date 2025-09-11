@@ -1537,9 +1537,6 @@ async function loadAllData(){
   }
 }
 
-function checkAutoLogin() {
-  const savedUser = localStorage.getItem('hwg_current_user');
-  const savedIsAdmin = localStorage.getItem('hwg_is_admin') === 'true';
   
   if (savedUser) {
     currentUser = savedUser;
