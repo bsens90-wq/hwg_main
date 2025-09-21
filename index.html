@@ -897,11 +897,15 @@
         <span style="font-size:18px; display:block; margin-bottom:4px;">상품별/플랜별 인수한도_0922</span>
       </button>
 
-      <button id="videoMenuBtn" style="margin-bottom:1rem;">
-      <span style="font-size:18px; display:block; margin-bottom:4px;">10분 정보미팅 다시보기</span>
-      </button>
-      
-      <div class="meta" style="margin-top:2rem;">Copyright 2025 하세봉 all rights reserved.</div>
+<button id="videoMenuBtn" style="margin-bottom:1rem;">
+<span style="font-size:18px; display:block; margin-bottom:4px;">10분 정보미팅 다시보기</span>
+</button>
+
+<button id="logMenuBtn" style="margin-bottom:1rem; display:none; background:#dc3545;">
+<span style="font-size:18px; display:block; margin-bottom:4px;">사용자 로그 조회 (관리자)</span>
+</button>
+
+<div class="meta" style="margin-top:2rem;">Copyright 2025 하세봉 all rights reserved.</div>
     </div>
   </section>
 
@@ -998,7 +1002,33 @@
     </div>
   </div>
 
-  <!-- 유튜브 비디오 화면 -->
+<!-- 로그 조회 화면 -->
+<section id="logScreen" class="screen" style="display:none;">
+  <div class="app-title">사용자 로그 조회</div>
+  <div class="card container-narrow">
+    <h2 style="margin-bottom:1rem;">로그 분석</h2>
+    
+    <div class="row">
+      <button id="loadLogsBtn">로그 데이터 불러오기</button>
+    </div>
+    
+    <div id="logAnalysis" style="margin-top:20px; display:none;">
+      <h3>사용자별 활동</h3>
+      <div id="userStats"></div>
+      
+      <h3 style="margin-top:20px;">메뉴별 사용 통계</h3>
+      <div id="menuStats"></div>
+      
+      <h3 style="margin-top:20px;">일별 활동</h3>
+      <div id="dailyStats"></div>
+    </div>
+    
+    <button id="logBackBtn" class="secondary" style="margin-top:20px;">뒤로가기</button>
+    <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+  </div>
+</section>
+
+<!-- 유튜브 비디오 화면 -->
 <section id="videoScreen" class="screen" style="display:none;">
   <div class="app-title">10분 정보미팅 다시보기</div>
   <div class="card container-narrow">
@@ -1026,11 +1056,151 @@ const screenHistory = [];
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
 const GUIDE_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/udw_dcw.json";
+const LOG_API_URL = "https://api.github.com/repos/bsens90-wq/hwg_logs/contents/logs";
+const GITHUB_TOKEN = "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"; // GitHub Personal Access Token 
 
 const ADMIN_ACCOUNT = {
   empno: "8091768",
   password: "dcw8091"
 };
+
+// 로그 관리 시스템
+class LogManager {
+  static async logUserAction(userCode, action, menu = '') {
+    if (!userCode) return;
+    
+    const logData = {
+      userCode: userCode,
+      action: action,
+      menu: menu,
+      timestamp: new Date().toISOString(),
+      date: new Date().toISOString().split('T')[0]
+    };
+    
+    try {
+      await this.sendLogToGitHub(logData);
+    } catch (error) {
+      console.error('로그 전송 실패:', error);
+    }
+  }
+  
+  static async sendLogToGitHub(logData) {
+    const fileName = `${logData.date}.json`;
+    const filePath = `logs/${fileName}`;
+    
+    try {
+      // 기존 로그 파일 가져오기
+      let existingLogs = [];
+      try {
+        const response = await fetch(`${LOG_API_URL}/${fileName}`, {
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        
+        if (response.ok) {
+          const fileData = await response.json();
+          const content = atob(fileData.content);
+          existingLogs = JSON.parse(content);
+        }
+      } catch (e) {
+        // 파일이 없으면 새로 만들기
+        existingLogs = [];
+      }
+      
+      // 새 로그 추가
+      existingLogs.push(logData);
+      
+      // GitHub에 업로드
+      await this.uploadToGitHub(filePath, JSON.stringify(existingLogs, null, 2), fileName);
+      
+    } catch (error) {
+      console.error('GitHub 로그 업로드 실패:', error);
+    }
+  }
+  
+  static async uploadToGitHub(path, content, fileName) {
+    const encodedContent = btoa(unescape(encodeURIComponent(content)));
+    
+    // 기존 파일 SHA 가져오기
+    let sha = null;
+    try {
+      const getResponse = await fetch(`${LOG_API_URL}/${fileName}`, {
+        headers: {
+          'Authorization': `token ${GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      
+      if (getResponse.ok) {
+        const fileData = await getResponse.json();
+        sha = fileData.sha;
+      }
+    } catch (e) {
+      // 파일이 없으면 SHA는 null
+    }
+    
+    const payload = {
+      message: `로그 업데이트: ${fileName}`,
+      content: encodedContent,
+      ...(sha && { sha })
+    };
+    
+    const response = await fetch(`${LOG_API_URL}/${fileName}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`GitHub API 오류: ${response.status}`);
+    }
+  }
+  
+  static async getLogData() {
+    if (!isAdminUser) {
+      alert('관리자만 로그를 조회할 수 있습니다.');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${LOG_API_URL}`, {
+        headers: {
+          'Authorization': `token ${GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('로그 데이터를 가져올 수 없습니다.');
+      }
+      
+      const files = await response.json();
+      const logFiles = files.filter(file => file.name.endsWith('.json'));
+      
+      let allLogs = [];
+      for (const file of logFiles) {
+        try {
+          const fileResponse = await fetch(file.download_url);
+          const logs = await fileResponse.json();
+          allLogs = allLogs.concat(logs);
+        } catch (e) {
+          console.error(`파일 ${file.name} 로드 실패:`, e);
+        }
+      }
+      
+      return allLogs;
+    } catch (error) {
+      console.error('로그 조회 실패:', error);
+      return [];
+    }
+  }
+}
 
   // 유튜브 비디오 데이터 (여기서 직접 수정 가능)
 const VIDEO_DATA = [
@@ -1464,6 +1634,9 @@ function navigateToScreen(screen, addToHistory = true) {
       initializeLimitScreen();
       break;
 
+case 'log':
+  document.getElementById("logScreen").style.display = "flex";
+  break;
 case 'video':
   document.getElementById("videoScreen").style.display = "flex";
   displayVideoScreen(); // 함수명 변경
@@ -1473,11 +1646,14 @@ case 'video':
 
 function updateMenuVisibility() {
   const diseaseMenuBtn = document.getElementById("diseaseMenuBtn");
+  const logMenuBtn = document.getElementById("logMenuBtn");
   
   if (isAdminUser) {
     diseaseMenuBtn.style.display = "block";
+    logMenuBtn.style.display = "block";
   } else {
     diseaseMenuBtn.style.display = "none";
+    logMenuBtn.style.display = "none";
   }
 }
 
@@ -1765,6 +1941,7 @@ function login(){
     isAdminUser = true;
     localStorage.setItem('hwg_current_user', empno);
     localStorage.setItem('hwg_is_admin', 'true');
+    LogManager.logUserAction(empno, 'login', '관리자로그인');
     showLoginSuccess();
     msg.textContent = "";
     return;
@@ -1782,6 +1959,7 @@ function login(){
     isAdminUser = false;
     localStorage.setItem('hwg_current_user', empno);
     localStorage.removeItem('hwg_is_admin');
+    LogManager.logUserAction(empno, 'login', '일반로그인');
     showLoginSuccess();
     msg.textContent = "";
   }else{
@@ -1796,6 +1974,7 @@ function hideAllScreens() {
   document.getElementById("searchScreen").style.display = "none";
   document.getElementById("contactScreen").style.display = "none";
   document.getElementById("limitScreen").style.display = "none";
+  document.getElementById("logScreen").style.display = "none";
   document.getElementById("videoScreen").style.display = "none";
 }
 
@@ -1812,23 +1991,33 @@ function goHome() {
 }
 
 function showGuideScreen() {
+  LogManager.logUserAction(currentUser, 'menu_click', '통합인수가이드');
   navigateToScreen('guide');
 }
 
 function showDiseaseScreen() {
+  LogManager.logUserAction(currentUser, 'menu_click', '즉시인수질환');
   navigateToScreen('search');
 }
 
 function showContactScreen() {
+  LogManager.logUserAction(currentUser, 'menu_click', '연락처조회');
   navigateToScreen('contact');
 }
 
 function showLimitScreen() {
+  LogManager.logUserAction(currentUser, 'menu_click', '인수한도조회');
   navigateToScreen('limit');
 }
 
 function showVideoScreen() {
+  LogManager.logUserAction(currentUser, 'menu_click', '영상다시보기');
   navigateToScreen('video');
+}
+
+function showLogScreen() {
+  LogManager.logUserAction(currentUser, 'menu_click', '로그조회');
+  navigateToScreen('log');
 }
 
 function goBackFromContact() {
@@ -1837,6 +2026,90 @@ function goBackFromContact() {
 
 function goBackFromVideo() {
   navigateToScreen('menu');
+}
+
+function goBackFromLog() {
+  navigateToScreen('menu');
+}
+
+async function loadLogAnalysis() {
+  if (!isAdminUser) {
+    alert('관리자만 접근 가능합니다.');
+    return;
+  }
+  
+  const logs = await LogManager.getLogData();
+  
+  if (logs.length === 0) {
+    document.getElementById('logAnalysis').innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
+    document.getElementById('logAnalysis').style.display = 'block';
+    return;
+  }
+  
+  // 사용자별 통계
+  const userStats = {};
+  const menuStats = {};
+  const dailyStats = {};
+  
+  logs.forEach(log => {
+    // 사용자별 통계
+    if (!userStats[log.userCode]) {
+      userStats[log.userCode] = { total: 0, menus: {} };
+    }
+    userStats[log.userCode].total++;
+    
+    if (log.menu) {
+      if (!userStats[log.userCode].menus[log.menu]) {
+        userStats[log.userCode].menus[log.menu] = 0;
+      }
+      userStats[log.userCode].menus[log.menu]++;
+      
+      // 메뉴별 통계
+      if (!menuStats[log.menu]) {
+        menuStats[log.menu] = 0;
+      }
+      menuStats[log.menu]++;
+    }
+    
+    // 일별 통계
+    if (!dailyStats[log.date]) {
+      dailyStats[log.date] = 0;
+    }
+    dailyStats[log.date]++;
+  });
+  
+  // 사용자별 통계 HTML 생성
+  let userStatsHTML = '<table style="width:100%; border-collapse:collapse;">';
+  userStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:8px;">사용자</th><th style="border:1px solid #e6e6e6; padding:8px;">총 활동</th><th style="border:1px solid #e6e6e6; padding:8px;">메뉴별 사용</th></tr>';
+  
+  Object.entries(userStats).forEach(([user, data]) => {
+    const menuDetails = Object.entries(data.menus).map(([menu, count]) => `${menu}: ${count}회`).join(', ');
+    userStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px;">${user}</td><td style="border:1px solid #e6e6e6; padding:8px;">${data.total}회</td><td style="border:1px solid #e6e6e6; padding:8px;">${menuDetails}</td></tr>`;
+  });
+  userStatsHTML += '</table>';
+  
+  // 메뉴별 통계 HTML 생성
+  let menuStatsHTML = '<table style="width:100%; border-collapse:collapse;">';
+  menuStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:8px;">메뉴</th><th style="border:1px solid #e6e6e6; padding:8px;">사용횟수</th></tr>';
+  
+  Object.entries(menuStats).sort((a, b) => b[1] - a[1]).forEach(([menu, count]) => {
+    menuStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px;">${menu}</td><td style="border:1px solid #e6e6e6; padding:8px;">${count}회</td></tr>`;
+  });
+  menuStatsHTML += '</table>';
+  
+  // 일별 통계 HTML 생성
+  let dailyStatsHTML = '<table style="width:100%; border-collapse:collapse;">';
+  dailyStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:8px;">날짜</th><th style="border:1px solid #e6e6e6; padding:8px;">활동횟수</th></tr>';
+  
+  Object.entries(dailyStats).sort((a, b) => b[0].localeCompare(a[0])).forEach(([date, count]) => {
+    dailyStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px;">${date}</td><td style="border:1px solid #e6e6e6; padding:8px;">${count}회</td></tr>`;
+  });
+  dailyStatsHTML += '</table>';
+  
+  document.getElementById('userStats').innerHTML = userStatsHTML;
+  document.getElementById('menuStats').innerHTML = menuStatsHTML;
+  document.getElementById('dailyStats').innerHTML = dailyStatsHTML;
+  document.getElementById('logAnalysis').style.display = 'block';
 }
   
 // 개선된 연락처 화면 표시 함수
@@ -2156,7 +2429,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
   document.getElementById('contactMenuBtn').addEventListener('click', showContactScreen);
   document.getElementById('limitMenuBtn').addEventListener('click', showLimitScreen);
-  document.getElementById('videoMenuBtn').addEventListener('click', showVideoScreen);
+document.getElementById('videoMenuBtn').addEventListener('click', showVideoScreen);
+  document.getElementById('logMenuBtn').addEventListener('click', showLogScreen);
   document.getElementById('logoutBtnHeader').addEventListener('click', logout);
   document.getElementById('guideSearchBtn').addEventListener('click', searchGuide);
   document.getElementById('guideSearchInput').addEventListener('keydown', e => {
@@ -2170,6 +2444,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('backBtn').addEventListener('click', goBack);
   document.getElementById('contactBackBtn').addEventListener('click', goBackFromContact);
 document.getElementById('videoBackBtn').addEventListener('click', goBackFromVideo);
+document.getElementById('logBackBtn').addEventListener('click', goBackFromLog);
+document.getElementById('loadLogsBtn').addEventListener('click', loadLogAnalysis);
   document.getElementById('installBtn').addEventListener('click', () => {
     alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
   });
