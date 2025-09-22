@@ -1103,6 +1103,13 @@ const ADMIN_ACCOUNT = {
 class LogManager {
   static PROXY_URL = 'https://hwg-log-proxy.netlify.app/.netlify/functions/log';
   
+// 한국시간 날짜 생성 함수 추가
+static getKoreaDate() {
+  const now = new Date();
+  const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
+  return koreaTime.toISOString().split('T')[0];
+}
+
 static async logUserAction(userCode, action, menu = '') {
   if (!userCode) return;
   
@@ -1111,15 +1118,15 @@ static async logUserAction(userCode, action, menu = '') {
     action: action,
     menu: menu,
     timestamp: new Date().toISOString(),
-    date: new Date().toISOString().split('T')[0]
+    date: this.getKoreaDate() // 한국시간 기준 날짜
   };
   
   try {
-    // 로그 기록
     await this.sendLogToProxy(logData);
   } catch (error) {
     console.error('로그 전송 실패:', error);
   }
+}
   
   // 사용자 활동 시간 업데이트는 별도로 처리 (실패해도 메인 로그에 영향 없음)
   if (action === 'login' || action === 'menu_click') {
@@ -1129,10 +1136,12 @@ static async logUserAction(userCode, action, menu = '') {
   
  static async updateLastActivity(userCode) {
   try {
-    const response = await fetch(this.PROXY_URL, {
+    // 캐시 무력화 추가
+    const response = await fetch(this.PROXY_URL + `?t=${Date.now()}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
       },
       body: JSON.stringify({
         action: 'updateLastActivity',
@@ -1149,60 +1158,66 @@ static async logUserAction(userCode, action, menu = '') {
 }
   
   static async sendLogToProxy(logData) {
-    try {
-      const response = await fetch(this.PROXY_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'writeLog',
-          logData: logData
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`프록시 API 오류: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      console.log('로그 전송 성공:', result);
-      
-    } catch (error) {
-      console.error('프록시 로그 전송 실패:', error);
-      throw error;
-    }
-  }
-  
-  static async getLogData() {
-    if (!isAdminUser) {
-      alert('관리자만 로그를 조회할 수 있습니다.');
-      return [];
+  try {
+    // 캐시 무력화 추가
+    const response = await fetch(this.PROXY_URL + `?t=${Date.now()}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      },
+      body: JSON.stringify({
+        action: 'writeLog',
+        logData: logData
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`프록시 API 오류: ${response.status}`);
     }
     
-    try {
-      const response = await fetch(this.PROXY_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'readLogs'
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('로그 데이터를 가져올 수 없습니다.');
-      }
-      
-      const result = await response.json();
-      return result.logs || [];
-      
-    } catch (error) {
-      console.error('로그 조회 실패:', error);
-      return [];
-    }
+    const result = await response.json();
+    console.log('로그 전송 성공:', result);
+    
+  } catch (error) {
+    console.error('프록시 로그 전송 실패:', error);
+    throw error;
   }
+}
+  
+  static async getLogData() {
+  if (!isAdminUser) {
+    alert('관리자만 로그를 조회할 수 있습니다.');
+    return [];
+  }
+  
+  try {
+    // 캐시 무력화 추가
+    const response = await fetch(this.PROXY_URL + `?t=${Date.now()}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      },
+      body: JSON.stringify({
+        action: 'readLogs'
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('로그 데이터를 가져올 수 없습니다.');
+    }
+    
+    const result = await response.json();
+    return result.logs || [];
+    
+  } catch (error) {
+    console.error('로그 조회 실패:', error);
+    return [];
+  }
+}
   
   // 비활성 사용자 체크 (관리자 전용)
   static async checkInactiveUsers() {
