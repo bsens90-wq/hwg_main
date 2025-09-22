@@ -2234,7 +2234,7 @@ function searchUsers() {
   }
   
   const filteredUsers = window.allUsers.filter(emp => 
-    emp.empno && emp.empno.toLowerCase().includes(searchTerm)
+    emp.empno && String(emp.empno).toLowerCase().includes(searchTerm)
   );
   
   displayUsersList(filteredUsers);
