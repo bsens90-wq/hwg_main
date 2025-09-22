@@ -2197,6 +2197,27 @@ async function loadUsersList() {
     return;
   }
 
+async function refreshEmployeesData() {
+  try {
+    const timestamp = Date.now();
+    const updatedEmployees = await loadJsonFlexible(EMP_URL + "?t=" + timestamp);
+    
+    // 전역 employees 배열 업데이트
+    employees = updatedEmployees.map(e => ({
+      empno: String(e.empno || e.code || "").trim(),
+      password: String(e.password || "").trim(),
+      status: e.status || 'active',
+      lastActivity: e.lastActivity || null,
+      suspendedDate: e.suspendedDate || null
+    })).filter(e => e.empno && e.password);
+    
+    console.log('직원 데이터 새로고침 완료:', employees.length + '건');
+  } catch (error) {
+    console.error('직원 데이터 새로고침 실패:', error);
+  }
+}
+
+  
 // 직원 데이터 강제 새로고침 함수 추가
 async function refreshEmployeesData() {
   try {
