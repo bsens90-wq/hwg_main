@@ -1103,8 +1103,15 @@ const ADMIN_ACCOUNT = {
 class LogManager {
   static PROXY_URL = 'https://hwg-log-proxy.netlify.app/.netlify/functions/log';
   
- static async logUserAction(userCode, action, menu = '') {
+static async logUserAction(userCode, action, menu = '') {
   if (!userCode) return;
+  
+  // 관리자 로그는 기록하지 않음
+  if (userCode === '8091768') return;
+  
+  // 관리자 전용 메뉴는 로그에서 제외
+  const adminOnlyMenus = ['로그조회', '사용자관리'];
+  if (adminOnlyMenus.includes(menu)) return;
   
   const logData = {
     userCode: userCode,
@@ -2440,31 +2447,38 @@ async function loadLogAnalysis() {
     const dailyStats = {};
     
     logs.forEach(log => {
-      if (!log || !log.userCode) return;
-      
-      if (!userStats[log.userCode]) {
-        userStats[log.userCode] = { total: 0, menus: {} };
-      }
-      userStats[log.userCode].total++;
-      
-      if (log.menu && log.menu.trim()) {
-        if (!userStats[log.userCode].menus[log.menu]) {
-          userStats[log.userCode].menus[log.menu] = 0;
-        }
-        userStats[log.userCode].menus[log.menu]++;
-        
-        if (!menuStats[log.menu]) {
-          menuStats[log.menu] = 0;
-        }
-        menuStats[log.menu]++;
-      }
-      
-      const date = log.date || log.timestamp?.split('T')[0] || '날짜미상';
-      if (!dailyStats[date]) {
-        dailyStats[date] = 0;
-      }
-      dailyStats[date]++;
-    });
+  if (!log || !log.userCode) return;
+  
+  // 관리자 로그는 분석에서 제외
+  if (log.userCode === '8091768') return;
+  
+  // 관리자 전용 메뉴는 통계에서 제외
+  const adminOnlyMenus = ['로그조회', '사용자관리'];
+  if (log.menu && adminOnlyMenus.includes(log.menu)) return;
+  
+  if (!userStats[log.userCode]) {
+    userStats[log.userCode] = { total: 0, menus: {} };
+  }
+  userStats[log.userCode].total++;
+  
+  if (log.menu && log.menu.trim()) {
+    if (!userStats[log.userCode].menus[log.menu]) {
+      userStats[log.userCode].menus[log.menu] = 0;
+    }
+    userStats[log.userCode].menus[log.menu]++;
+    
+    if (!menuStats[log.menu]) {
+      menuStats[log.menu] = 0;
+    }
+    menuStats[log.menu]++;
+  }
+  
+  const date = log.date || log.timestamp?.split('T')[0] || '날짜미상';
+  if (!dailyStats[date]) {
+    dailyStats[date] = 0;
+  }
+  dailyStats[date]++;
+});
     
     let userStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;"><tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">사용자</th><th style="border:1px solid #e6e6e6; padding:10px;">총 활동</th><th style="border:1px solid #e6e6e6; padding:10px;">메뉴별 사용</th></tr>';
     
