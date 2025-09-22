@@ -905,6 +905,10 @@
 <span style="font-size:18px; display:block; margin-bottom:4px;">사용자 로그 조회 (관리자)</span>
 </button>
 
+<button id="userManageBtn" style="margin-bottom:1rem; display:none; background:#28a745;">
+<span style="font-size:18px; display:block; margin-bottom:4px;">코드 관리 (관리자)</span>
+</button>
+
 <div class="meta" style="margin-top:2rem;">Copyright 2025 하세봉 all rights reserved.</div>
     </div>
   </section>
@@ -1028,6 +1032,32 @@
   </div>
 </section>
 
+<!-- 사용자 관리 화면 -->
+<section id="userManageScreen" class="screen" style="display:none;">
+  <div class="app-title">사용자 관리</div>
+  <div class="card container-narrow">
+    <h2 style="margin-bottom:1rem;">사용자 상태 관리</h2>
+    
+    <div class="row">
+      <button id="checkInactiveBtn">30일 미활성 사용자 체크</button>
+    </div>
+    
+    <div class="row">
+      <button id="loadUsersBtn" class="secondary">전체 사용자 목록 조회</button>
+    </div>
+    
+    <div id="userManageResults" class="results" style="display:none;">
+      <h3>사용자 목록</h3>
+      <div id="usersList"></div>
+    </div>
+    
+    <button id="userManageBackBtn" class="secondary" style="margin-top:20px;">뒤로가기</button>
+    <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+  </div>
+</section>
+
+  
+
 <!-- 유튜브 비디오 화면 -->
 <section id="videoScreen" class="screen" style="display:none;">
   <div class="app-title">10분 정보미팅 다시보기</div>
@@ -1065,6 +1095,7 @@ const ADMIN_ACCOUNT = {
 
 // 로그 관리 시스템
 // 프록시 API를 사용하는 LogManager
+// 프록시 API를 사용하는 LogManager (활동 추적 기능 추가)
 class LogManager {
   static PROXY_URL = 'https://hwg-log-proxy.netlify.app/.netlify/functions/log';
   
@@ -1080,9 +1111,33 @@ class LogManager {
     };
     
     try {
+      // 로그 기록
       await this.sendLogToProxy(logData);
+      
+      // 사용자 활동 시간 업데이트 (로그인이나 메뉴 클릭 시)
+      if (action === 'login' || action === 'menu_click') {
+        await this.updateLastActivity(userCode);
+      }
+      
     } catch (error) {
       console.error('로그 전송 실패:', error);
+    }
+  }
+  
+  static async updateLastActivity(userCode) {
+    try {
+      await fetch(this.PROXY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'updateLastActivity',
+          logData: { userCode: userCode }
+        })
+      });
+    } catch (error) {
+      console.error('활동 시간 업데이트 실패:', error);
     }
   }
   
@@ -1140,6 +1195,66 @@ class LogManager {
       console.error('로그 조회 실패:', error);
       return [];
     }
+  }
+  
+  // 비활성 사용자 체크 (관리자 전용)
+  static async checkInactiveUsers() {
+    if (!isAdminUser) {
+      alert('관리자만 접근 가능합니다.');
+      return;
+    }
+    
+    try {
+      const response = await fetch(this.PROXY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'checkInactiveUsers'
+        })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.updated) {
+          alert('비활성 사용자들이 일시정지 처리되었습니다.');
+        } else {
+          alert('일시정지 처리할 비활성 사용자가 없습니다.');
+        }
+      }
+    } catch (error) {
+      console.error('비활성 사용자 체크 실패:', error);
+    }
+  }
+  
+  // 사용자 재승인 (관리자 전용)
+  static async reactivateUser(userCode) {
+    if (!isAdminUser) {
+      alert('관리자만 접근 가능합니다.');
+      return;
+    }
+    
+    try {
+      const response = await fetch(this.PROXY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'reactivateUser',
+          userCode: userCode
+        })
+      });
+      
+      if (response.ok) {
+        alert(`사용자 ${userCode}가 재승인되었습니다. 패스워드가 1111로 초기화되었습니다.`);
+        return true;
+      }
+    } catch (error) {
+      console.error('사용자 재승인 실패:', error);
+    }
+    return false;
   }
 }
 
@@ -1578,23 +1693,29 @@ function navigateToScreen(screen, addToHistory = true) {
 case 'log':
   document.getElementById("logScreen").style.display = "flex";
   break;
-case 'video':
-  document.getElementById("videoScreen").style.display = "flex";
-  displayVideoScreen(); // 함수명 변경
-  break;
+    case 'video':
+      document.getElementById("videoScreen").style.display = "flex";
+      displayVideoScreen();
+      break;
+    case 'userManage':
+      document.getElementById("userManageScreen").style.display = "flex";
+      break;
   }
 }
 
 function updateMenuVisibility() {
   const diseaseMenuBtn = document.getElementById("diseaseMenuBtn");
   const logMenuBtn = document.getElementById("logMenuBtn");
+  const userManageBtn = document.getElementById("userManageBtn");
   
   if (isAdminUser) {
     diseaseMenuBtn.style.display = "block";
     logMenuBtn.style.display = "block";
+    userManageBtn.style.display = "block";
   } else {
     diseaseMenuBtn.style.display = "none";
     logMenuBtn.style.display = "none";
+    userManageBtn.style.display = "none";
   }
 }
 
@@ -1867,7 +1988,7 @@ function checkAutoLogin() {
   }
 }
 
-function login(){
+async function login(){
   const empno = document.getElementById("empno").value.trim();
   const password = document.getElementById("password").value.trim();
   const msg = document.getElementById("loginMsg");
@@ -1877,16 +1998,17 @@ function login(){
     return;
   }
 
+  // 관리자 로그인
   if (empno === ADMIN_ACCOUNT.empno && password === ADMIN_ACCOUNT.password) {
-  currentUser = empno;
-  isAdminUser = true;
-  localStorage.setItem('hwg_current_user', empno);
-  localStorage.setItem('hwg_is_admin', 'true');
-  LogManager.logUserAction(empno, 'login', '관리자로그인');
-  showLoginSuccess();
-  msg.textContent = "";
-  return;
-}
+    currentUser = empno;
+    isAdminUser = true;
+    localStorage.setItem('hwg_current_user', empno);
+    localStorage.setItem('hwg_is_admin', 'true');
+    LogManager.logUserAction(empno, 'login', '관리자로그인');
+    showLoginSuccess();
+    msg.textContent = "";
+    return;
+  }
 
   if(!employees.length){
     msg.textContent = "데이터가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.";
@@ -1896,6 +2018,19 @@ function login(){
   const user = employees.find(u => u.empno === empno && u.password === password);
  
   if(user){
+    // 일시정지 상태 체크
+    if(user.status === 'suspended') {
+      msg.innerHTML = `
+        <div style="color: #d93025; font-weight: bold; margin-bottom: 10px;">
+          30일 미사용으로 코드 재승인이 필요합니다.
+        </div>
+        <div style="font-size: 12px; color: #666;">
+          관리자에게 문의하여 계정을 재활성화하세요.
+        </div>
+      `;
+      return;
+    }
+    
     currentUser = empno;
     isAdminUser = false;
     localStorage.setItem('hwg_current_user', empno);
@@ -1916,6 +2051,7 @@ function hideAllScreens() {
   document.getElementById("contactScreen").style.display = "none";
   document.getElementById("limitScreen").style.display = "none";
   document.getElementById("logScreen").style.display = "none";
+  document.getElementById("userManageScreen").style.display = "none";
   document.getElementById("videoScreen").style.display = "none";
 }
 
@@ -1959,6 +2095,104 @@ function showVideoScreen() {
 function showLogScreen() {
   LogManager.logUserAction(currentUser, 'menu_click', '로그조회');
   navigateToScreen('log');
+}
+
+function showUserManageScreen() {
+  LogManager.logUserAction(currentUser, 'menu_click', '사용자관리');
+  navigateToScreen('userManage');
+}
+
+function goBackFromUserManage() {
+  navigateToScreen('menu');
+}
+
+async function checkInactiveUsers() {
+  if (!isAdminUser) {
+    alert('관리자만 접근 가능합니다.');
+    return;
+  }
+  
+  const checkBtn = document.getElementById('checkInactiveBtn');
+  checkBtn.textContent = '체크 중...';
+  checkBtn.disabled = true;
+  
+  try {
+    await LogManager.checkInactiveUsers();
+    // 체크 후 사용자 목록 새로고침
+    await loadUsersList();
+  } finally {
+    checkBtn.textContent = '30일 미활성 사용자 체크';
+    checkBtn.disabled = false;
+  }
+}
+
+async function loadUsersList() {
+  if (!isAdminUser) {
+    alert('관리자만 접근 가능합니다.');
+    return;
+  }
+  
+  const loadBtn = document.getElementById('loadUsersBtn');
+  loadBtn.textContent = '로딩 중...';
+  loadBtn.disabled = true;
+  
+  try {
+    // employees 데이터를 다시 로드해야 함 (상태 변경 반영을 위해)
+    const updatedEmployees = await loadJsonFlexible(EMP_URL);
+    
+    const usersList = document.getElementById('usersList');
+    const results = document.getElementById('userManageResults');
+    
+    let usersHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
+    usersHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">사용자코드</th><th style="border:1px solid #e6e6e6; padding:10px;">상태</th><th style="border:1px solid #e6e6e6; padding:10px;">마지막활동</th><th style="border:1px solid #e6e6e6; padding:10px;">관리</th></tr>';
+    
+    updatedEmployees.forEach(emp => {
+      if (emp.empno === '8091768') return; // 관리자 제외
+      
+      const status = emp.status === 'suspended' ? '일시정지' : '활성';
+      const statusColor = emp.status === 'suspended' ? '#d93025' : '#28a745';
+      const lastActivity = emp.lastActivity || '기록없음';
+      
+      usersHTML += `
+        <tr>
+          <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${emp.empno}</td>
+          <td style="border:1px solid #e6e6e6; padding:8px; text-align:center; color:${statusColor}; font-weight:600;">${status}</td>
+          <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${lastActivity}</td>
+          <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">
+            ${emp.status === 'suspended' ? 
+              `<button onclick="reactivateUser('${emp.empno}')" style="padding:4px 8px; font-size:12px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">재승인</button>` : 
+              '<span style="color:#666;">-</span>'
+            }
+          </td>
+        </tr>
+      `;
+    });
+    
+    usersHTML += '</table>';
+    usersList.innerHTML = usersHTML;
+    results.style.display = 'block';
+    
+  } catch (error) {
+    console.error('사용자 목록 로드 실패:', error);
+    alert('사용자 목록을 불러오는데 실패했습니다.');
+  } finally {
+    loadBtn.textContent = '전체 사용자 목록 조회';
+    loadBtn.disabled = false;
+  }
+}
+
+async function reactivateUser(userCode) {
+  if (!confirm(`사용자 ${userCode}를 재승인하시겠습니까?\n패스워드가 1111로 초기화됩니다.`)) {
+    return;
+  }
+  
+  const success = await LogManager.reactivateUser(userCode);
+  if (success) {
+    // 목록 새로고침
+    await loadUsersList();
+  } else {
+    alert('재승인에 실패했습니다.');
+  }
 }
 
 function goBackFromContact() {
@@ -2417,6 +2651,11 @@ document.getElementById('loadLogsBtn').addEventListener('click', loadLogAnalysis
       ageSelectRow.style.display = "none";
       limitResults.innerHTML = "";
     }
+
+    document.getElementById('userManageBtn').addEventListener('click', showUserManageScreen);
+document.getElementById('userManageBackBtn').addEventListener('click', goBackFromUserManage);
+document.getElementById('checkInactiveBtn').addEventListener('click', checkInactiveUsers);
+document.getElementById('loadUsersBtn').addEventListener('click', loadUsersList);
   });
   
   document.getElementById('ageSelect').addEventListener('change', function() {
