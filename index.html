@@ -1056,7 +1056,7 @@ const screenHistory = [];
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
 const GUIDE_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/udw_dcw.json";
-const LOG_API_URL = "https://api.github.com/repos/bsens90-wq/hwg_logs/contents/logs";
+
 
   // 토큰을 코드에 하드코딩하지 않고 런타임에 설정
 let GITHUB_TOKEN = sessionStorage.getItem('admin_github_token');
@@ -1077,7 +1077,10 @@ const ADMIN_ACCOUNT = {
 };
 
 // 로그 관리 시스템
+// 프록시 API를 사용하는 LogManager
 class LogManager {
+  static PROXY_URL = 'https://hwg-log-proxy.netlify.app/.netlify/functions/log';
+  
   static async logUserAction(userCode, action, menu = '') {
     if (!userCode) return;
     
@@ -1090,123 +1093,62 @@ class LogManager {
     };
     
     try {
-      await this.sendLogToGitHub(logData);
+      await this.sendLogToProxy(logData);
     } catch (error) {
       console.error('로그 전송 실패:', error);
     }
   }
   
-  static async sendLogToGitHub(logData) {
-    const fileName = `${logData.date}.json`;
-    const filePath = `logs/${fileName}`;
-    
+  static async sendLogToProxy(logData) {
     try {
-      // 기존 로그 파일 가져오기
-      let existingLogs = [];
-      try {
-        const response = await fetch(`${LOG_API_URL}/${fileName}`, {
-          headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        });
-        
-        if (response.ok) {
-          const fileData = await response.json();
-          const content = atob(fileData.content);
-          existingLogs = JSON.parse(content);
-        }
-      } catch (e) {
-        // 파일이 없으면 새로 만들기
-        existingLogs = [];
-      }
-      
-      // 새 로그 추가
-      existingLogs.push(logData);
-      
-      // GitHub에 업로드
-      await this.uploadToGitHub(filePath, JSON.stringify(existingLogs, null, 2), fileName);
-      
-    } catch (error) {
-      console.error('GitHub 로그 업로드 실패:', error);
-    }
-  }
-  
-  static async uploadToGitHub(path, content, fileName) {
-    const encodedContent = btoa(unescape(encodeURIComponent(content)));
-    
-    // 기존 파일 SHA 가져오기
-    let sha = null;
-    try {
-      const getResponse = await fetch(`${LOG_API_URL}/${fileName}`, {
+      const response = await fetch(this.PROXY_URL, {
+        method: 'POST',
         headers: {
-          'Authorization': `token ${GITHUB_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'writeLog',
+          logData: logData
+        })
       });
       
-      if (getResponse.ok) {
-        const fileData = await getResponse.json();
-        sha = fileData.sha;
+      if (!response.ok) {
+        throw new Error(`프록시 API 오류: ${response.status}`);
       }
-    } catch (e) {
-      // 파일이 없으면 SHA는 null
-    }
-    
-    const payload = {
-      message: `로그 업데이트: ${fileName}`,
-      content: encodedContent,
-      ...(sha && { sha })
-    };
-    
-    const response = await fetch(`${LOG_API_URL}/${fileName}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`GitHub API 오류: ${response.status}`);
+      
+      const result = await response.json();
+      console.log('로그 전송 성공:', result);
+      
+    } catch (error) {
+      console.error('프록시 로그 전송 실패:', error);
+      throw error;
     }
   }
   
   static async getLogData() {
     if (!isAdminUser) {
       alert('관리자만 로그를 조회할 수 있습니다.');
-      return;
+      return [];
     }
     
     try {
-      const response = await fetch(`${LOG_API_URL}`, {
+      const response = await fetch(this.PROXY_URL, {
+        method: 'POST',
         headers: {
-          'Authorization': `token ${GITHUB_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'readLogs'
+        })
       });
       
       if (!response.ok) {
         throw new Error('로그 데이터를 가져올 수 없습니다.');
       }
       
-      const files = await response.json();
-      const logFiles = files.filter(file => file.name.endsWith('.json'));
+      const result = await response.json();
+      return result.logs || [];
       
-      let allLogs = [];
-      for (const file of logFiles) {
-        try {
-          const fileResponse = await fetch(file.download_url);
-          const logs = await fileResponse.json();
-          allLogs = allLogs.concat(logs);
-        } catch (e) {
-          console.error(`파일 ${file.name} 로드 실패:`, e);
-        }
-      }
-      
-      return allLogs;
     } catch (error) {
       console.error('로그 조회 실패:', error);
       return [];
