@@ -2043,36 +2043,41 @@ async function login(){
     return;
   }
 
-  if(!employees.length){
-    msg.textContent = "데이터가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.";
-    return;
-  }
-
-  const user = employees.find(u => u.empno === empno && u.password === password);
- 
-  if(user){
-    // 일시정지 상태 체크
-    if(user.status === 'suspended') {
-      msg.innerHTML = `
-        <div style="color: #d93025; font-weight: bold; margin-bottom: 10px;">
-          30일 미사용으로 코드 재승인이 필요합니다.
-        </div>
-        <div style="font-size: 12px; color: #666;">
-          관리자에게 문의하여 계정을 재활성화하세요.
-        </div>
-      `;
-      return;
-    }
+  try {
+    // 최신 직원 데이터 강제 로드 (캐시 무시)
+    msg.textContent = "인증 중...";
+    const timestamp = Date.now();
+    const latestEmployees = await loadJsonFlexible(EMP_URL + "?t=" + timestamp);
     
-    currentUser = empno;
-    isAdminUser = false;
-    localStorage.setItem('hwg_current_user', empno);
-    localStorage.removeItem('hwg_is_admin');
-    LogManager.logUserAction(empno, 'login', '일반로그인');
-    showLoginSuccess();
-    msg.textContent = "";
-  }else{
-    msg.textContent = "코드 또는 비밀번호가 올바르지 않습니다.";
+    const user = latestEmployees.find(u => u.empno === empno && u.password === password);
+   
+    if(user){
+      // 일시정지 상태 체크
+      if(user.status === 'suspended') {
+        msg.innerHTML = `
+          <div style="color: #d93025; font-weight: bold; margin-bottom: 10px;">
+            30일 미사용으로 코드 재승인이 필요합니다.
+          </div>
+          <div style="font-size: 12px; color: #666;">
+            관리자에게 문의하여 계정을 재활성화하세요.
+          </div>
+        `;
+        return;
+      }
+      
+      currentUser = empno;
+      isAdminUser = false;
+      localStorage.setItem('hwg_current_user', empno);
+      localStorage.removeItem('hwg_is_admin');
+      LogManager.logUserAction(empno, 'login', '일반로그인');
+      showLoginSuccess();
+      msg.textContent = "";
+    }else{
+      msg.textContent = "코드 또는 비밀번호가 올바르지 않습니다.";
+    }
+  } catch (error) {
+    console.error('로그인 중 오류:', error);
+    msg.textContent = "로그인 중 오류가 발생했습니다. 다시 시도해주세요.";
   }
 }
 
@@ -2090,6 +2095,11 @@ function hideAllScreens() {
 
 function showLoginSuccess() {
   navigateToScreen('menu');
+  
+  // 일반 사용자인 경우 세션 검증 시작
+  if (!isAdminUser) {
+    startSessionValidation();
+  }
 }
 
 function goHome() {
@@ -2271,6 +2281,55 @@ async function reactivateUser(userCode) {
   }
 }
 
+// 세션 검증 함수 추가
+async function validateUserSession() {
+  if (!currentUser || isAdminUser) return;
+  
+  try {
+    // 최신 직원 데이터 가져오기 (캐시 무시)
+    const timestamp = Date.now();
+    const latestEmployees = await loadJsonFlexible(EMP_URL + "?t=" + timestamp);
+    
+    const currentUserData = latestEmployees.find(emp => emp.empno === currentUser);
+    
+    if (!currentUserData || currentUserData.status === 'suspended') {
+      // 사용자가 승인해제됨 - 강제 로그아웃
+      alert('계정이 승인해제되었습니다. 다시 로그인해주세요.');
+      logout();
+      return;
+    }
+    
+    // 패스워드가 변경되었는지 확인 (선택사항)
+    if (currentUserData.password !== '1111') {
+      alert('계정 상태가 변경되었습니다. 다시 로그인해주세요.');
+      logout();
+      return;
+    }
+    
+  } catch (error) {
+    console.error('세션 검증 실패:', error);
+  }
+}
+
+// 주기적 세션 검증 시작
+let sessionCheckInterval = null;
+
+function startSessionValidation() {
+  if (sessionCheckInterval) clearInterval(sessionCheckInterval);
+  
+  sessionCheckInterval = setInterval(() => {
+    validateUserSession();
+  }, 30000); // 30초마다 검증
+}
+
+function stopSessionValidation() {
+  if (sessionCheckInterval) {
+    clearInterval(sessionCheckInterval);
+    sessionCheckInterval = null;
+  }
+}
+
+  
 function goBackFromContact() {
   navigateToScreen('menu');
 }
@@ -2436,6 +2495,9 @@ function showInsuranceContactsInContactScreen() {
 
 function logout() {
   if (currentUser) {
+    // 세션 검증 중지
+    stopSessionValidation();
+    
     localStorage.removeItem('hwg_current_user');
     localStorage.removeItem('hwg_is_admin');
     currentUser = null;
