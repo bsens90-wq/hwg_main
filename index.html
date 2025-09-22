@@ -1106,13 +1106,6 @@ class LogManager {
 static async logUserAction(userCode, action, menu = '') {
   if (!userCode) return;
   
-  // 관리자 로그는 기록하지 않음
-  if (userCode === '8091768') return;
-  
-  // 관리자 전용 메뉴는 로그에서 제외
-  const adminOnlyMenus = ['로그조회', '사용자관리'];
-  if (adminOnlyMenus.includes(menu)) return;
-  
   const logData = {
     userCode: userCode,
     action: action,
@@ -1130,7 +1123,7 @@ static async logUserAction(userCode, action, menu = '') {
   
   // 사용자 활동 시간 업데이트는 별도로 처리 (실패해도 메인 로그에 영향 없음)
   if (action === 'login' || action === 'menu_click') {
-    this.updateLastActivity(userCode); // await 제거
+    this.updateLastActivity(userCode);
   }
 }
   
@@ -2442,10 +2435,10 @@ async function loadLogAnalysis() {
     const menuStats = {};
     const dailyStats = {};
     
-    logs.forEach(log => {
+logs.forEach(log => {
   if (!log || !log.userCode) return;
   
-  // 관리자 로그는 분석에서 제외
+  // 관리자 로그는 분석 시에만 제외 (기록은 됨)
   if (log.userCode === '8091768') return;
   
   // 관리자 전용 메뉴는 통계에서 제외
