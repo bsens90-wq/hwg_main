@@ -2053,9 +2053,13 @@ async function loadLogAnalysis() {
     }
     menuStatsHTML += '</table>';
     
-    let dailyStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
-    dailyStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">날짜</th><th style="border:1px solid #e6
-  
+let dailyStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
+dailyStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">날짜</th><th style="border:1px solid #e6e6e6; padding:10px;">활동횟수</th></tr>';
+
+Object.entries(dailyStats).sort((a, b) => b[0].localeCompare(a[0])).forEach(([date, count]) => {
+  dailyStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${date}</td><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${count}회</td></tr>`;
+});
+dailyStatsHTML += '</table>';
   const logs = await LogManager.getLogData();
   
   if (logs.length === 0) {
