@@ -1965,10 +1965,12 @@ async function loadJsonFlexible(url){
 
 async function loadAllData(){
   try{
+    // 캐시 무시를 위한 타임스탬프 추가
+    const timestamp = Date.now();
     const [emp, dis, guide] = await Promise.all([
-      loadJsonFlexible(EMP_URL),
-      loadJsonFlexible(DIS_URL),
-      loadJsonFlexible(GUIDE_URL)
+      loadJsonFlexible(EMP_URL + "?t=" + timestamp),
+      loadJsonFlexible(DIS_URL + "?t=" + timestamp),
+      loadJsonFlexible(GUIDE_URL + "?t=" + timestamp)
     ]);
 
     employees = emp.map(e => ({
@@ -2194,6 +2196,28 @@ async function loadUsersList() {
     alert('관리자만 접근 가능합니다.');
     return;
   }
+
+// 직원 데이터 강제 새로고침 함수 추가
+async function refreshEmployeesData() {
+  try {
+    const timestamp = Date.now();
+    const updatedEmployees = await loadJsonFlexible(EMP_URL + "?t=" + timestamp);
+    
+    // 전역 employees 배열 업데이트
+    employees = updatedEmployees.map(e => ({
+      empno: String(e.empno || e.code || "").trim(),
+      password: String(e.password || "").trim(),
+      status: e.status || 'active',
+      lastActivity: e.lastActivity || null,
+      suspendedDate: e.suspendedDate || null
+    })).filter(e => e.empno && e.password);
+    
+    console.log('직원 데이터 새로고침 완료:', employees.length + '건');
+  } catch (error) {
+    console.error('직원 데이터 새로고침 실패:', error);
+  }
+}
+
   
   const loadBtn = document.getElementById('loadUsersBtn');
   loadBtn.textContent = '로딩 중...';
@@ -2271,17 +2295,20 @@ function searchUsers() {
   displayUsersList(filteredUsers);
 }
 
-async function suspendUser(userCode) {
+  async function suspendUser(userCode) {
   if (!confirm(`사용자 ${userCode}를 승인해제하시겠습니까?\n패스워드가 랜덤으로 변경됩니다.`)) {
     return;
   }
   
   const success = await LogManager.suspendUser(userCode);
   if (success) {
-    // GitHub 업데이트 후 잠시 대기
+    // 즉시 employees 배열 업데이트
+    await refreshEmployeesData();
+    
+    // GitHub 업데이트 후 잠시 대기 후 목록 새로고침
     setTimeout(async () => {
       await loadUsersList();
-    }, 500); // 0.5초 후 새로고침
+    }, 2000);
   } else {
     alert('승인해제에 실패했습니다.');
   }
@@ -2292,12 +2319,19 @@ async function reactivateUser(userCode) {
     return;
   }
   
-  const success = await LogManager.reactivateUser(userCode);
-  if (success) {
-    // 목록 새로고침
-    await loadUsersList();
-  } else {
-    alert('재승인에 실패했습니다.');
+  try {
+    const success = await LogManager.reactivateUser(userCode);
+    if (success) {
+      // 즉시 employees 배열 업데이트
+      await refreshEmployeesData();
+      
+      setTimeout(async () => {
+        await loadUsersList();
+      }, 2000);
+    }
+  } catch (error) {
+    console.error('재승인 처리 오류:', error);
+    alert('재승인 처리 중 오류가 발생했습니다.');
   }
 }
 
