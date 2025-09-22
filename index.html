@@ -1980,15 +1980,11 @@ async function loadLogAnalysis() {
   }
   
   try {
-    // 버튼 상태 변경
     const loadBtn = document.getElementById('loadLogsBtn');
     loadBtn.textContent = '로딩 중...';
     loadBtn.disabled = true;
     
-    console.log('로그 데이터 요청 시작...');
     const logs = await LogManager.getLogData();
-    console.log('받은 로그 데이터:', logs);
-    console.log('로그 개수:', logs ? logs.length : 0);
     
     if (!logs || logs.length === 0) {
       document.getElementById('logAnalysis').innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
@@ -1996,7 +1992,6 @@ async function loadLogAnalysis() {
       return;
     }
     
-    // 사용자별 통계
     const userStats = {};
     const menuStats = {};
     const dailyStats = {};
@@ -2004,7 +1999,6 @@ async function loadLogAnalysis() {
     logs.forEach(log => {
       if (!log || !log.userCode) return;
       
-      // 사용자별 통계
       if (!userStats[log.userCode]) {
         userStats[log.userCode] = { total: 0, menus: {} };
       }
@@ -2016,14 +2010,12 @@ async function loadLogAnalysis() {
         }
         userStats[log.userCode].menus[log.menu]++;
         
-        // 메뉴별 통계
         if (!menuStats[log.menu]) {
           menuStats[log.menu] = 0;
         }
         menuStats[log.menu]++;
       }
       
-      // 일별 통계
       const date = log.date || log.timestamp?.split('T')[0] || '날짜미상';
       if (!dailyStats[date]) {
         dailyStats[date] = 0;
@@ -2031,9 +2023,7 @@ async function loadLogAnalysis() {
       dailyStats[date]++;
     });
     
-    // HTML 생성
-    let userStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
-    userStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">사용자</th><th style="border:1px solid #e6e6e6; padding:10px;">총 활동</th><th style="border:1px solid #e6e6e6; padding:10px;">메뉴별 사용</th></tr>';
+    let userStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;"><tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">사용자</th><th style="border:1px solid #e6e6e6; padding:10px;">총 활동</th><th style="border:1px solid #e6e6e6; padding:10px;">메뉴별 사용</th></tr>';
     
     Object.entries(userStats).forEach(([user, data]) => {
       const menuDetails = Object.entries(data.menus).map(([menu, count]) => `${menu}: ${count}회`).join(', ') || '없음';
@@ -2041,8 +2031,7 @@ async function loadLogAnalysis() {
     });
     userStatsHTML += '</table>';
     
-    let menuStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
-    menuStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">메뉴</th><th style="border:1px solid #e6e6e6; padding:10px;">사용횟수</th></tr>';
+    let menuStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;"><tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">메뉴</th><th style="border:1px solid #e6e6e6; padding:10px;">사용횟수</th></tr>';
     
     if (Object.keys(menuStats).length === 0) {
       menuStatsHTML += '<tr><td colspan="2" style="border:1px solid #e6e6e6; padding:8px; text-align:center;">메뉴 사용 데이터가 없습니다.</td></tr>';
@@ -2053,85 +2042,27 @@ async function loadLogAnalysis() {
     }
     menuStatsHTML += '</table>';
     
-let dailyStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
-dailyStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">날짜</th><th style="border:1px solid #e6e6e6; padding:10px;">활동횟수</th></tr>';
-
-Object.entries(dailyStats).sort((a, b) => b[0].localeCompare(a[0])).forEach(([date, count]) => {
-  dailyStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${date}</td><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${count}회</td></tr>`;
-});
-dailyStatsHTML += '</table>';
-
-  
-  if (logs.length === 0) {
-    document.getElementById('logAnalysis').innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
+    let dailyStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;"><tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">날짜</th><th style="border:1px solid #e6e6e6; padding:10px;">활동횟수</th></tr>';
+    
+    Object.entries(dailyStats).sort((a, b) => b[0].localeCompare(a[0])).forEach(([date, count]) => {
+      dailyStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${date}</td><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${count}회</td></tr>`;
+    });
+    dailyStatsHTML += '</table>';
+    
+    document.getElementById('userStats').innerHTML = userStatsHTML;
+    document.getElementById('menuStats').innerHTML = menuStatsHTML;
+    document.getElementById('dailyStats').innerHTML = dailyStatsHTML;
     document.getElementById('logAnalysis').style.display = 'block';
-    return;
+    
+  } catch (error) {
+    console.error('로그 분석 오류:', error);
+    document.getElementById('logAnalysis').innerHTML = '<div class="error">로그 분석 중 오류가 발생했습니다.</div>';
+    document.getElementById('logAnalysis').style.display = 'block';
+  } finally {
+    const loadBtn = document.getElementById('loadLogsBtn');
+    loadBtn.textContent = '로그 데이터 새로고침';
+    loadBtn.disabled = false;
   }
-  
-  // 사용자별 통계
-  const userStats = {};
-  const menuStats = {};
-  const dailyStats = {};
-  
-  logs.forEach(log => {
-    // 사용자별 통계
-    if (!userStats[log.userCode]) {
-      userStats[log.userCode] = { total: 0, menus: {} };
-    }
-    userStats[log.userCode].total++;
-    
-    if (log.menu) {
-      if (!userStats[log.userCode].menus[log.menu]) {
-        userStats[log.userCode].menus[log.menu] = 0;
-      }
-      userStats[log.userCode].menus[log.menu]++;
-      
-      // 메뉴별 통계
-      if (!menuStats[log.menu]) {
-        menuStats[log.menu] = 0;
-      }
-      menuStats[log.menu]++;
-    }
-    
-    // 일별 통계
-    if (!dailyStats[log.date]) {
-      dailyStats[log.date] = 0;
-    }
-    dailyStats[log.date]++;
-  });
-  
-  // 사용자별 통계 HTML 생성
-  let userStatsHTML = '<table style="width:100%; border-collapse:collapse;">';
-  userStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:8px;">사용자</th><th style="border:1px solid #e6e6e6; padding:8px;">총 활동</th><th style="border:1px solid #e6e6e6; padding:8px;">메뉴별 사용</th></tr>';
-  
-  Object.entries(userStats).forEach(([user, data]) => {
-    const menuDetails = Object.entries(data.menus).map(([menu, count]) => `${menu}: ${count}회`).join(', ');
-    userStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px;">${user}</td><td style="border:1px solid #e6e6e6; padding:8px;">${data.total}회</td><td style="border:1px solid #e6e6e6; padding:8px;">${menuDetails}</td></tr>`;
-  });
-  userStatsHTML += '</table>';
-  
-  // 메뉴별 통계 HTML 생성
-  let menuStatsHTML = '<table style="width:100%; border-collapse:collapse;">';
-  menuStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:8px;">메뉴</th><th style="border:1px solid #e6e6e6; padding:8px;">사용횟수</th></tr>';
-  
-  Object.entries(menuStats).sort((a, b) => b[1] - a[1]).forEach(([menu, count]) => {
-    menuStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px;">${menu}</td><td style="border:1px solid #e6e6e6; padding:8px;">${count}회</td></tr>`;
-  });
-  menuStatsHTML += '</table>';
-  
-  // 일별 통계 HTML 생성
-  let dailyStatsHTML = '<table style="width:100%; border-collapse:collapse;">';
-  dailyStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:8px;">날짜</th><th style="border:1px solid #e6e6e6; padding:8px;">활동횟수</th></tr>';
-  
-  Object.entries(dailyStats).sort((a, b) => b[0].localeCompare(a[0])).forEach(([date, count]) => {
-    dailyStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px;">${date}</td><td style="border:1px solid #e6e6e6; padding:8px;">${count}회</td></tr>`;
-  });
-  dailyStatsHTML += '</table>';
-  
-  document.getElementById('userStats').innerHTML = userStatsHTML;
-  document.getElementById('menuStats').innerHTML = menuStatsHTML;
-  document.getElementById('dailyStats').innerHTML = dailyStatsHTML;
-  document.getElementById('logAnalysis').style.display = 'block';
 }
   
 // 개선된 연락처 화면 표시 함수
