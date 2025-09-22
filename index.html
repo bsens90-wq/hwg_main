@@ -1058,19 +1058,6 @@ const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data
 const GUIDE_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/udw_dcw.json";
 
 
-  // 토큰을 코드에 하드코딩하지 않고 런타임에 설정
-let GITHUB_TOKEN = sessionStorage.getItem('admin_github_token');
-
-// 관리자 로그인 시에만 토큰 입력받기
-function initializeAdminToken() {
-  if (isAdminUser && !GITHUB_TOKEN) {
-    GITHUB_TOKEN = prompt('GitHub 관리자 토큰을 입력하세요:');
-    if (GITHUB_TOKEN) {
-      sessionStorage.setItem('admin_github_token', GITHUB_TOKEN);
-    }
-  }
-}
-
 const ADMIN_ACCOUNT = {
   empno: "8091768",
   password: "dcw8091"
@@ -1895,7 +1882,6 @@ function login(){
   isAdminUser = true;
   localStorage.setItem('hwg_current_user', empno);
   localStorage.setItem('hwg_is_admin', 'true');
-  initializeAdminToken(); // 관리자 토큰 초기화
   LogManager.logUserAction(empno, 'login', '관리자로그인');
   showLoginSuccess();
   msg.textContent = "";
@@ -1992,6 +1978,83 @@ async function loadLogAnalysis() {
     alert('관리자만 접근 가능합니다.');
     return;
   }
+  
+  try {
+    // 버튼 상태 변경
+    const loadBtn = document.getElementById('loadLogsBtn');
+    loadBtn.textContent = '로딩 중...';
+    loadBtn.disabled = true;
+    
+    console.log('로그 데이터 요청 시작...');
+    const logs = await LogManager.getLogData();
+    console.log('받은 로그 데이터:', logs);
+    console.log('로그 개수:', logs ? logs.length : 0);
+    
+    if (!logs || logs.length === 0) {
+      document.getElementById('logAnalysis').innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
+      document.getElementById('logAnalysis').style.display = 'block';
+      return;
+    }
+    
+    // 사용자별 통계
+    const userStats = {};
+    const menuStats = {};
+    const dailyStats = {};
+    
+    logs.forEach(log => {
+      if (!log || !log.userCode) return;
+      
+      // 사용자별 통계
+      if (!userStats[log.userCode]) {
+        userStats[log.userCode] = { total: 0, menus: {} };
+      }
+      userStats[log.userCode].total++;
+      
+      if (log.menu && log.menu.trim()) {
+        if (!userStats[log.userCode].menus[log.menu]) {
+          userStats[log.userCode].menus[log.menu] = 0;
+        }
+        userStats[log.userCode].menus[log.menu]++;
+        
+        // 메뉴별 통계
+        if (!menuStats[log.menu]) {
+          menuStats[log.menu] = 0;
+        }
+        menuStats[log.menu]++;
+      }
+      
+      // 일별 통계
+      const date = log.date || log.timestamp?.split('T')[0] || '날짜미상';
+      if (!dailyStats[date]) {
+        dailyStats[date] = 0;
+      }
+      dailyStats[date]++;
+    });
+    
+    // HTML 생성
+    let userStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
+    userStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">사용자</th><th style="border:1px solid #e6e6e6; padding:10px;">총 활동</th><th style="border:1px solid #e6e6e6; padding:10px;">메뉴별 사용</th></tr>';
+    
+    Object.entries(userStats).forEach(([user, data]) => {
+      const menuDetails = Object.entries(data.menus).map(([menu, count]) => `${menu}: ${count}회`).join(', ') || '없음';
+      userStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${user}</td><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${data.total}회</td><td style="border:1px solid #e6e6e6; padding:8px;">${menuDetails}</td></tr>`;
+    });
+    userStatsHTML += '</table>';
+    
+    let menuStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
+    menuStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">메뉴</th><th style="border:1px solid #e6e6e6; padding:10px;">사용횟수</th></tr>';
+    
+    if (Object.keys(menuStats).length === 0) {
+      menuStatsHTML += '<tr><td colspan="2" style="border:1px solid #e6e6e6; padding:8px; text-align:center;">메뉴 사용 데이터가 없습니다.</td></tr>';
+    } else {
+      Object.entries(menuStats).sort((a, b) => b[1] - a[1]).forEach(([menu, count]) => {
+        menuStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px;">${menu}</td><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${count}회</td></tr>`;
+      });
+    }
+    menuStatsHTML += '</table>';
+    
+    let dailyStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
+    dailyStatsHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">날짜</th><th style="border:1px solid #e6
   
   const logs = await LogManager.getLogData();
   
