@@ -2592,88 +2592,90 @@ function goBackFromGuide() {
 
 // 페이지 로드 시 자동 로그인 체크를 먼저 수행
 document.addEventListener('DOMContentLoaded', () => {
+  
   if (window.location.hash) {
     history.replaceState({ screen: 'login' }, '', window.location.pathname);
   }
   
-  // 자동 로그인 체크를 먼저 수행
-  checkAutoLogin();
-  
-  // 그 다음 데이터 로드
-  loadAllData();
- 
-  document.getElementById('loginBtn').addEventListener('click', login);
-  document.getElementById('empno').addEventListener('keydown', e => {
-    if(e.key === 'Enter') {
-      document.getElementById('password').focus();
-    }
-  });
-  document.getElementById('password').addEventListener('keydown', e => {
-    if(e.key === 'Enter') login();
-  });
+ // 자동 로그인 체크를 먼저 수행
+checkAutoLogin();
 
-  document.getElementById('guideMenuBtn').addEventListener('click', showGuideScreen);
-  document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
-  document.getElementById('contactMenuBtn').addEventListener('click', showContactScreen);
-  document.getElementById('limitMenuBtn').addEventListener('click', showLimitScreen);
+// 그 다음 데이터 로드
+loadAllData();
+
+document.getElementById('loginBtn').addEventListener('click', login);
+document.getElementById('empno').addEventListener('keydown', e => {
+  if(e.key === 'Enter') {
+    document.getElementById('password').focus();
+  }
+});
+document.getElementById('password').addEventListener('keydown', e => {
+  if(e.key === 'Enter') login();
+});
+
+document.getElementById('guideMenuBtn').addEventListener('click', showGuideScreen);
+document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
+document.getElementById('contactMenuBtn').addEventListener('click', showContactScreen);
+document.getElementById('limitMenuBtn').addEventListener('click', showLimitScreen);
 document.getElementById('videoMenuBtn').addEventListener('click', showVideoScreen);
-  document.getElementById('logMenuBtn').addEventListener('click', showLogScreen);
-  document.getElementById('logoutBtnHeader').addEventListener('click', logout);
-  document.getElementById('guideSearchBtn').addEventListener('click', searchGuide);
-  document.getElementById('guideSearchInput').addEventListener('keydown', e => {
-    if(e.key === 'Enter') searchGuide();
-  });
-  document.getElementById('guideBackBtn').addEventListener('click', goBackFromGuide);
-  document.getElementById('searchBtn').addEventListener('click', search);
-  document.getElementById('searchInput').addEventListener('keydown', e => {
-    if(e.key === 'Enter') search();
-  });
-  document.getElementById('backBtn').addEventListener('click', goBack);
-  document.getElementById('contactBackBtn').addEventListener('click', goBackFromContact);
+document.getElementById('logMenuBtn').addEventListener('click', showLogScreen);
+document.getElementById('userManageBtn').addEventListener('click', showUserManageScreen);
+document.getElementById('logoutBtnHeader').addEventListener('click', logout);
+
+document.getElementById('guideSearchBtn').addEventListener('click', searchGuide);
+document.getElementById('guideSearchInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') searchGuide();
+});
+document.getElementById('guideBackBtn').addEventListener('click', goBackFromGuide);
+document.getElementById('searchBtn').addEventListener('click', search);
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') search();
+});
+document.getElementById('backBtn').addEventListener('click', goBack);
+document.getElementById('contactBackBtn').addEventListener('click', goBackFromContact);
 document.getElementById('videoBackBtn').addEventListener('click', goBackFromVideo);
 document.getElementById('logBackBtn').addEventListener('click', goBackFromLog);
-document.getElementById('loadLogsBtn').addEventListener('click', loadLogAnalysis);
-  document.getElementById('installBtn').addEventListener('click', () => {
-    alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
-  });
-
-  document.getElementById('productSelect').addEventListener('change', function() {
-    updatePlanSelect(this.value);
-  });
-  
-  document.getElementById('planSelect').addEventListener('change', function() {
-    const productSelect = document.getElementById("productSelect");
-    if (this.value && productSelect.value) {
-      updateAgeSelect(productSelect.value, this.value);
-    } else {
-      const ageSelectRow = document.getElementById("ageSelectRow");
-      const limitResults = document.getElementById("limitResults");
-      ageSelectRow.style.display = "none";
-      limitResults.innerHTML = "";
-    }
-
-    document.getElementById('userManageBtn').addEventListener('click', showUserManageScreen);
 document.getElementById('userManageBackBtn').addEventListener('click', goBackFromUserManage);
+document.getElementById('loadLogsBtn').addEventListener('click', loadLogAnalysis);
 document.getElementById('checkInactiveBtn').addEventListener('click', checkInactiveUsers);
 document.getElementById('loadUsersBtn').addEventListener('click', loadUsersList);
-  });
-  
-  document.getElementById('ageSelect').addEventListener('change', function() {
-    const productSelect = document.getElementById("productSelect");
-    const planSelect = document.getElementById("planSelect");
-    if (this.value && productSelect.value && planSelect.value) {
-      searchLimitsAuto(productSelect.value, planSelect.value, this.value);
-    }
-  });
-  
-  document.getElementById('limitBackBtn').addEventListener('click', goBackFromLimit);
-  
-  document.querySelector('.close').addEventListener('click', closeNoteModal);
-  document.getElementById('noteModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-      closeNoteModal();
-    }
-  });
+
+document.getElementById('installBtn').addEventListener('click', () => {
+  alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
+});
+
+document.getElementById('productSelect').addEventListener('change', function() {
+  updatePlanSelect(this.value);
+});
+
+document.getElementById('planSelect').addEventListener('change', function() {
+  const productSelect = document.getElementById("productSelect");
+  if (this.value && productSelect.value) {
+    updateAgeSelect(productSelect.value, this.value);
+  } else {
+    const ageSelectRow = document.getElementById("ageSelectRow");
+    const limitResults = document.getElementById("limitResults");
+    ageSelectRow.style.display = "none";
+    limitResults.innerHTML = "";
+  }
+});
+
+document.getElementById('ageSelect').addEventListener('change', function() {
+  const productSelect = document.getElementById("productSelect");
+  const planSelect = document.getElementById("planSelect");
+  if (this.value && productSelect.value && planSelect.value) {
+    searchLimitsAuto(productSelect.value, planSelect.value, this.value);
+  }
+});
+
+document.getElementById('limitBackBtn').addEventListener('click', goBackFromLimit);
+
+document.querySelector('.close').addEventListener('click', closeNoteModal);
+document.getElementById('noteModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeNoteModal();
+  }
+});
 });
 </script>
 
