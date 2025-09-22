@@ -2142,54 +2142,56 @@ if (currentUser) {
 }
 }
 
-async function showGuideScreen() {
-  // 사용자 상태 검증
-  if (!(await validateCurrentUser())) return;
+function showGuideScreen() {
+  // 로컬 비밀번호 검증
+  if (!validateCurrentUserPassword()) return;
   
   LogManager.logUserAction(currentUser, 'menu_click', '통합인수가이드');
   navigateToScreen('guide');
 }
 
-async function showDiseaseScreen() {
-  // 사용자 상태 검증
-  if (!(await validateCurrentUser())) return;
+function showDiseaseScreen() {
+  // 로컬 비밀번호 검증
+  if (!validateCurrentUserPassword()) return;
   
   LogManager.logUserAction(currentUser, 'menu_click', '즉시인수질환');
   navigateToScreen('search');
 }
 
-async function showContactScreen() {
-  // 사용자 상태 검증
-  if (!(await validateCurrentUser())) return;
+function showContactScreen() {
+  // 로컬 비밀번호 검증
+  if (!validateCurrentUserPassword()) return;
   
   LogManager.logUserAction(currentUser, 'menu_click', '연락처조회');
   navigateToScreen('contact');
 }
 
-async function showLimitScreen() {
-  // 사용자 상태 검증
-  if (!(await validateCurrentUser())) return;
+function showLimitScreen() {
+  // 로컬 비밀번호 검증
+  if (!validateCurrentUserPassword()) return;
   
   LogManager.logUserAction(currentUser, 'menu_click', '인수한도조회');
   navigateToScreen('limit');
 }
 
-async function showVideoScreen() {
-  // 사용자 상태 검증
-  if (!(await validateCurrentUser())) return;
+function showVideoScreen() {
+  // 로컬 비밀번호 검증
+  if (!validateCurrentUserPassword()) return;
   
   LogManager.logUserAction(currentUser, 'menu_click', '영상다시보기');
   navigateToScreen('video');
 }
 
 function showLogScreen() {
-LogManager.logUserAction(currentUser, 'menu_click', '로그조회');
-navigateToScreen('log');
+  // 관리자 기능이므로 검증 생략
+  LogManager.logUserAction(currentUser, 'menu_click', '로그조회');
+  navigateToScreen('log');
 }
 
 function showUserManageScreen() {
-LogManager.logUserAction(currentUser, 'menu_click', '사용자관리');
-navigateToScreen('userManage');
+  // 관리자 기능이므로 검증 생략
+  LogManager.logUserAction(currentUser, 'menu_click', '사용자관리');
+  navigateToScreen('userManage');
 }
 
 function goBackFromUserManage() {
@@ -2375,28 +2377,22 @@ function startSessionValidation() {
   return;
 }
 
-async function validateCurrentUser() {
+function validateCurrentUserPassword() {
   if (!currentUser || isAdminUser) return true;
   
-  try {
-    const timestamp = Date.now();
-    const latestEmployees = await loadJsonFlexible(EMP_URL + "?t=" + timestamp);
-    
-    const userData = latestEmployees.find(emp => 
-      String(emp.empno) === String(currentUser)
-    );
-    
-    if (!userData || userData.status === 'suspended' || userData.password !== '1111') {
-      alert('계정 상태가 변경되었습니다. 다시 로그인해주세요.');
-      logout();
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('사용자 검증 실패:', error);
-    return true; // 네트워크 오류시 계속 진행
+  // 로컬 employees 배열에서 현재 사용자 찾기
+  const userData = employees.find(emp => 
+    String(emp.empno) === String(currentUser)
+  );
+  
+  // 사용자가 없거나 비밀번호가 1111이 아니면 로그아웃
+  if (!userData || userData.password !== '1111') {
+    alert('계정 상태가 변경되었습니다. 다시 로그인해주세요.');
+    logout();
+    return false;
   }
+  
+  return true;
 }
 
 
