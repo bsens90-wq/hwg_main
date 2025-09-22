@@ -2043,41 +2043,61 @@ async function login(){
     return;
   }
 
-  try {
-    // 최신 직원 데이터 강제 로드 (캐시 무시)
-    msg.textContent = "인증 중...";
-    const timestamp = Date.now();
-    const latestEmployees = await loadJsonFlexible(EMP_URL + "?t=" + timestamp);
-    
-    const user = latestEmployees.find(u => u.empno === empno && u.password === password);
-   
-    if(user){
-      // 일시정지 상태 체크
-      if(user.status === 'suspended') {
-        msg.innerHTML = `
-          <div style="color: #d93025; font-weight: bold; margin-bottom: 10px;">
-            30일 미사용으로 코드 재승인이 필요합니다.
-          </div>
-          <div style="font-size: 12px; color: #666;">
-            관리자에게 문의하여 계정을 재활성화하세요.
-          </div>
-        `;
-        return;
-      }
+  // 기존 employees 데이터로 먼저 시도
+  if(!employees.length){
+    msg.textContent = "데이터가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.";
+    return;
+  }
+
+  let user = employees.find(u => u.empno === empno && u.password === password);
+  
+  // 기존 데이터에서 찾지 못했으면 최신 데이터로 재시도
+  if (!user) {
+    try {
+      msg.textContent = "인증 중...";
+      const timestamp = Date.now();
+      const latestEmployees = await loadJsonFlexible(EMP_URL + "?t=" + timestamp);
       
-      currentUser = empno;
-      isAdminUser = false;
-      localStorage.setItem('hwg_current_user', empno);
-      localStorage.removeItem('hwg_is_admin');
-      LogManager.logUserAction(empno, 'login', '일반로그인');
-      showLoginSuccess();
-      msg.textContent = "";
-    }else{
-      msg.textContent = "코드 또는 비밀번호가 올바르지 않습니다.";
+      // 최신 데이터로 다시 검색
+      user = latestEmployees.find(u => u.empno === empno && u.password === password);
+      
+      if (user) {
+        // 기존 employees 배열도 업데이트
+        employees = latestEmployees.map(e => ({
+          empno: String(e.empno || e.code || "").trim(),
+          password: String(e.password || "").trim()
+        })).filter(e => e.empno && e.password);
+      }
+    } catch (error) {
+      console.error('최신 데이터 로드 실패:', error);
+      msg.textContent = "인증 중 오류가 발생했습니다.";
+      return;
     }
-  } catch (error) {
-    console.error('로그인 중 오류:', error);
-    msg.textContent = "로그인 중 오류가 발생했습니다. 다시 시도해주세요.";
+  }
+ 
+  if(user){
+    // 일시정지 상태 체크
+    if(user.status === 'suspended') {
+      msg.innerHTML = `
+        <div style="color: #d93025; font-weight: bold; margin-bottom: 10px;">
+          30일 미사용으로 코드 재승인이 필요합니다.
+        </div>
+        <div style="font-size: 12px; color: #666;">
+          관리자에게 문의하여 계정을 재활성화하세요.
+        </div>
+      `;
+      return;
+    }
+    
+    currentUser = empno;
+    isAdminUser = false;
+    localStorage.setItem('hwg_current_user', empno);
+    localStorage.removeItem('hwg_is_admin');
+    LogManager.logUserAction(empno, 'login', '일반로그인');
+    showLoginSuccess();
+    msg.textContent = "";
+  }else{
+    msg.textContent = "코드 또는 비밀번호가 올바르지 않습니다.";
   }
 }
 
