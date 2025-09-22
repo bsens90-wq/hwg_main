@@ -1260,6 +1260,35 @@ class LogManager {
     }
     return false;
   }
+  
+  // 사용자 승인해제 (관리자 전용)
+  static async suspendUser(userCode) {
+    if (!isAdminUser) {
+      alert('관리자만 접근 가능합니다.');
+      return;
+    }
+    
+    try {
+      const response = await fetch(this.PROXY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'suspendUser',
+          userCode: userCode
+        })
+      });
+      
+      if (response.ok) {
+        alert(`사용자 ${userCode}가 승인해제되었습니다. 패스워드가 랜덤으로 변경되었습니다.`);
+        return true;
+      }
+    } catch (error) {
+      console.error('사용자 승인해제 실패:', error);
+    }
+    return false;
+  }
 }
 
   // 유튜브 비디오 데이터 (여기서 직접 수정 가능)
@@ -2141,40 +2170,14 @@ async function loadUsersList() {
   loadBtn.disabled = true;
   
   try {
-    // employees 데이터를 다시 로드해야 함 (상태 변경 반영을 위해)
     const updatedEmployees = await loadJsonFlexible(EMP_URL);
+    window.allUsers = updatedEmployees; // 검색을 위해 전역 저장
     
-    const usersList = document.getElementById('usersList');
-    const results = document.getElementById('userManageResults');
+    displayUsersList(updatedEmployees);
     
-    let usersHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
-    usersHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">사용자코드</th><th style="border:1px solid #e6e6e6; padding:10px;">상태</th><th style="border:1px solid #e6e6e6; padding:10px;">마지막활동</th><th style="border:1px solid #e6e6e6; padding:10px;">관리</th></tr>';
-    
-    updatedEmployees.forEach(emp => {
-      if (emp.empno === '8091768') return; // 관리자 제외
-      
-      const status = emp.status === 'suspended' ? '일시정지' : '활성';
-      const statusColor = emp.status === 'suspended' ? '#d93025' : '#28a745';
-      const lastActivity = emp.lastActivity || '기록없음';
-      
-      usersHTML += `
-        <tr>
-          <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${emp.empno}</td>
-          <td style="border:1px solid #e6e6e6; padding:8px; text-align:center; color:${statusColor}; font-weight:600;">${status}</td>
-          <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${lastActivity}</td>
-          <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">
-            ${emp.status === 'suspended' ? 
-              `<button onclick="reactivateUser('${emp.empno}')" style="padding:4px 8px; font-size:12px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">재승인</button>` : 
-              '<span style="color:#666;">-</span>'
-            }
-          </td>
-        </tr>
-      `;
-    });
-    
-    usersHTML += '</table>';
-    usersList.innerHTML = usersHTML;
-    results.style.display = 'block';
+    // 검색 컨테이너 표시
+    document.getElementById('userSearchContainer').style.display = 'block';
+    document.getElementById('userManageResults').style.display = 'block';
     
   } catch (error) {
     console.error('사용자 목록 로드 실패:', error);
@@ -2182,6 +2185,71 @@ async function loadUsersList() {
   } finally {
     loadBtn.textContent = '전체 사용자 목록 조회';
     loadBtn.disabled = false;
+  }
+}
+
+function displayUsersList(employees) {
+  const usersList = document.getElementById('usersList');
+  
+  let usersHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
+  usersHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">사용자코드</th><th style="border:1px solid #e6e6e6; padding:10px;">상태</th><th style="border:1px solid #e6e6e6; padding:10px;">마지막활동</th><th style="border:1px solid #e6e6e6; padding:10px;">관리</th></tr>';
+  
+  employees.forEach(emp => {
+    if (emp.empno === '8091768') return; // 관리자 제외
+    
+    const status = emp.status === 'suspended' ? '일시정지' : '활성';
+    const statusColor = emp.status === 'suspended' ? '#d93025' : '#28a745';
+    const lastActivity = emp.lastActivity || '기록없음';
+    
+    usersHTML += `
+      <tr>
+        <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${emp.empno}</td>
+        <td style="border:1px solid #e6e6e6; padding:8px; text-align:center; color:${statusColor}; font-weight:600;">${status}</td>
+        <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${lastActivity}</td>
+        <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">
+          ${emp.status === 'suspended' ? 
+            `<button onclick="reactivateUser('${emp.empno}')" style="padding:4px 8px; font-size:12px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer; margin-right:4px;">승인</button>` : 
+            `<button onclick="suspendUser('${emp.empno}')" style="padding:4px 8px; font-size:12px; background:#d93025; color:white; border:none; border-radius:4px; cursor:pointer; margin-right:4px;">승인해제</button>`
+          }
+        </td>
+      </tr>
+    `;
+  });
+  
+  usersHTML += '</table>';
+  usersList.innerHTML = usersHTML;
+}
+
+function searchUsers() {
+  const searchTerm = document.getElementById('userSearchInput').value.trim().toLowerCase();
+  
+  if (!window.allUsers) {
+    alert('먼저 사용자 목록을 조회해주세요.');
+    return;
+  }
+  
+  if (!searchTerm) {
+    displayUsersList(window.allUsers);
+    return;
+  }
+  
+  const filteredUsers = window.allUsers.filter(emp => 
+    emp.empno && emp.empno.toLowerCase().includes(searchTerm)
+  );
+  
+  displayUsersList(filteredUsers);
+}
+
+async function suspendUser(userCode) {
+  if (!confirm(`사용자 ${userCode}를 승인해제하시겠습니까?\n패스워드가 랜덤으로 변경됩니다.`)) {
+    return;
+  }
+  
+  const success = await LogManager.suspendUser(userCode);
+  if (success) {
+    await loadUsersList();
+  } else {
+    alert('승인해제에 실패했습니다.');
   }
 }
 
@@ -2643,7 +2711,7 @@ document.getElementById('userManageBackBtn').addEventListener('click', goBackFro
 document.getElementById('loadLogsBtn').addEventListener('click', loadLogAnalysis);
 document.getElementById('checkInactiveBtn').addEventListener('click', checkInactiveUsers);
 document.getElementById('loadUsersBtn').addEventListener('click', loadUsersList);
-
+document.getElementById('userSearchInput').addEventListener('input', searchUsers);
 document.getElementById('installBtn').addEventListener('click', () => {
   alert('브라우저에서 홈화면 추가 기능을 사용해주세요.');
 });
