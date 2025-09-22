@@ -2277,29 +2277,24 @@ displayUsersList(filteredUsers);
 }
 
 async function suspendUser(userCode) {
-if (!confirm(`사용자 ${userCode}를 승인해제하시겠습니까?\n패스워드가 랜덤으로 변경됩니다.`)) {
-  return;
-}
+  if (!confirm(`사용자 ${userCode}를 승인해제하시겠습니까?\n패스워드가 랜덤으로 변경됩니다.`)) {
+    return;
+  }
 
-const success = await LogManager.suspendUser(userCode);
-if (success) {
-  setTimeout(async () => {
-    await loadUsersList();
-  }, 3000);
-} else {
-  alert('승인해제에 실패했습니다.');
-}
-
+  const success = await LogManager.suspendUser(userCode);
   if (success) {
-    // 해당 사용자가 현재 로그인되어 있으면 로그아웃 처리
+    // 해당 사용자가 현재 로그인되어 있으면 즉시 로그아웃 처리
     if (currentUser === userCode) {
       alert('계정이 승인해제되었습니다.');
       logout();
+      return;
     }
     
     setTimeout(async () => {
       await loadUsersList();
-    }, 2000);
+    }, 3000);
+  } else {
+    alert('승인해제에 실패했습니다.');
   }
 }
 
