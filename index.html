@@ -2060,7 +2060,7 @@ Object.entries(dailyStats).sort((a, b) => b[0].localeCompare(a[0])).forEach(([da
   dailyStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${date}</td><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${count}회</td></tr>`;
 });
 dailyStatsHTML += '</table>';
-  const logs = await LogManager.getLogData();
+
   
   if (logs.length === 0) {
     document.getElementById('logAnalysis').innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
