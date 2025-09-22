@@ -2118,10 +2118,10 @@ document.getElementById("videoScreen").style.display = "none";
 function showLoginSuccess() {
   navigateToScreen('menu');
   
-  // 일반 사용자인 경우 세션 검증 시작
-  if (!isAdminUser) {
-    startSessionValidation();
-  }
+  // 세션 검증 완전 비활성화
+  // if (!isAdminUser) {
+  //   startSessionValidation();
+  // }
 }
 
 function goHome() {
@@ -2286,6 +2286,18 @@ if (success) {
 } else {
   alert('승인해제에 실패했습니다.');
 }
+
+  if (success) {
+    // 해당 사용자가 현재 로그인되어 있으면 로그아웃 처리
+    if (currentUser === userCode) {
+      alert('계정이 승인해제되었습니다.');
+      logout();
+    }
+    
+    setTimeout(async () => {
+      await loadUsersList();
+    }, 2000);
+  }
 }
 
 async function reactivateUser(userCode) {
@@ -2308,24 +2320,48 @@ try {
 
 // 세션 검증 함수들 (일시 중단)
 async function validateUserSession() {
-if (!currentUser || isAdminUser) return;
-
-console.log('세션 검증 시작 - currentUser:', currentUser);
-
-try {
-  const timestamp = Date.now();
-  const latestEmployees = await loadJsonFlexible(EMP_URL + "?t=" + timestamp);
-  console.log('최신 직원 데이터 로드 완료:', latestEmployees.length);
+  if (!currentUser || isAdminUser) return;
   
-  const currentUserData = latestEmployees.find(emp => emp.empno === currentUser);
-  console.log('현재 사용자 데이터:', currentUserData);
-  
-  if (!currentUserData) {
-    console.log('사용자를 찾을 수 없음');
-    alert('계정 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
-    logout();
-    return;
+  try {
+    const timestamp = Date.now();
+    const latestEmployees = await loadJsonFlexible(EMP_URL + "?t=" + timestamp);
+    
+    // 데이터 로드 검증
+    if (!latestEmployees || !Array.isArray(latestEmployees) || latestEmployees.length === 0) {
+      console.error('직원 데이터 로드 실패 또는 빈 배열');
+      return; // 오류 시 로그아웃하지 않고 그냥 리턴
+    }
+    
+    // 타입 안전한 사용자 검색
+    const currentUserData = latestEmployees.find(emp => 
+      String(emp.empno) === String(currentUser) || emp.empno === currentUser
+    );
+    
+    if (!currentUserData) {
+      console.error('사용자를 찾을 수 없음:', currentUser);
+      console.log('사용가능한 사용자들:', latestEmployees.map(emp => emp.empno));
+      
+      // 3회 연속 실패 시에만 로그아웃
+      if (!validateUserSession.failCount) validateUserSession.failCount = 0;
+      validateUserSession.failCount++;
+      
+      if (validateUserSession.failCount >= 3) {
+        alert('계정 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
+        logout();
+      }
+      return;
+    }
+    
+    // 성공 시 실패 카운트 리셋
+    validateUserSession.failCount = 0;
+    
+    // 나머지 검증 로직...
+    
+  } catch (error) {
+    console.error('세션 검증 실패:', error);
+    // 네트워크 오류 등으로 인한 실패 시 로그아웃하지 않음
   }
+}
   
   if (currentUserData.status === 'suspended') {
     console.log('사용자가 일시정지 상태');
