@@ -2135,29 +2135,44 @@ if (currentUser) {
 }
 }
 
-function showGuideScreen() {
-LogManager.logUserAction(currentUser, 'menu_click', '통합인수가이드');
-navigateToScreen('guide');
+async function showGuideScreen() {
+  // 사용자 상태 검증
+  if (!(await validateCurrentUser())) return;
+  
+  LogManager.logUserAction(currentUser, 'menu_click', '통합인수가이드');
+  navigateToScreen('guide');
 }
 
-function showDiseaseScreen() {
-LogManager.logUserAction(currentUser, 'menu_click', '즉시인수질환');
-navigateToScreen('search');
+async function showDiseaseScreen() {
+  // 사용자 상태 검증
+  if (!(await validateCurrentUser())) return;
+  
+  LogManager.logUserAction(currentUser, 'menu_click', '즉시인수질환');
+  navigateToScreen('search');
 }
 
-function showContactScreen() {
-LogManager.logUserAction(currentUser, 'menu_click', '연락처조회');
-navigateToScreen('contact');
+async function showContactScreen() {
+  // 사용자 상태 검증
+  if (!(await validateCurrentUser())) return;
+  
+  LogManager.logUserAction(currentUser, 'menu_click', '연락처조회');
+  navigateToScreen('contact');
 }
 
-function showLimitScreen() {
-LogManager.logUserAction(currentUser, 'menu_click', '인수한도조회');
-navigateToScreen('limit');
+async function showLimitScreen() {
+  // 사용자 상태 검증
+  if (!(await validateCurrentUser())) return;
+  
+  LogManager.logUserAction(currentUser, 'menu_click', '인수한도조회');
+  navigateToScreen('limit');
 }
 
-function showVideoScreen() {
-LogManager.logUserAction(currentUser, 'menu_click', '영상다시보기');
-navigateToScreen('video');
+async function showVideoScreen() {
+  // 사용자 상태 검증
+  if (!(await validateCurrentUser())) return;
+  
+  LogManager.logUserAction(currentUser, 'menu_click', '영상다시보기');
+  navigateToScreen('video');
 }
 
 function showLogScreen() {
@@ -2337,6 +2352,33 @@ function startSessionValidation() {
   return;
 }
 
+async function validateCurrentUser() {
+  if (!currentUser || isAdminUser) return true;
+  
+  try {
+    const timestamp = Date.now();
+    const latestEmployees = await loadJsonFlexible(EMP_URL + "?t=" + timestamp);
+    
+    const userData = latestEmployees.find(emp => 
+      String(emp.empno) === String(currentUser)
+    );
+    
+    if (!userData || userData.status === 'suspended' || userData.password !== '1111') {
+      alert('계정 상태가 변경되었습니다. 다시 로그인해주세요.');
+      logout();
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('사용자 검증 실패:', error);
+    return true; // 네트워크 오류시 계속 진행
+  }
+}
+
+
+
+  
 
 function stopSessionValidation() {
   if (sessionCheckInterval) {
