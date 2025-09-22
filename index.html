@@ -1103,47 +1103,50 @@ const ADMIN_ACCOUNT = {
 class LogManager {
   static PROXY_URL = 'https://hwg-log-proxy.netlify.app/.netlify/functions/log';
   
-  static async logUserAction(userCode, action, menu = '') {
-    if (!userCode) return;
-    
-    const logData = {
-      userCode: userCode,
-      action: action,
-      menu: menu,
-      timestamp: new Date().toISOString(),
-      date: new Date().toISOString().split('T')[0]
-    };
-    
-    try {
-      // 로그 기록
-      await this.sendLogToProxy(logData);
-      
-      // 사용자 활동 시간 업데이트 (로그인이나 메뉴 클릭 시)
-      if (action === 'login' || action === 'menu_click') {
-        await this.updateLastActivity(userCode);
-      }
-      
-    } catch (error) {
-      console.error('로그 전송 실패:', error);
-    }
+ static async logUserAction(userCode, action, menu = '') {
+  if (!userCode) return;
+  
+  const logData = {
+    userCode: userCode,
+    action: action,
+    menu: menu,
+    timestamp: new Date().toISOString(),
+    date: new Date().toISOString().split('T')[0]
+  };
+  
+  try {
+    // 로그 기록
+    await this.sendLogToProxy(logData);
+  } catch (error) {
+    console.error('로그 전송 실패:', error);
   }
   
-  static async updateLastActivity(userCode) {
-    try {
-      await fetch(this.PROXY_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'updateLastActivity',
-          logData: { userCode: userCode }
-        })
-      });
-    } catch (error) {
-      console.error('활동 시간 업데이트 실패:', error);
-    }
+  // 사용자 활동 시간 업데이트는 별도로 처리 (실패해도 메인 로그에 영향 없음)
+  if (action === 'login' || action === 'menu_click') {
+    this.updateLastActivity(userCode); // await 제거
   }
+}
+  
+ static async updateLastActivity(userCode) {
+  try {
+    const response = await fetch(this.PROXY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'updateLastActivity',
+        logData: { userCode: userCode }
+      })
+    });
+    
+    if (!response.ok) {
+      console.warn(`활동 시간 업데이트 실패 (${response.status}): ${userCode}`);
+    }
+  } catch (error) {
+    console.error('활동 시간 업데이트 실패:', error);
+  }
+}
   
   static async sendLogToProxy(logData) {
     try {
