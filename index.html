@@ -2280,14 +2280,22 @@ async function suspendUser(userCode) {
   if (!confirm(`사용자 ${userCode}를 승인해제하시겠습니까?\n패스워드가 랜덤으로 변경됩니다.`)) {
     return;
   }
-
+  
+  console.log('승인해제 대상:', userCode);
+  console.log('현재 로그인 사용자:', currentUser);
+  
   const success = await LogManager.suspendUser(userCode);
+  console.log('승인해제 성공 여부:', success);
+  
   if (success) {
     // 해당 사용자가 현재 로그인되어 있으면 즉시 로그아웃 처리
     if (currentUser === userCode) {
+      console.log('현재 사용자와 승인해제 대상이 일치 - 로그아웃 실행');
       alert('계정이 승인해제되었습니다.');
       logout();
       return;
+    } else {
+      console.log('다른 사용자 승인해제 - 로그아웃 안함');
     }
     
     setTimeout(async () => {
