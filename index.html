@@ -1120,13 +1120,6 @@ static getKoreaDate() {
   return koreaTime.toISOString().split('T')[0];
 }
 
-// 한국시간 날짜 생성 함수 추가
-static getKoreaDate() {
-  const now = new Date();
-  const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
-  return koreaTime.toISOString().split('T')[0];
-}
-
 static async logUserAction(userCode, action, menu = '') {
   if (!userCode) return;
   
