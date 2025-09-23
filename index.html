@@ -1928,8 +1928,9 @@ async function loadLogAnalysis() {
       
       if (log.userCode === '8091768') return;
       
-      const adminOnlyMenus = ['로그조회', '사용자관리'];
-      if (log.menu && adminOnlyMenus.includes(log.menu)) return;
+      // 허용된 메뉴만 포함 (4개 항목만)
+      const allowedMenus = ['통합인수가이드', '인수한도조회', '연락처조회', '영상다시보기'];
+      if (!log.menu || !allowedMenus.includes(log.menu)) return;
       
       if (!userStats[log.userCode]) {
         userStats[log.userCode] = { total: 0, menus: {} };
