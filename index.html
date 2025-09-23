@@ -2596,12 +2596,7 @@ async function loadLogAnalysis() {
     loadBtn.disabled = false;
   }
 }
-    
-    // 날짜 필터링 추가
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    
-    let filteredLogs = logs;
+  
   
     
     // 기간 정보 표시
@@ -2656,16 +2651,6 @@ async function loadLogAnalysis() {
     
     // ... 나머지 HTML 생성 코드는 동일
     
-  } catch (error) {
-    console.error('로그 분석 오류:', error);
-    document.getElementById('logAnalysis').innerHTML = '<div class="error">로그 분석 중 오류가 발생했습니다.</div>';
-    document.getElementById('logAnalysis').style.display = 'block';
-  } finally {
-    const loadBtn = document.getElementById('loadLogsBtn');
-    loadBtn.textContent = '로그 데이터 새로고침';
-    loadBtn.disabled = false;
-  }
-}
   
 // 개선된 연락처 화면 표시 함수
 function showInsuranceContactsInContactScreen() {
