@@ -1994,7 +1994,8 @@ async function loadAllData(){
 
     employees = emp.map(e => ({
       empno: String(e.empno || e.code || "").trim(),
-      password: String(e.password || "").trim()
+      password: String(e.password || "").trim(),
+      status: e.status || 'active'
     })).filter(e => e.empno && e.password);
 
     diseases = dis.map(d => ({
@@ -2064,13 +2065,13 @@ async function login(){
     return;
   }
 
- // 기존 employees 데이터로 먼저 시도
+// 기존 employees 데이터로 먼저 시도
 if(!employees.length){
   msg.textContent = "데이터가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.";
   return;
 }
 
-let user = employees.find(u => u.empno === empno && u.password === password);
+let user = employees.find(u => String(u.empno).trim() === empno && String(u.password).trim() === password);
 
 // 기존 데이터에서 찾지 못했으면 최신 데이터로 재시도
 if (!user) {
@@ -2079,8 +2080,20 @@ if (!user) {
     const timestamp = Date.now();
     const latestEmployees = await loadJsonFlexible(EMP_URL + "?t=" + timestamp);
     
+    // 최신 데이터 형식 정규화
+    const normalizedEmployees = latestEmployees.map(e => ({
+      empno: String(e.empno || e.code || "").trim(),
+      password: String(e.password || "").trim(),
+      status: e.status || 'active'
+    })).filter(e => e.empno && e.password);
+    
     // 최신 데이터로 다시 검색
-    user = latestEmployees.find(u => u.empno === empno && u.password === password);
+    user = normalizedEmployees.find(u => u.empno === empno && u.password === password);
+    
+    if (user) {
+      // 기존 employees 배열도 업데이트
+      employees = normalizedEmployees;
+    }
     
     if (user) {
       // 기존 employees 배열도 업데이트
@@ -2428,9 +2441,6 @@ function goBackFromLog() {
 }
 
 async function loadLogAnalysis() {
-  console.log('loadLogAnalysis 함수 시작');
-  console.log('isAdminUser:', isAdminUser);
-  
   if (!isAdminUser) {
     alert('관리자만 접근 가능합니다.');
     return;
@@ -2441,22 +2451,132 @@ async function loadLogAnalysis() {
     loadBtn.textContent = '로딩 중...';
     loadBtn.disabled = true;
     
-    console.log('LogManager.getLogData() 호출 시작');
     const logs = await LogManager.getLogData();
-    console.log('받아온 로그 데이터:', logs);
-    console.log('로그 개수:', logs ? logs.length : 0);
     
     if (!logs || logs.length === 0) {
-      console.log('로그 데이터가 없음');
       document.getElementById('logAnalysis').innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
       document.getElementById('logAnalysis').style.display = 'block';
       return;
     }
     
-    console.log('로그 데이터 처리 시작');
+    // 날짜 필터링 추가
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
     
-    // 일단 여기까지만 테스트
-    document.getElementById('logAnalysis').innerHTML = `<div class="hint">로그 ${logs.length}건을 받았습니다.</div>`;
+    let filteredLogs = logs;
+    
+    if (startDate || endDate) {
+      filteredLogs = logs.filter(log => {
+        const logDate = log.date || log.timestamp?.split('T')[0] || '';
+        if (!logDate) return false;
+        
+        let includeLog = true;
+        
+        if (startDate && logDate < startDate) {
+          includeLog = false;
+        }
+        
+        if (endDate && logDate > endDate) {
+          includeLog = false;
+        }
+        
+        return includeLog;
+      });
+    }
+    
+    // 기간 정보 표시
+    let dateRangeText = '';
+    if (startDate && endDate) {
+      dateRangeText = `(${startDate} ~ ${endDate})`;
+    } else if (startDate) {
+      dateRangeText = `(${startDate} ~)`;
+    } else if (endDate) {
+      dateRangeText = `(~ ${endDate})`;
+    } else {
+      dateRangeText = '(전체 기간)';
+    }
+    document.getElementById('dateRangeInfo').textContent = dateRangeText;
+    
+    const userStats = {};
+    const menuStats = {};
+    const dailyStats = {};
+    
+    // 필터링된 로그로 통계 생성
+    filteredLogs.forEach(log => {
+      if (!log || !log.userCode) return;
+      
+      if (log.userCode === '8091768') return;
+      
+      const adminOnlyMenus = ['로그조회', '사용자관리'];
+      if (log.menu && adminOnlyMenus.includes(log.menu)) return;
+      
+      if (!userStats[log.userCode]) {
+        userStats[log.userCode] = { total: 0, menus: {} };
+      }
+      userStats[log.userCode].total++;
+      
+      if (log.menu && log.menu.trim()) {
+        if (!userStats[log.userCode].menus[log.menu]) {
+          userStats[log.userCode].menus[log.menu] = 0;
+        }
+        userStats[log.userCode].menus[log.menu]++;
+        
+        if (!menuStats[log.menu]) {
+          menuStats[log.menu] = 0;
+        }
+        menuStats[log.menu]++;
+      }
+      
+      const date = log.date || log.timestamp?.split('T')[0] || '날짜미상';
+      if (!dailyStats[date]) {
+        dailyStats[date] = 0;
+      }
+      dailyStats[date]++;
+    });
+    
+    // 사용자별 통계 HTML 생성
+    let userStatsHTML = '<div style="max-height:300px; overflow-y:auto; border:1px solid #e6e6e6; border-radius:8px; padding:10px;">';
+    Object.entries(userStats)
+      .sort(([,a], [,b]) => b.total - a.total)
+      .forEach(([userCode, stats]) => {
+        userStatsHTML += `<div style="margin-bottom:15px; padding:10px; background:#f8f9fa; border-radius:6px;">`;
+        userStatsHTML += `<div style="font-weight:600; margin-bottom:5px;">사용자: ${userCode} (총 ${stats.total}회)</div>`;
+        userStatsHTML += '<div style="font-size:12px; color:#666;">';
+        Object.entries(stats.menus)
+          .sort(([,a], [,b]) => b - a)
+          .forEach(([menu, count]) => {
+            userStatsHTML += `${menu}: ${count}회 `;
+          });
+        userStatsHTML += '</div></div>';
+      });
+    userStatsHTML += '</div>';
+    
+    // 메뉴별 통계 HTML 생성
+    let menuStatsHTML = '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">';
+    Object.entries(menuStats)
+      .sort(([,a], [,b]) => b - a)
+      .forEach(([menu, count]) => {
+        menuStatsHTML += `<div style="padding:10px; background:#fff; border:1px solid #e6e6e6; border-radius:6px; text-align:center;">`;
+        menuStatsHTML += `<div style="font-weight:600; color:#ff7f00;">${menu}</div>`;
+        menuStatsHTML += `<div style="font-size:18px; font-weight:700; margin-top:5px;">${count}회</div>`;
+        menuStatsHTML += '</div>';
+      });
+    menuStatsHTML += '</div>';
+    
+    // 일별 통계 HTML 생성
+    let dailyStatsHTML = '<div style="max-height:300px; overflow-y:auto; border:1px solid #e6e6e6; border-radius:8px; padding:10px;">';
+    Object.entries(dailyStats)
+      .sort(([a], [b]) => b.localeCompare(a))
+      .forEach(([date, count]) => {
+        dailyStatsHTML += `<div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #f0f0f0;">`;
+        dailyStatsHTML += `<span>${date}</span><span style="font-weight:600; color:#ff7f00;">${count}회</span>`;
+        dailyStatsHTML += '</div>';
+      });
+    dailyStatsHTML += '</div>';
+    
+    document.getElementById('userStats').innerHTML = userStatsHTML;
+    document.getElementById('menuStats').innerHTML = menuStatsHTML;
+    document.getElementById('dailyStats').innerHTML = dailyStatsHTML;
     document.getElementById('logAnalysis').style.display = 'block';
     
   } catch (error) {
@@ -2465,23 +2585,10 @@ async function loadLogAnalysis() {
     document.getElementById('logAnalysis').style.display = 'block';
   } finally {
     const loadBtn = document.getElementById('loadLogsBtn');
-    loadBtn.textContent = '로그 데이터 새로고침';
+    loadBtn.textContent = '로그 데이터 불러오기';
     loadBtn.disabled = false;
   }
 }
-  
-  try {
-    const loadBtn = document.getElementById('loadLogsBtn');
-    loadBtn.textContent = '로딩 중...';
-    loadBtn.disabled = true;
-    
-    const logs = await LogManager.getLogData();
-    
-    if (!logs || logs.length === 0) {
-      document.getElementById('logAnalysis').innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
-      document.getElementById('logAnalysis').style.display = 'block';
-      return;
-    }
     
     // 날짜 필터링 추가
     const startDate = document.getElementById('startDate').value;
