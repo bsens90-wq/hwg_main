@@ -832,7 +832,7 @@
     #videoMenuBtn:hover {
       background: #cc0000 !important;
     }
-     /* 보장분석지 관련 스타일 시작 */
+   /* 보장분석지 관련 스타일 시작 */
     .analysis-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -840,6 +840,67 @@
       border-radius: 10px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       overflow: hidden;
+    }
+
+    .analysis-nav-steps {
+      display: flex;
+      background: #f8f9fa;
+      padding: 10px 0;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .analysis-nav-step {
+      padding: 8px 16px;
+      margin: 0 5px;
+      border-radius: 20px;
+      font-size: 14px;
+      white-space: nowrap;
+      background: white;
+      border: 1px solid #ddd;
+    }
+
+    .analysis-nav-step.active {
+      background: var(--hanwha);
+      color: white;
+    }
+
+    .analysis-header {
+      padding: 20px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .analysis-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .analysis-legend {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .analysis-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+    }
+
+    .analysis-legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .analysis-info-row {
+      display: flex;
+      gap: 30px;
+      font-size: 14px;
+      flex-wrap: wrap;
     }
 
     .analysis-upload-section {
@@ -855,12 +916,221 @@
       text-align: center;
       background: white;
       transition: all 0.3s;
+      cursor: pointer;
     }
 
     .analysis-upload-area:hover {
       border-color: var(--hanwha);
       background: #fafafa;
     }
+
+    .analysis-upload-btn {
+      background: var(--hanwha);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px;
+    }
+
+    .analysis-main-content {
+      padding: 20px;
+    }
+
+    .analysis-sections-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .analysis-section {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px;
+      background: white;
+    }
+
+    .analysis-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .analysis-section-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .analysis-score-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 16px;
+      position: relative;
+      background: conic-gradient(from 0deg, #4caf50 0deg, #4caf50 var(--score-deg), #e0e0e0 var(--score-deg), #e0e0e0 360deg);
+    }
+
+    .analysis-score-circle span {
+      position: relative;
+      z-index: 1;
+      background: white;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .analysis-item {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      background: #f9f9f9;
+    }
+
+    .analysis-item-name {
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .analysis-item-amounts {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .analysis-amount-input {
+      width: 80px;
+      padding: 4px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-align: right;
+      font-size: 12px;
+    }
+
+    .analysis-amount-display {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .analysis-shortage {
+      color: var(--hanwha);
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .analysis-sufficient {
+      color: #4caf50;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .analysis-progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+
+    .analysis-progress-fill {
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .analysis-lifestyle-section {
+      grid-column: 1 / -1;
+    }
+
+    .analysis-lifestyle-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .analysis-lifestyle-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-radius: 6px;
+      background: #f9f9f9;
+    }
+
+    .analysis-status-indicator {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .analysis-status-o { background: #4caf50; }
+    .analysis-status-triangle { background: #ff9800; }
+    .analysis-status-x { background: #f44336; }
+
+    .analysis-action-buttons {
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid #eee;
+      background: #f9f9f9;
+    }
+
+    .analysis-generate-btn {
+      background: #2196F3;
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 10px;
+      transition: all 0.3s;
+    }
+
+    .analysis-generate-btn:hover {
+      background: #1976D2;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 768px) {
+      .analysis-sections-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .analysis-info-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .analysis-nav-steps {
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding: 10px;
+      }
+    }
+    /* 보장분석지 관련 스타일 끝 */
   </style>
 </head>
 <body>
@@ -1121,7 +1391,71 @@
     <div class="app-title">보장분석지 관리</div>
     <div class="card container-wide">
       <div class="analysis-container">
-        <!-- [여기에 보장분석지 전체 내용 추가] -->
+        <!-- 네비게이션 -->
+        <div class="analysis-nav-steps">
+          <div class="analysis-nav-step">1. 컨설팅 가이드</div>
+          <div class="analysis-nav-step active">2. 간편분석</div>
+          <div class="analysis-nav-step">3. 계약상세</div>
+          <div class="analysis-nav-step">4. 주요보장</div>
+          <div class="analysis-nav-step">5. 예상보험금 조회</div>
+          <div class="analysis-nav-step">6. 컨설팅 결과</div>
+          <div class="analysis-nav-step">7. 전/후비교</div>
+        </div>
+
+        <!-- 헤더 -->
+        <div class="analysis-header">
+          <div class="analysis-title" id="analysisTitle">보장분석지</div>
+          <div class="analysis-legend">
+            <div class="analysis-legend-item">
+              <div class="analysis-legend-color" style="background: #4caf50;"></div>
+              <span>100% 이상</span>
+            </div>
+            <div class="analysis-legend-item">
+              <div class="analysis-legend-color" style="background: #ff9800;"></div>
+              <span>80% 이상</span>
+            </div>
+            <div class="analysis-legend-item">
+              <div class="analysis-legend-color" style="background: #f44336;"></div>
+              <span>30% 미만</span>
+            </div>
+          </div>
+          <div class="analysis-info-row" id="analysisInfoRow">
+            <div>생년월일: <span id="analysisBirthDate">73-12-19</span></div>
+            <div>상령일: <span id="analysisAgeDate">06-18</span></div>
+            <div>손해보험: <span id="analysisDamageInsurance">3</span>건</div>
+            <div>생명보험: <span id="analysisLifeInsurance">7</span>건</div>
+            <div>월납보험료: <span id="analysisMonthlyPremium">563,810</span>원</div>
+          </div>
+        </div>
+
+        <!-- 업로드 섹션 -->
+        <div class="analysis-upload-section">
+          <div class="analysis-upload-area" onclick="document.getElementById('analysisFileInput').click()">
+            <input type="file" id="analysisFileInput" accept="image/*" style="display:none;">
+            <div>
+              <h3>보장분석지 이미지를 업로드하세요</h3>
+              <p>클릭하거나 파일을 드래그해서 업로드</p>
+              <button class="analysis-upload-btn" type="button">파일 선택</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="analysis-main-content">
+          <div class="analysis-sections-container" id="analysisSectionsContainer">
+            <!-- 섹션들이 여기에 동적으로 생성됩니다 -->
+          </div>
+        </div>
+
+        <!-- 액션 버튼들 -->
+        <div class="analysis-action-buttons">
+          <button class="analysis-generate-btn" onclick="generateAnalysisReport()">
+            보고서 생성
+          </button>
+          <button class="analysis-generate-btn" onclick="downloadAnalysisAsImage()">
+            이미지로 다운로드
+          </button>
+        </div>
       </div>
       
       <button id="analysisBackBtn" class="secondary" style="margin-top:20px;">뒤로가기</button>
@@ -1138,6 +1472,72 @@ let currentUser = null;
 let isAdminUser = false;
 let currentScreen = 'login';
 const screenHistory = [];
+  // 보장분석지 관련 변수
+let analysisData = {
+  personal: {
+    name: "고객명",
+    birthDate: "73-12-19",
+    ageDate: "06-18",
+    damageInsurance: 3,
+    lifeInsurance: 7,
+    monthlyPremium: 563810
+  },
+  sections: {
+    family: {
+      score: 53,
+      items: [
+        { name: "질병사망", current: 3800, target: 10000 },
+        { name: "상해사망", current: 8200, target: 20000 },
+        { name: "질병후유(3%)", current: 2000, target: 3000 },
+        { name: "상해후유(3%)", current: 7000, target: 10000 }
+      ]
+    },
+    disease: {
+      score: 78,
+      items: [
+        { name: "유사암", current: 900, target: 1000 },
+        { name: "일반암", current: 3000, target: 7000 },
+        { name: "통합암", current: 0, target: 7000 },
+        { name: "표적항암약물", current: 0, target: 5000 },
+        { name: "뇌혈관질환", current: 1000, target: 2000 },
+        { name: "뇌졸중", current: 1000, target: 3000 },
+        { name: "허혈성심장질환", current: 1000, target: 2000 },
+        { name: "급성심근경색", current: 1000, target: 3000 }
+      ]
+    },
+    medical: {
+      score: 87,
+      items: [
+        { name: "질병입원 실손", current: 5000, target: 5000 },
+        { name: "상해입원 실손", current: 5000, target: 5000 },
+        { name: "질병입원(1일)", current: 10, target: 3 },
+        { name: "상해입원(1일)", current: 2, target: 3 },
+        { name: "질병수술비", current: 52, target: 50 },
+        { name: "상해수술비", current: 53, target: 150 }
+      ]
+    },
+    care: {
+      score: 13,
+      items: [
+        { name: "경증치매", current: 0, target: 2000 },
+        { name: "중증치매", current: 0, target: 4000 },
+        { name: "장기요양(4급)", current: 0, target: 2000 },
+        { name: "장기요양(1급)", current: 0, target: 4000 },
+        { name: "간병인상해입원", current: 0, target: 10 },
+        { name: "간병인질병입원", current: 0, target: 10 }
+      ]
+    }
+  },
+  lifestyle: [
+    { name: "대인형사합의지원금", amount: 20000, status: "O" },
+    { name: "변호사선임비용", amount: 3000, status: "△" },
+    { name: "운전자벌금", amount: 3500, status: "O" },
+    { name: "자동차부상발생금", amount: 10, status: "△" },
+    { name: "화재벌금", amount: 2000, status: "O" },
+    { name: "일상생활배상책임", amount: 10000, status: "O" },
+    { name: "임플란트", amount: 200, status: "O" }
+  ]
+};
 
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
@@ -1899,6 +2299,219 @@ function goBackFromAnalysis() {
   navigateToScreen('menu');
 }
 
+  // 보장분석지 관련 함수들
+function initializeAnalysisScreen() {
+  updateAnalysisPersonalInfo();
+  renderAnalysisSections();
+  setupAnalysisUpload();
+}
+
+function updateAnalysisPersonalInfo() {
+  document.getElementById('analysisTitle').textContent = `${analysisData.personal.name}님의 한 장 요약 보장분석`;
+  document.getElementById('analysisBirthDate').textContent = analysisData.personal.birthDate;
+  document.getElementById('analysisAgeDate').textContent = analysisData.personal.ageDate;
+  document.getElementById('analysisDamageInsurance').textContent = analysisData.personal.damageInsurance;
+  document.getElementById('analysisLifeInsurance').textContent = analysisData.personal.lifeInsurance;
+  document.getElementById('analysisMonthlyPremium').textContent = analysisData.personal.monthlyPremium.toLocaleString();
+}
+
+function renderAnalysisSections() {
+  const container = document.getElementById('analysisSectionsContainer');
+  const sections = [
+    { key: 'family', title: '가족보장' },
+    { key: 'disease', title: '큰병보장' },
+    { key: 'medical', title: '의료보장' },
+    { key: 'care', title: '간병보장' }
+  ];
+  
+  container.innerHTML = '';
+  
+  sections.forEach(sectionInfo => {
+    const section = analysisData.sections[sectionInfo.key];
+    const sectionElement = createAnalysisSectionElement(sectionInfo, section);
+    container.appendChild(sectionElement);
+  });
+  
+  // 생활보장 섹션 추가
+  const lifestyleSection = createLifestyleSectionElement();
+  container.appendChild(lifestyleSection);
+}
+
+function createAnalysisSectionElement(sectionInfo, section) {
+  const div = document.createElement('div');
+  div.className = 'analysis-section';
+  
+  const degrees = (section.score / 100) * 360;
+  
+  div.innerHTML = `
+    <div class="analysis-section-header">
+      <div class="analysis-section-title">${sectionInfo.title}</div>
+      <div class="analysis-score-circle" style="--score-deg: ${degrees}deg;">
+        <span>${section.score}점</span>
+      </div>
+    </div>
+    <div class="analysis-items">
+      ${section.items.map((item, index) => createAnalysisItemHTML(item, sectionInfo.key, index)).join('')}
+    </div>
+  `;
+  
+  return div;
+}
+
+function createAnalysisItemHTML(item, sectionKey, itemIndex) {
+  const shortage = Math.max(0, item.target - item.current);
+  const percentage = Math.min(100, (item.current / item.target) * 100);
+  
+  let progressColor = '#f44336';
+  if (percentage >= 100) progressColor = '#4caf50';
+  else if (percentage >= 80) progressColor = '#ff9800';
+  
+  return `
+    <div class="analysis-item">
+      <div class="analysis-item-name">${item.name}</div>
+      <div class="analysis-item-amounts">
+        <input type="number" class="analysis-amount-input" value="${item.current}" 
+               onchange="updateAnalysisAmount('${sectionKey}', ${itemIndex}, 'current', this.value)">
+        <span class="analysis-amount-display">만원 /</span>
+        <input type="number" class="analysis-amount-input" value="${item.target}" 
+               onchange="updateAnalysisAmount('${sectionKey}', ${itemIndex}, 'target', this.value)">
+        <span class="analysis-amount-display">만원</span>
+        ${shortage > 0 ? `<span class="analysis-shortage">(${shortage.toLocaleString()}만원 부족)</span>` : 
+          item.current >= item.target ? `<span class="analysis-sufficient">충족</span>` : ''}
+      </div>
+      <div class="analysis-progress-bar">
+        <div class="analysis-progress-fill" style="width: ${Math.min(100, percentage)}%; background: ${progressColor};"></div>
+      </div>
+    </div>
+  `;
+}
+
+function createLifestyleSectionElement() {
+  const div = document.createElement('div');
+  div.className = 'analysis-section analysis-lifestyle-section';
+  
+  div.innerHTML = `
+    <div class="analysis-section-header">
+      <div class="analysis-section-title">생활보장</div>
+      <div style="font-size: 12px; color: #666;">
+        <span style="color: #4caf50;">●</span> 적정
+        <span style="color: #ff9800; margin-left: 10px;">▲</span> 부족
+        <span style="color: #f44336; margin-left: 10px;">✕</span> 미보장
+      </div>
+    </div>
+    <div class="analysis-lifestyle-items">
+      ${analysisData.lifestyle.map((item, index) => createLifestyleItemHTML(item, index)).join('')}
+    </div>
+  `;
+  
+  return div;
+}
+
+function createLifestyleItemHTML(item, index) {
+  const statusClass = item.status === 'O' ? 'analysis-status-o' : 
+                     item.status === '△' ? 'analysis-status-triangle' : 'analysis-status-x';
+  const statusText = item.status === 'O' ? '●' : 
+                    item.status === '△' ? '▲' : '✕';
+  
+  return `
+    <div class="analysis-lifestyle-item">
+      <div>
+        <strong>${item.name}</strong>
+        <div style="font-size: 12px; color: #666; margin-top: 2px;">
+          <input type="number" class="analysis-amount-input" value="${item.amount}" 
+                 onchange="updateAnalysisLifestyle(${index}, 'amount', this.value)">만원
+        </div>
+      </div>
+      <div class="analysis-status-indicator ${statusClass}" onclick="toggleAnalysisStatus(${index})">${statusText}</div>
+    </div>
+  `;
+}
+
+function updateAnalysisAmount(sectionKey, itemIndex, field, value) {
+  const numValue = parseInt(value) || 0;
+  analysisData.sections[sectionKey].items[itemIndex][field] = numValue;
+  
+  // 점수 재계산
+  const section = analysisData.sections[sectionKey];
+  const totalPercentage = section.items.reduce((sum, item) => {
+    return sum + Math.min(100, (item.current / item.target) * 100);
+  }, 0);
+  section.score = Math.round(totalPercentage / section.items.length);
+  
+  renderAnalysisSections();
+}
+
+function updateAnalysisLifestyle(index, field, value) {
+  analysisData.lifestyle[index][field] = field === 'amount' ? (parseInt(value) || 0) : value;
+  renderAnalysisSections();
+}
+
+function toggleAnalysisStatus(index) {
+  const statuses = ['O', '△', '✕'];
+  const currentStatus = analysisData.lifestyle[index].status;
+  const currentIndex = statuses.indexOf(currentStatus);
+  const nextIndex = (currentIndex + 1) % statuses.length;
+  analysisData.lifestyle[index].status = statuses[nextIndex];
+  renderAnalysisSections();
+}
+
+function setupAnalysisUpload() {
+  const fileInput = document.getElementById('analysisFileInput');
+  const uploadArea = document.querySelector('.analysis-upload-area');
+  
+  fileInput.addEventListener('change', handleAnalysisFileUpload);
+  
+  // 드래그 앤 드롭 설정
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, preventDefaults, false);
+  });
+  
+  ['dragenter', 'dragover'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, () => {
+      uploadArea.style.borderColor = 'var(--hanwha)';
+      uploadArea.style.background = '#fafafa';
+    });
+  });
+  
+  ['dragleave', 'drop'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, () => {
+      uploadArea.style.borderColor = '#ccc';
+      uploadArea.style.background = 'white';
+    });
+  });
+  
+  uploadArea.addEventListener('drop', handleAnalysisDrop);
+  
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  
+  function handleAnalysisDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    
+    if (files.length > 0) {
+      fileInput.files = files;
+      handleAnalysisFileUpload({ target: { files: files } });
+    }
+  }
+}
+
+function handleAnalysisFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  alert('OCR 기능은 실제 구현에서 Tesseract.js 등을 사용하여 구현할 수 있습니다.\n현재는 기본 데이터를 사용합니다.');
+}
+
+function generateAnalysisReport() {
+  alert('보고서 생성 기능이 실행되었습니다.');
+}
+
+function downloadAnalysisAsImage() {
+  alert('이미지 다운로드 기능이 실행되었습니다.');
+}
   
 function showLogScreen() {
   LogManager.logUserAction(currentUser, 'menu_click', '로그조회');
