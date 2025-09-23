@@ -2441,6 +2441,40 @@ async function loadLogAnalysis() {
     loadBtn.textContent = '로딩 중...';
     loadBtn.disabled = true;
     
+    console.log('LogManager.getLogData() 호출 시작');
+    const logs = await LogManager.getLogData();
+    console.log('받아온 로그 데이터:', logs);
+    console.log('로그 개수:', logs ? logs.length : 0);
+    
+    if (!logs || logs.length === 0) {
+      console.log('로그 데이터가 없음');
+      document.getElementById('logAnalysis').innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
+      document.getElementById('logAnalysis').style.display = 'block';
+      return;
+    }
+    
+    console.log('로그 데이터 처리 시작');
+    
+    // 일단 여기까지만 테스트
+    document.getElementById('logAnalysis').innerHTML = `<div class="hint">로그 ${logs.length}건을 받았습니다.</div>`;
+    document.getElementById('logAnalysis').style.display = 'block';
+    
+  } catch (error) {
+    console.error('로그 분석 오류:', error);
+    document.getElementById('logAnalysis').innerHTML = '<div class="error">로그 분석 중 오류가 발생했습니다: ' + error.message + '</div>';
+    document.getElementById('logAnalysis').style.display = 'block';
+  } finally {
+    const loadBtn = document.getElementById('loadLogsBtn');
+    loadBtn.textContent = '로그 데이터 새로고침';
+    loadBtn.disabled = false;
+  }
+}
+  
+  try {
+    const loadBtn = document.getElementById('loadLogsBtn');
+    loadBtn.textContent = '로딩 중...';
+    loadBtn.disabled = true;
+    
     const logs = await LogManager.getLogData();
     
     if (!logs || logs.length === 0) {
