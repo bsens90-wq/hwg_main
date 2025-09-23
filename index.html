@@ -1984,6 +1984,7 @@ async function loadJsonFlexible(url){
 
 async function loadAllData(){
   try{
+    console.log("데이터 로드 시작...");
     // 캐시 무시를 위한 타임스탬프 추가
     const timestamp = Date.now();
     const [emp, dis, guide] = await Promise.all([
@@ -1992,11 +1993,15 @@ async function loadAllData(){
       loadJsonFlexible(GUIDE_URL + "?t=" + timestamp)
     ]);
 
+    console.log("받은 직원 데이터:", emp);
+    
     employees = emp.map(e => ({
       empno: String(e.empno || e.code || "").trim(),
       password: String(e.password || "").trim(),
       status: e.status || 'active'
     })).filter(e => e.empno && e.password);
+    
+    console.log("처리된 직원 데이터:", employees);
 
     diseases = dis.map(d => ({
       name: String(d.name || "").trim(),
@@ -2071,7 +2076,17 @@ if(!employees.length){
   return;
 }
 
-let user = employees.find(u => String(u.empno).trim() === empno && String(u.password).trim() === password);
+console.log("로그인 시도:", { empno, password: "***" });
+console.log("현재 직원 목록:", employees.map(e => ({ empno: e.empno, password: "***" })));
+
+let user = employees.find(u => {
+  const userEmpno = String(u.empno).trim();
+  const userPassword = String(u.password).trim();
+  console.log("비교 중:", { userEmpno, inputEmpno: empno, match: userEmpno === empno });
+  return userEmpno === empno && userPassword === password;
+});
+
+console.log("찾은 사용자:", user ? "있음" : "없음");
 
 // 기존 데이터에서 찾지 못했으면 최신 데이터로 재시도
 if (!user) {
@@ -2090,17 +2105,9 @@ if (!user) {
     // 최신 데이터로 다시 검색
     user = normalizedEmployees.find(u => u.empno === empno && u.password === password);
     
-    if (user) {
+   if (user) {
       // 기존 employees 배열도 업데이트
       employees = normalizedEmployees;
-    }
-    
-    if (user) {
-      // 기존 employees 배열도 업데이트
-      employees = latestEmployees.map(e => ({
-        empno: String(e.empno || e.code || "").trim(),
-        password: String(e.password || "").trim()
-      })).filter(e => e.empno && e.password);
     }
   } catch (error) {
     console.error('최신 데이터 로드 실패:', error);
@@ -2595,25 +2602,7 @@ async function loadLogAnalysis() {
     const endDate = document.getElementById('endDate').value;
     
     let filteredLogs = logs;
-    
-    if (startDate || endDate) {
-      filteredLogs = logs.filter(log => {
-        const logDate = log.date || log.timestamp?.split('T')[0] || '';
-        if (!logDate) return false;
-        
-        let includeLog = true;
-        
-        if (startDate && logDate < startDate) {
-          includeLog = false;
-        }
-        
-        if (endDate && logDate > endDate) {
-          includeLog = false;
-        }
-        
-        return includeLog;
-      });
-    }
+  
     
     // 기간 정보 표시
     let dateRangeText = '';
