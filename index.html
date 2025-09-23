@@ -1143,12 +1143,10 @@ static async logUserAction(userCode, action, menu = '') {
   
 static async updateLastActivity(userCode) {
   try {
-    // 캐시 무력화 추가
     const response = await fetch(this.PROXY_URL + `?t=${Date.now()}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         action: 'updateLastActivity',
@@ -1166,13 +1164,10 @@ static async updateLastActivity(userCode) {
   
  static async sendLogToProxy(logData) {
   try {
-    // 캐시 무력화 추가
     const response = await fetch(this.PROXY_URL + `?t=${Date.now()}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         action: 'writeLog',
@@ -1200,13 +1195,10 @@ static async updateLastActivity(userCode) {
   }
   
   try {
-    // 캐시 무력화 추가
     const response = await fetch(this.PROXY_URL + `?t=${Date.now()}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         action: 'readLogs'
