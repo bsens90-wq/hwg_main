@@ -1110,6 +1110,13 @@ static getKoreaDate() {
   return koreaTime.toISOString().split('T')[0];
 }
 
+// 한국시간 날짜 생성 함수 추가
+static getKoreaDate() {
+  const now = new Date();
+  const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
+  return koreaTime.toISOString().split('T')[0];
+}
+
 static async logUserAction(userCode, action, menu = '') {
   if (!userCode) return;
   
@@ -1122,11 +1129,11 @@ static async logUserAction(userCode, action, menu = '') {
   };
   
   try {
+    // 로그 기록
     await this.sendLogToProxy(logData);
   } catch (error) {
     console.error('로그 전송 실패:', error);
   }
-}
   
   // 사용자 활동 시간 업데이트는 별도로 처리 (실패해도 메인 로그에 영향 없음)
   if (action === 'login' || action === 'menu_click') {
@@ -1134,7 +1141,7 @@ static async logUserAction(userCode, action, menu = '') {
   }
 }
   
- static async updateLastActivity(userCode) {
+static async updateLastActivity(userCode) {
   try {
     // 캐시 무력화 추가
     const response = await fetch(this.PROXY_URL + `?t=${Date.now()}`, {
@@ -1157,7 +1164,7 @@ static async logUserAction(userCode, action, menu = '') {
   }
 }
   
-  static async sendLogToProxy(logData) {
+ static async sendLogToProxy(logData) {
   try {
     // 캐시 무력화 추가
     const response = await fetch(this.PROXY_URL + `?t=${Date.now()}`, {
@@ -1186,7 +1193,7 @@ static async logUserAction(userCode, action, menu = '') {
   }
 }
   
-  static async getLogData() {
+ static async getLogData() {
   if (!isAdminUser) {
     alert('관리자만 로그를 조회할 수 있습니다.');
     return [];
@@ -1218,7 +1225,6 @@ static async logUserAction(userCode, action, menu = '') {
     return [];
   }
 }
-  
   // 비활성 사용자 체크 (관리자 전용)
   static async checkInactiveUsers() {
     if (!isAdminUser) {
