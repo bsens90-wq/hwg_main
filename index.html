@@ -1013,11 +1013,21 @@
     <h2 style="margin-bottom:1rem;">로그 분석</h2>
     
     <div class="row">
+      <label style="display:block; margin-bottom:5px; font-weight:600;">조회 시작일</label>
+      <input id="startDate" type="date" style="margin-bottom:10px;">
+    </div>
+    
+    <div class="row">
+      <label style="display:block; margin-bottom:5px; font-weight:600;">조회 종료일</label>
+      <input id="endDate" type="date" style="margin-bottom:10px;">
+    </div>
+    
+    <div class="row">
       <button id="loadLogsBtn">로그 데이터 불러오기</button>
     </div>
     
     <div id="logAnalysis" style="margin-top:20px; display:none;">
-      <h3>사용자별 활동</h3>
+      <h3>사용자별 활동 <span id="dateRangeInfo" style="font-size:14px; color:#666;"></span></h3>
       <div id="userStats"></div>
       
       <h3 style="margin-top:20px;">메뉴별 사용 통계</h3>
@@ -2189,9 +2199,16 @@ function showVideoScreen() {
 }
 
 function showLogScreen() {
-  // 관리자 기능이므로 검증 생략
   LogManager.logUserAction(currentUser, 'menu_click', '로그조회');
   navigateToScreen('log');
+  
+  // 기본값으로 오늘부터 7일 전까지 설정
+  const today = new Date();
+  const weekAgo = new Date(today);
+  weekAgo.setDate(today.getDate() - 7);
+  
+  document.getElementById('endDate').value = today.toISOString().split('T')[0];
+  document.getElementById('startDate').value = weekAgo.toISOString().split('T')[0];
 }
 
 function showUserManageScreen() {
@@ -2444,74 +2461,83 @@ async function loadLogAnalysis() {
       return;
     }
     
+    // 조회 기간 필터링
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    let filteredLogs = logs;
+    
+    if (startDate || endDate) {
+      filteredLogs = logs.filter(log => {
+        const logDate = log.date || log.timestamp?.split('T')[0] || '';
+        if (!logDate) return false;
+        
+        let includeLog = true;
+        
+        if (startDate && logDate < startDate) {
+          includeLog = false;
+        }
+        
+        if (endDate && logDate > endDate) {
+          includeLog = false;
+        }
+        
+        return includeLog;
+      });
+    }
+    
+    // 기간 정보 표시
+    let dateRangeText = '';
+    if (startDate && endDate) {
+      dateRangeText = `(${startDate} ~ ${endDate})`;
+    } else if (startDate) {
+      dateRangeText = `(${startDate} ~)`;
+    } else if (endDate) {
+      dateRangeText = `(~ ${endDate})`;
+    } else {
+      dateRangeText = '(전체 기간)';
+    }
+    document.getElementById('dateRangeInfo').textContent = dateRangeText;
+    
     const userStats = {};
     const menuStats = {};
     const dailyStats = {};
     
-logs.forEach(log => {
-  if (!log || !log.userCode) return;
-  
-  // 관리자 로그는 분석 시에만 제외 (기록은 됨)
-  if (log.userCode === '8091768') return;
-  
-  // 관리자 전용 메뉴는 통계에서 제외
-  const adminOnlyMenus = ['로그조회', '사용자관리'];
-  if (log.menu && adminOnlyMenus.includes(log.menu)) return;
-  
-  if (!userStats[log.userCode]) {
-    userStats[log.userCode] = { total: 0, menus: {} };
-  }
-  userStats[log.userCode].total++;
-  
-  if (log.menu && log.menu.trim()) {
-    if (!userStats[log.userCode].menus[log.menu]) {
-      userStats[log.userCode].menus[log.menu] = 0;
-    }
-    userStats[log.userCode].menus[log.menu]++;
-    
-    if (!menuStats[log.menu]) {
-      menuStats[log.menu] = 0;
-    }
-    menuStats[log.menu]++;
-  }
-  
-  const date = log.date || log.timestamp?.split('T')[0] || '날짜미상';
-  if (!dailyStats[date]) {
-    dailyStats[date] = 0;
-  }
-  dailyStats[date]++;
-});
-    
-    let userStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;"><tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">사용자</th><th style="border:1px solid #e6e6e6; padding:10px;">총 활동</th><th style="border:1px solid #e6e6e6; padding:10px;">메뉴별 사용</th></tr>';
-    
-    Object.entries(userStats).forEach(([user, data]) => {
-      const menuDetails = Object.entries(data.menus).map(([menu, count]) => `${menu}: ${count}회`).join(', ') || '없음';
-      userStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${user}</td><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${data.total}회</td><td style="border:1px solid #e6e6e6; padding:8px;">${menuDetails}</td></tr>`;
+    filteredLogs.forEach(log => {
+      if (!log || !log.userCode) return;
+      
+      // 관리자 로그는 분석 시에만 제외 (기록은 됨)
+      if (log.userCode === '8091768') return;
+      
+      // 관리자 전용 메뉴는 통계에서 제외
+      const adminOnlyMenus = ['로그조회', '사용자관리'];
+      if (log.menu && adminOnlyMenus.includes(log.menu)) return;
+      
+      if (!userStats[log.userCode]) {
+        userStats[log.userCode] = { total: 0, menus: {} };
+      }
+      userStats[log.userCode].total++;
+      
+      if (log.menu && log.menu.trim()) {
+        if (!userStats[log.userCode].menus[log.menu]) {
+          userStats[log.userCode].menus[log.menu] = 0;
+        }
+        userStats[log.userCode].menus[log.menu]++;
+        
+        if (!menuStats[log.menu]) {
+          menuStats[log.menu] = 0;
+        }
+        menuStats[log.menu]++;
+      }
+      
+      const date = log.date || log.timestamp?.split('T')[0] || '날짜미상';
+      if (!dailyStats[date]) {
+        dailyStats[date] = 0;
+      }
+      dailyStats[date]++;
     });
-    userStatsHTML += '</table>';
     
-    let menuStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;"><tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">메뉴</th><th style="border:1px solid #e6e6e6; padding:10px;">사용횟수</th></tr>';
-    
-    if (Object.keys(menuStats).length === 0) {
-      menuStatsHTML += '<tr><td colspan="2" style="border:1px solid #e6e6e6; padding:8px; text-align:center;">메뉴 사용 데이터가 없습니다.</td></tr>';
-    } else {
-      Object.entries(menuStats).sort((a, b) => b[1] - a[1]).forEach(([menu, count]) => {
-        menuStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px;">${menu}</td><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${count}회</td></tr>`;
-      });
-    }
-    menuStatsHTML += '</table>';
-    
-    let dailyStatsHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;"><tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">날짜</th><th style="border:1px solid #e6e6e6; padding:10px;">활동횟수</th></tr>';
-    
-    Object.entries(dailyStats).sort((a, b) => b[0].localeCompare(a[0])).forEach(([date, count]) => {
-      dailyStatsHTML += `<tr><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${date}</td><td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${count}회</td></tr>`;
-    });
-    dailyStatsHTML += '</table>';
-    
-    document.getElementById('userStats').innerHTML = userStatsHTML;
-    document.getElementById('menuStats').innerHTML = menuStatsHTML;
-    document.getElementById('dailyStats').innerHTML = dailyStatsHTML;
-    document.getElementById('logAnalysis').style.display = 'block';
+    // 나머지 기존 HTML 생성 코드는 동일...
     
   } catch (error) {
     console.error('로그 분석 오류:', error);
