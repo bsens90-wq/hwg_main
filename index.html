@@ -1130,8 +1130,77 @@
         padding: 10px;
       }
     }
-    /* 보장분석지 관련 스타일 끝 */
+/* 보장분석지 관련 스타일 끝 */
+    
+    /* OCR 관련 스타일 */
+    .ocr-progress {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e6e6e6;
+      display: none;
+    }
+
+    .ocr-progress-bar {
+      width: 100%;
+      height: 20px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .ocr-progress-fill {
+      height: 100%;
+      background: var(--hanwha);
+      transition: width 0.3s;
+      border-radius: 10px;
+    }
+
+    .ocr-status {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .ocr-preview {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .ocr-preview img {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .ocr-results {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e6e6e6;
+      display: none;
+    }
+
+    .ocr-text {
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      background: white;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    
   </style>
+  <!-- Tesseract.js OCR 라이브러리 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 </head>
 <body>
   <div class="header-fixed">
@@ -1428,7 +1497,7 @@
           </div>
         </div>
 
-        <!-- 업로드 섹션 -->
+     <!-- 업로드 섹션 -->
         <div class="analysis-upload-section">
           <div class="analysis-upload-area" onclick="document.getElementById('analysisFileInput').click()">
             <input type="file" id="analysisFileInput" accept="image/*" style="display:none;">
@@ -1437,6 +1506,29 @@
               <p>클릭하거나 파일을 드래그해서 업로드</p>
               <button class="analysis-upload-btn" type="button">파일 선택</button>
             </div>
+          </div>
+          
+          <!-- OCR 진행상황 -->
+          <div id="ocrProgress" class="ocr-progress">
+            <div class="ocr-status" id="ocrStatus">이미지 처리 중...</div>
+            <div class="ocr-progress-bar">
+              <div class="ocr-progress-fill" id="ocrProgressFill" style="width: 0%"></div>
+            </div>
+          </div>
+          
+          <!-- 이미지 미리보기 -->
+          <div id="ocrPreview" class="ocr-preview">
+            <h4>업로드된 이미지:</h4>
+            <img id="previewImage" src="" alt="미리보기">
+          </div>
+          
+          <!-- OCR 결과 -->
+          <div id="ocrResults" class="ocr-results">
+            <h4>OCR 추출 결과:</h4>
+            <div class="ocr-text" id="ocrText"></div>
+            <button class="analysis-upload-btn" onclick="parseOCRResults()" style="margin-top: 10px;">
+              데이터 적용하기
+            </button>
           </div>
         </div>
 
@@ -2498,11 +2590,52 @@ function setupAnalysisUpload() {
   }
 }
 
-function handleAnalysisFileUpload(event) {
+// 파일 업로드 처리 (OCR 포함)
+async function handleAnalysisFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
   
-  alert('OCR 기능은 실제 구현에서 Tesseract.js 등을 사용하여 구현할 수 있습니다.\n현재는 기본 데이터를 사용합니다.');
+  // 이미지 미리보기
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const previewDiv = document.getElementById('ocrPreview');
+    const previewImage = document.getElementById('previewImage');
+    
+    previewImage.src = e.target.result;
+    previewDiv.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+  
+  try {
+    // OCR 워커가 없으면 초기화
+    if (!ocrWorker) {
+      await initializeOCR();
+    }
+    
+    // OCR 실행
+    document.getElementById('ocrProgress').style.display = 'block';
+    document.getElementById('ocrStatus').textContent = 'OCR 처리 시작...';
+    
+    const { data: { text } } = await ocrWorker.recognize(file);
+    
+    // 결과 표시
+    currentOCRText = text;
+    document.getElementById('ocrText').textContent = text;
+    document.getElementById('ocrResults').style.display = 'block';
+    document.getElementById('ocrProgress').style.display = 'none';
+    
+    console.log('OCR 결과:', text);
+    
+  } catch (error) {
+    console.error('OCR 처리 실패:', error);
+    document.getElementById('ocrStatus').textContent = 'OCR 처리 중 오류가 발생했습니다.';
+    
+    // 에러 시 기본 알림으로 대체
+    setTimeout(() => {
+      document.getElementById('ocrProgress').style.display = 'none';
+      alert('OCR 처리에 실패했습니다. 수동으로 데이터를 입력해주세요.');
+    }, 2000);
+  }
 }
 
 function generateAnalysisReport() {
@@ -2512,6 +2645,190 @@ function generateAnalysisReport() {
 function downloadAnalysisAsImage() {
   alert('이미지 다운로드 기능이 실행되었습니다.');
 }
+
+// OCR 관련 변수
+let currentOCRText = '';
+let ocrWorker = null;
+
+// OCR 초기화
+async function initializeOCR() {
+  try {
+    ocrWorker = await Tesseract.createWorker('kor+eng', 1, {
+      logger: m => {
+        updateOCRProgress(m);
+      }
+    });
+    console.log('OCR 워커 초기화 완료');
+  } catch (error) {
+    console.error('OCR 초기화 실패:', error);
+  }
+}
+
+// OCR 진행상황 업데이트
+function updateOCRProgress(m) {
+  const progressDiv = document.getElementById('ocrProgress');
+  const statusDiv = document.getElementById('ocrStatus');
+  const progressFill = document.getElementById('ocrProgressFill');
+  
+  if (!progressDiv || !statusDiv || !progressFill) return;
+  
+  progressDiv.style.display = 'block';
+  
+  if (m.status) {
+    let statusText = '';
+    let progress = 0;
+    
+    switch (m.status) {
+      case 'loading tesseract core':
+        statusText = 'OCR 엔진 로딩 중...';
+        progress = 10;
+        break;
+      case 'initializing tesseract':
+        statusText = 'OCR 초기화 중...';
+        progress = 20;
+        break;
+      case 'loading language traineddata':
+        statusText = '한국어 데이터 로딩 중...';
+        progress = 30;
+        break;
+      case 'initializing api':
+        statusText = 'API 초기화 중...';
+        progress = 40;
+        break;
+      case 'recognizing text':
+        statusText = '텍스트 인식 중...';
+        progress = 50 + (m.progress * 50);
+        break;
+      default:
+        statusText = m.status;
+        progress = m.progress * 100;
+    }
+    
+    statusDiv.textContent = statusText;
+    progressFill.style.width = progress + '%';
+  }
+}
+
+// OCR 결과 파싱 및 적용
+function parseOCRResults() {
+  if (!currentOCRText) {
+    alert('OCR 텍스트가 없습니다.');
+    return;
+  }
+  
+  try {
+    const parsedData = parseInsuranceAnalysisText(currentOCRText);
+    
+    if (parsedData) {
+      // 파싱된 데이터를 analysisData에 적용
+      if (parsedData.personal) {
+        Object.assign(analysisData.personal, parsedData.personal);
+      }
+      
+      if (parsedData.sections) {
+        Object.assign(analysisData.sections, parsedData.sections);
+      }
+      
+      if (parsedData.lifestyle) {
+        analysisData.lifestyle = parsedData.lifestyle;
+      }
+      
+      // 화면 업데이트
+      updateAnalysisPersonalInfo();
+      renderAnalysisSections();
+      
+      alert('OCR 데이터가 성공적으로 적용되었습니다!');
+      
+      // 결과 창 숨기기
+      document.getElementById('ocrResults').style.display = 'none';
+      document.getElementById('ocrPreview').style.display = 'none';
+      
+    } else {
+      alert('텍스트에서 보장분석 데이터를 찾을 수 없습니다.');
+    }
+    
+  } catch (error) {
+    console.error('OCR 파싱 오류:', error);
+    alert('OCR 텍스트 파싱 중 오류가 발생했습니다.');
+  }
+}
+
+// 보장분석지 텍스트 파싱 함수
+function parseInsuranceAnalysisText(text) {
+  const result = {
+    personal: {},
+    sections: {
+      family: { score: 0, items: [] },
+      disease: { score: 0, items: [] },
+      medical: { score: 0, items: [] },
+      care: { score: 0, items: [] }
+    },
+    lifestyle: []
+  };
+  
+  // 개인정보 추출
+  const nameMatch = text.match(/([가-힣]{2,4})님의?\s*한\s*장\s*요약\s*보장분석/);
+  if (nameMatch) {
+    result.personal.name = nameMatch[1];
+  }
+  
+  // 생년월일 추출
+  const birthMatch = text.match(/생년월일[:\s]*(\d{2}-\d{2}-\d{2})/);
+  if (birthMatch) {
+    result.personal.birthDate = birthMatch[1];
+  }
+  
+  // 상령일 추출
+  const ageMatch = text.match(/상령일[:\s]*(\d{2}-\d{2})/);
+  if (ageMatch) {
+    result.personal.ageDate = ageMatch[1];
+  }
+  
+  // 보험건수 추출
+  const damageMatch = text.match(/손해보험[:\s]*(\d+)건/);
+  if (damageMatch) {
+    result.personal.damageInsurance = parseInt(damageMatch[1]);
+  }
+  
+  const lifeMatch = text.match(/생명보험[:\s]*(\d+)건/);
+  if (lifeMatch) {
+    result.personal.lifeInsurance = parseInt(lifeMatch[1]);
+  }
+  
+  // 월납보험료 추출
+  const premiumMatch = text.match(/월납보험료[:\s]*([0-9,]+)원/);
+  if (premiumMatch) {
+    result.personal.monthlyPremium = parseInt(premiumMatch[1].replace(/,/g, ''));
+  }
+  
+  // 점수 추출
+  const scorePatterns = [
+    { key: 'family', pattern: /가족보장.*?(\d+)점/ },
+    { key: 'disease', pattern: /큰병보장.*?(\d+)점/ },
+    { key: 'medical', pattern: /의료보장.*?(\d+)점/ },
+    { key: 'care', pattern: /간병보장.*?(\d+)점/ }
+  ];
+  
+  scorePatterns.forEach(({ key, pattern }) => {
+    const match = text.match(pattern);
+    if (match) {
+      result.sections[key].score = parseInt(match[1]);
+    }
+  });
+  
+  console.log('파싱 결과:', result);
+  return result;
+}
+
+// OCR 워커 정리
+async function cleanupOCR() {
+  if (ocrWorker) {
+    await ocrWorker.terminate();
+    ocrWorker = null;
+  }
+}
+
+  
   
 function showLogScreen() {
   LogManager.logUserAction(currentUser, 'menu_click', '로그조회');
@@ -3568,6 +3885,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// 페이지 언로드 시 OCR 워커 정리
+window.addEventListener('beforeunload', cleanupOCR);
+
 </script>
 
 </body>
