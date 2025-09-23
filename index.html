@@ -2428,6 +2428,9 @@ function goBackFromLog() {
 }
 
 async function loadLogAnalysis() {
+  console.log('loadLogAnalysis 함수 시작');
+  console.log('isAdminUser:', isAdminUser);
+  
   if (!isAdminUser) {
     alert('관리자만 접근 가능합니다.');
     return;
@@ -2874,7 +2877,10 @@ document.getElementById('contactBackBtn').addEventListener('click', goBackFromCo
 document.getElementById('videoBackBtn').addEventListener('click', goBackFromVideo);
 document.getElementById('logBackBtn').addEventListener('click', goBackFromLog);
 document.getElementById('userManageBackBtn').addEventListener('click', goBackFromUserManage);
-document.getElementById('loadLogsBtn').addEventListener('click', loadLogAnalysis);
+document.getElementById('loadLogsBtn').addEventListener('click', function() {
+  console.log('로그 버튼 클릭됨'); // 디버깅용
+  loadLogAnalysis();
+});
 document.getElementById('checkInactiveBtn').addEventListener('click', checkInactiveUsers);
 document.getElementById('loadUsersBtn').addEventListener('click', loadUsersList);
 document.getElementById('userSearchInput').addEventListener('input', searchUsers);
