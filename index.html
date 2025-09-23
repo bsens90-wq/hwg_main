@@ -2212,10 +2212,17 @@ function hideAllScreens() {
   document.getElementById("logScreen").style.display = "none";
   document.getElementById("userManageScreen").style.display = "none";
   document.getElementById("videoScreen").style.display = "none";
+  document.getElementById("analysisScreen").style.display = "none";
+  
+  // 보장분석지 관련 요소들 숨김 처리
+  const ocrProgress = document.getElementById("ocrProgress");
+  const ocrPreview = document.getElementById("ocrPreview");
+  const ocrResults = document.getElementById("ocrResults");
+  
+  if (ocrProgress) ocrProgress.style.display = "none";
+  if (ocrPreview) ocrPreview.style.display = "none";
+  if (ocrResults) ocrResults.style.display = "none";
 }
-
-document.getElementById("analysisScreen").style.display = "none";
-    
 function showLoginSuccess() {
   navigateToScreen('menu');
 }
@@ -2301,6 +2308,10 @@ function navigateToScreen(screen, addToHistory = true) {
       break;
 
 case 'analysis':
+      // 다른 화면에서 오는 경우 정리
+      if (currentScreen !== 'analysis') {
+        cleanupAnalysisScreen();
+      }
       document.getElementById("analysisScreen").style.display = "flex";
       initializeAnalysisScreen();
       break;
@@ -2348,34 +2359,51 @@ function validateCurrentUserPassword() {
 function showGuideScreen() {
   if (!validateCurrentUserPassword()) return;
   
+  // 보장분석지 화면에서 오는 경우 정리
+  if (currentScreen === 'analysis') {
+    cleanupAnalysisScreen();
+  }
+  
   LogManager.logUserAction(currentUser, 'menu_click', '통합인수가이드');
   navigateToScreen('guide');
 }
 
 function showDiseaseScreen() {
   if (!validateCurrentUserPassword()) return;
-  
+    // 보장분석지 화면에서 오는 경우 정리
+  if (currentScreen === 'analysis') {
+    cleanupAnalysisScreen();
+  }
   LogManager.logUserAction(currentUser, 'menu_click', '즉시인수질환');
   navigateToScreen('search');
 }
 
 function showContactScreen() {
   if (!validateCurrentUserPassword()) return;
-  
+    // 보장분석지 화면에서 오는 경우 정리
+  if (currentScreen === 'analysis') {
+    cleanupAnalysisScreen();
+  }
   LogManager.logUserAction(currentUser, 'menu_click', '연락처조회');
   navigateToScreen('contact');
 }
 
 function showLimitScreen() {
   if (!validateCurrentUserPassword()) return;
-  
+    // 보장분석지 화면에서 오는 경우 정리
+  if (currentScreen === 'analysis') {
+    cleanupAnalysisScreen();
+  }
   LogManager.logUserAction(currentUser, 'menu_click', '인수한도조회');
   navigateToScreen('limit');
 }
 
 function showVideoScreen() {
   if (!validateCurrentUserPassword()) return;
-  
+    // 보장분석지 화면에서 오는 경우 정리
+  if (currentScreen === 'analysis') {
+    cleanupAnalysisScreen();
+  }
   LogManager.logUserAction(currentUser, 'menu_click', '영상다시보기');
   navigateToScreen('video');
 }
@@ -2388,6 +2416,7 @@ function showAnalysisScreen() {
 }
 
 function goBackFromAnalysis() {
+  cleanupAnalysisScreen();
   navigateToScreen('menu');
 }
 
@@ -2396,6 +2425,39 @@ function initializeAnalysisScreen() {
   updateAnalysisPersonalInfo();
   renderAnalysisSections();
   setupAnalysisUpload();
+}
+
+// 보장분석지 화면 정리 함수
+function cleanupAnalysisScreen() {
+  // 파일 입력 초기화
+  const fileInput = document.getElementById('analysisFileInput');
+  if (fileInput) {
+    fileInput.value = '';
+  }
+  
+  // OCR 관련 요소들 숨김
+  const ocrProgress = document.getElementById("ocrProgress");
+  const ocrPreview = document.getElementById("ocrPreview");
+  const ocrResults = document.getElementById("ocrResults");
+  
+  if (ocrProgress) ocrProgress.style.display = "none";
+  if (ocrPreview) ocrPreview.style.display = "none";
+  if (ocrResults) ocrResults.style.display = "none";
+  
+  // OCR 텍스트 초기화
+  currentOCRText = '';
+  
+  // 이미지 미리보기 초기화
+  const previewImage = document.getElementById('previewImage');
+  if (previewImage) {
+    previewImage.src = '';
+  }
+  
+  // OCR 텍스트 초기화
+  const ocrText = document.getElementById('ocrText');
+  if (ocrText) {
+    ocrText.textContent = '';
+  }
 }
 
 function updateAnalysisPersonalInfo() {
@@ -2841,7 +2903,9 @@ function showUserManageScreen() {
 }
 
 function logout() {
-  if (currentUser) {
+  if (currentUser) {// 보장분석지 정리
+    cleanupAnalysisScreen();
+    
     localStorage.removeItem('hwg_current_user');
     localStorage.removeItem('hwg_is_admin');
     currentUser = null;
