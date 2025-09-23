@@ -1199,8 +1199,6 @@
     }
     
   </style>
-  <!-- Tesseract.js OCR 라이브러리 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 </head>
 <body>
   <div class="header-fixed">
@@ -2668,7 +2666,16 @@ async function handleAnalysisFileUpload(event) {
   };
   reader.readAsDataURL(file);
   
+  // OCR 기능 비활성화 - 수동 입력으로 대체
+  alert('이미지가 업로드되었습니다. 보장분석지의 내용을 수동으로 입력해주세요.');
+  
+  /* OCR 기능 임시 비활성화
   try {
+    // Tesseract 라이브러리 확인
+    if (typeof Tesseract === 'undefined') {
+      throw new Error('OCR 라이브러리가 로드되지 않았습니다.');
+    }
+    
     // OCR 워커가 없으면 초기화
     if (!ocrWorker) {
       await initializeOCR();
@@ -2698,6 +2705,7 @@ async function handleAnalysisFileUpload(event) {
       alert('OCR 처리에 실패했습니다. 수동으로 데이터를 입력해주세요.');
     }, 2000);
   }
+  */
 }
 
 function generateAnalysisReport() {
@@ -2712,9 +2720,14 @@ function downloadAnalysisAsImage() {
 let currentOCRText = '';
 let ocrWorker = null;
 
-// OCR 초기화
+// OCR 초기화 - 안전한 버전
 async function initializeOCR() {
   try {
+    // Tesseract가 로드되었는지 확인
+    if (typeof Tesseract === 'undefined') {
+      throw new Error('Tesseract.js 라이브러리가 로드되지 않았습니다.');
+    }
+    
     ocrWorker = await Tesseract.createWorker('kor+eng', 1, {
       logger: m => {
         updateOCRProgress(m);
@@ -2723,6 +2736,7 @@ async function initializeOCR() {
     console.log('OCR 워커 초기화 완료');
   } catch (error) {
     console.error('OCR 초기화 실패:', error);
+    alert('OCR 기능을 사용할 수 없습니다. 이미지 업로드 후 수동으로 데이터를 입력해주세요.');
   }
 }
 
@@ -2882,10 +2896,15 @@ function parseInsuranceAnalysisText(text) {
   return result;
 }
 
-// OCR 워커 정리
+// OCR 워커 정리 - 안전한 버전
 async function cleanupOCR() {
-  if (ocrWorker) {
-    await ocrWorker.terminate();
+  try {
+    if (ocrWorker && typeof ocrWorker.terminate === 'function') {
+      await ocrWorker.terminate();
+      ocrWorker = null;
+    }
+  } catch (error) {
+    console.error('OCR 워커 정리 실패:', error);
     ocrWorker = null;
   }
 }
