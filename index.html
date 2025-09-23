@@ -2455,11 +2455,58 @@ async function loadLogAnalysis() {
     
     const logs = await LogManager.getLogData();
     
+    // 디버깅용 로그 추가
+    console.log('받아온 로그 데이터:', logs);
+    console.log('로그 개수:', logs ? logs.length : 0);
+    
     if (!logs || logs.length === 0) {
       document.getElementById('logAnalysis').innerHTML = '<div class="hint">로그 데이터가 없습니다.</div>';
       document.getElementById('logAnalysis').style.display = 'block';
       return;
     }
+    
+    // 조회 기간 필터링
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    console.log('조회 기간:', startDate, '~', endDate);
+    
+    let filteredLogs = logs;
+    
+    if (startDate || endDate) {
+      filteredLogs = logs.filter(log => {
+        const logDate = log.date || log.timestamp?.split('T')[0] || '';
+        console.log('로그 날짜:', logDate, '로그:', log);
+        
+        if (!logDate) return false;
+        
+        let includeLog = true;
+        
+        if (startDate && logDate < startDate) {
+          includeLog = false;
+        }
+        
+        if (endDate && logDate > endDate) {
+          includeLog = false;
+        }
+        
+        return includeLog;
+      });
+    }
+    
+    console.log('필터링된 로그 개수:', filteredLogs.length);
+    
+    // 나머지 코드는 기존과 동일...
+  } catch (error) {
+    console.error('로그 분석 오류:', error);
+    document.getElementById('logAnalysis').innerHTML = '<div class="error">로그 분석 중 오류가 발생했습니다.</div>';
+    document.getElementById('logAnalysis').style.display = 'block';
+  } finally {
+    const loadBtn = document.getElementById('loadLogsBtn');
+    loadBtn.textContent = '로그 데이터 새로고침';
+    loadBtn.disabled = false;
+  }
+}
     
     // 조회 기간 필터링
     const startDate = document.getElementById('startDate').value;
