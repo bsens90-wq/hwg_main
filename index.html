@@ -881,6 +881,10 @@
         <span style="font-size:18px; display:block; margin-bottom:4px;">통합 인수 가이드</span>
         <span style="font-size:14px; opacity:0.8;">(건강고지/일반고지/간편고지)</span>
       </button>
+
+      <button id="analysisMenuBtn" style="margin-bottom:1rem; display:none; background:#8e44ad;">
+      <span style="font-size:18px; display:block; margin-bottom:4px;">나만의 보장분석 만들기</span>
+      </button>
       
       <button id="diseaseMenuBtn" style="margin-bottom:1rem; display:none;">
         <span style="font-size:18px; display:block; margin-bottom:4px;">한화손보 SI 즉시 인수 질환</span>
@@ -1765,15 +1769,18 @@ function navigateToScreen(screen, addToHistory = true) {
 }
 
 function updateMenuVisibility() {
+  const analysisMenuBtn = document.getElementById("analysisMenuBtn");  // 이 줄 추가
   const diseaseMenuBtn = document.getElementById("diseaseMenuBtn");
   const logMenuBtn = document.getElementById("logMenuBtn");
   const userManageBtn = document.getElementById("userManageBtn");
   
   if (isAdminUser) {
+    analysisMenuBtn.style.display = "block";  // 이 줄 추가
     diseaseMenuBtn.style.display = "block";
     logMenuBtn.style.display = "block";
     userManageBtn.style.display = "block";
   } else {
+    analysisMenuBtn.style.display = "none";   // 이 줄 추가
     diseaseMenuBtn.style.display = "none";
     logMenuBtn.style.display = "none";
     userManageBtn.style.display = "none";
@@ -1804,7 +1811,15 @@ function showGuideScreen() {
   LogManager.logUserAction(currentUser, 'menu_click', '통합인수가이드');
   navigateToScreen('guide');
 }
+  
+function showAnalysisScreen() {
+  if (!validateCurrentUserPassword()) return;
+  
+  LogManager.logUserAction(currentUser, 'menu_click', '보장분석만들기');
+  window.open('https://hwgdcw2.netlify.app/', '_blank');
+}
 
+  
 function showDiseaseScreen() {
   if (!validateCurrentUserPassword()) return;
   
@@ -2823,6 +2838,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('guideMenuBtn').addEventListener('click', showGuideScreen);
+  document.getElementById('analysisMenuBtn').addEventListener('click', showAnalysisScreen);
   document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
   document.getElementById('contactMenuBtn').addEventListener('click', showContactScreen);
   document.getElementById('limitMenuBtn').addEventListener('click', showLimitScreen);
