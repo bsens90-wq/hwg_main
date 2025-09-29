@@ -175,10 +175,24 @@
     }
     button.secondary:hover{background:#545b62}
     button.logout{
-      background:#28a745;
-      margin-bottom:8px;
-    }
-    button.logout:hover{background:#218838}
+  background:#28a745;
+  margin-bottom:8px;
+}
+button.logout:hover{background:#218838}
+
+/* 관리자 전용 메뉴 스타일 */
+button.admin-only{
+  background:#8e44ad !important;
+  margin-bottom:8px;
+}
+button.admin-only:hover{background:#7d3c98 !important;}
+
+/* 일반 사용자 메뉴 스타일 (기본 주황색 유지) */
+button.user-menu{
+  background:var(--hanwha) !important;
+  margin-bottom:8px;
+}
+button.user-menu:hover{background:var(--hanwha-dark) !important;}
     button.small{
       width:auto;
       padding:4px 6px;
@@ -1769,18 +1783,35 @@ function navigateToScreen(screen, addToHistory = true) {
 }
 
 function updateMenuVisibility() {
-  const analysisMenuBtn = document.getElementById("analysisMenuBtn");  // 이 줄 추가
+  const analysisMenuBtn = document.getElementById("analysisMenuBtn");
   const diseaseMenuBtn = document.getElementById("diseaseMenuBtn");
   const logMenuBtn = document.getElementById("logMenuBtn");
   const userManageBtn = document.getElementById("userManageBtn");
+  const guideMenuBtn = document.getElementById("guideMenuBtn");
+  const contactMenuBtn = document.getElementById("contactMenuBtn");
+  const limitMenuBtn = document.getElementById("limitMenuBtn");
+  const videoMenuBtn = document.getElementById("videoMenuBtn");
+  
+  // 일반 사용자 메뉴에 주황색 스타일 적용
+  guideMenuBtn.className = "user-menu";
+  contactMenuBtn.className = "user-menu";
+  limitMenuBtn.className = "user-menu";
+  videoMenuBtn.className = "user-menu";
+  analysisMenuBtn.className = "user-menu";
+  
+  // 보장분석 메뉴는 모든 사용자에게 표시
+  analysisMenuBtn.style.display = "block";
   
   if (isAdminUser) {
-    analysisMenuBtn.style.display = "block";  // 이 줄 추가
+    // 관리자 전용 메뉴에 겨자색 스타일 적용
+    diseaseMenuBtn.className = "admin-only";
+    logMenuBtn.className = "admin-only";
+    userManageBtn.className = "admin-only";
+    
     diseaseMenuBtn.style.display = "block";
     logMenuBtn.style.display = "block";
     userManageBtn.style.display = "block";
   } else {
-    analysisMenuBtn.style.display = "none";   // 이 줄 추가
     diseaseMenuBtn.style.display = "none";
     logMenuBtn.style.display = "none";
     userManageBtn.style.display = "none";
