@@ -896,12 +896,8 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
         <span style="font-size:14px; opacity:0.8;">(건강고지/일반고지/간편고지)</span>
       </button>
 
-      <button id="analysisMenuBtn" style="margin-bottom:1rem; display:none; background:#8e44ad;">
+     <button id="analysisMenuBtn" style="margin-bottom:1rem; display:none; background:#8e44ad;">
       <span style="font-size:18px; display:block; margin-bottom:4px;">나만의 보장분석 만들기</span>
-      </button>
-      
-      <button id="diseaseMenuBtn" style="margin-bottom:1rem; display:none;">
-        <span style="font-size:18px; display:block; margin-bottom:4px;">한화손보 SI 즉시 인수 질환</span>
       </button>
       
       <button id="contactMenuBtn" style="margin-bottom:1rem;">
@@ -914,6 +910,10 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
 
       <button id="videoMenuBtn" style="margin-bottom:1rem;">
         <span style="font-size:18px; display:block; margin-bottom:4px;">10분 정보미팅 다시보기</span>
+      </button>
+
+      <button id="diseaseMenuBtn" style="margin-bottom:1rem; display:none;">
+        <span style="font-size:18px; display:block; margin-bottom:4px;">한화손보 SI 즉시 인수 질환</span>
       </button>
 
       <button id="logMenuBtn" style="margin-bottom:1rem; display:none; background:#dc3545;">
@@ -1974,8 +1974,8 @@ async function loadLogAnalysis() {
       
       if (log.userCode === '8091768') return;
       
-      // 허용된 메뉴만 포함 (4개 항목만)
-      const allowedMenus = ['통합인수가이드', '인수한도조회', '연락처조회', '영상다시보기'];
+      // 허용된 메뉴만 포함 (5개 항목)
+      const allowedMenus = ['통합인수가이드', '인수한도조회', '연락처조회', '영상다시보기', '보장분석만들기'];
       if (!log.menu || !allowedMenus.includes(log.menu)) return;
       
       if (!userStats[log.userCode]) {
