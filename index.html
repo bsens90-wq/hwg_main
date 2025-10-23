@@ -2331,7 +2331,7 @@ function searchSurgery() {
 
   const matchedItems = [];
 
- // 검색어를 정규화하고 2글자 단위로 분리
+// 검색어를 정규화하고 2글자 단위로 분리
   const normalizedQuery = normalize(query);
   
   // 2글자 이상일 때만 처리
@@ -2358,10 +2358,18 @@ function searchSurgery() {
       }
     });
     
-    // 전체 토큰의 50% 이상 일치하거나, 2개 이상 일치하면 매칭
-    const threshold = Math.max(2, Math.ceil(searchTokens.length * 0.5));
+    // 매칭 조건:
+    // - 토큰이 1-2개: 모두 일치
+    // - 토큰이 3개 이상: 50% 이상 일치 (최소 2개)
+    let isMatch = false;
+    if (searchTokens.length <= 2) {
+      isMatch = matchCount === searchTokens.length;
+    } else {
+      const threshold = Math.max(2, Math.ceil(searchTokens.length * 0.5));
+      isMatch = matchCount >= threshold;
+    }
     
-    if (matchCount >= threshold) {
+    if (isMatch) {
       matchedItems.push(item);
     }
   });
