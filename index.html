@@ -1801,6 +1801,10 @@ function navigateToScreen(screen, addToHistory = true) {
       document.getElementById("videoScreen").style.display = "flex";
       displayVideoScreen();
       break;
+    case 'surgery':
+      document.getElementById("surgeryScreen").style.display = "flex";
+      document.getElementById("surgerySearchInput").focus();
+      break;
     case 'userManage':
       document.getElementById("userManageScreen").style.display = "flex";
       break;
