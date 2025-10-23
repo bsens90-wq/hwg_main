@@ -846,6 +846,61 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     #videoMenuBtn:hover {
       background: #cc0000 !important;
     }
+
+/* 수술비 검색 필터 스타일 */
+    .surgery-filter {
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .surgery-filter h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+      color: var(--text);
+    }
+    
+    .filter-checkboxes {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+    }
+    
+    .filter-checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .filter-checkbox-item input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      cursor: pointer;
+    }
+    
+    .filter-checkbox-item label {
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      margin: 0;
+    }
+    
+    .filter-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+    }
+    
+    .filter-actions button {
+      padding: 6px 12px;
+      font-size: 13px;
+      width: auto;
+      margin: 0;
+    }
+
     
   </style>
 </head>
@@ -1126,6 +1181,7 @@ let diseases = [];
 let guideData = [];
 let limitData = [];
 let surgeryData = [];
+let currentSearchResults = [];
 let currentUser = null;
 let isAdminUser = false;
 let currentScreen = 'login';
@@ -2257,6 +2313,9 @@ function searchGuide(){
 }
 
 
+// 전역 변수로 검색 결과 저장
+let currentSearchResults = [];
+
 function searchSurgery() {
   const query = document.getElementById('surgerySearchInput').value.trim();
   if (!query) {
@@ -2271,7 +2330,7 @@ function searchSurgery() {
   resultsDiv.innerHTML = '';
   resultsDiv.style.display = 'none';
 
-  const matchedGroups = {};
+  const matchedItems = [];
 
   surgeryData.forEach(item => {
     const normalizedOprnm = normalize(item.oprnm || '');
@@ -2303,34 +2362,119 @@ function searchSurgery() {
     }
 
     if (isMatch) {
-      if (!matchedGroups[item.oprnm]) {
-        matchedGroups[item.oprnm] = [];
-      }
-      matchedGroups[item.oprnm].push(item.cvrnm);
+      matchedItems.push(item);
     }
   });
 
-  const matchedKeys = Object.keys(matchedGroups);
-  
-  if (matchedKeys.length === 0) {
+  if (matchedItems.length === 0) {
     resultsDiv.innerHTML = '<div class="result-card"><div class="result-title">검색 결과가 없습니다.</div></div>';
     resultsDiv.style.display = 'block';
     return;
   }
 
+  // 전역 변수에 저장
+  currentSearchResults = matchedItems;
+  
+  // 결과 표시
+  displaySurgeryResults(matchedItems);
+}
+
+function displaySurgeryResults(items) {
+  const resultsDiv = document.getElementById('surgeryResults');
+  
+  // spt1 고유값 추출
+  const spt1Values = [...new Set(items.map(item => item.spt1))].sort();
+  
   let html = '';
-  matchedKeys.forEach(oprnm => {
-    const cvrnmList = [...new Set(matchedGroups[oprnm])].join(', ');
+  
+  // 필터 체크박스 (결과가 2개 이상일 때만)
+  if (items.length > 1 && spt1Values.length > 1) {
     html += `
-      <div class="result-card">
+      <div class="surgery-filter">
+        <h3>🏥 분류 필터</h3>
+        <div class="filter-checkboxes" id="spt1Checkboxes">
+    `;
+    
+    spt1Values.forEach(spt1 => {
+      const count = items.filter(item => item.spt1 === spt1).length;
+      html += `
+        <div class="filter-checkbox-item">
+          <input type="checkbox" id="filter_${spt1}" value="${spt1}" checked onchange="filterSurgeryResults()">
+          <label for="filter_${spt1}">${spt1} (${count})</label>
+        </div>
+      `;
+    });
+    
+    html += `
+        </div>
+        <div class="filter-actions">
+          <button onclick="selectAllSpt1()" class="small">전체선택</button>
+          <button onclick="deselectAllSpt1()" class="small secondary">전체해제</button>
+        </div>
+      </div>
+    `;
+  }
+  
+  // 검색 결과
+  html += '<div id="filteredResults">';
+  
+  const matchedGroups = {};
+  items.forEach(item => {
+    if (!matchedGroups[item.oprnm]) {
+      matchedGroups[item.oprnm] = {
+        spt1: item.spt1,
+        cvrnm: []
+      };
+    }
+    matchedGroups[item.oprnm].cvrnm.push(item.cvrnm);
+  });
+  
+  Object.keys(matchedGroups).forEach(oprnm => {
+    const data = matchedGroups[oprnm];
+    const cvrnmList = [...new Set(data.cvrnm)].join(', ');
+    html += `
+      <div class="result-card" data-spt1="${data.spt1}">
         <div class="result-title">${oprnm}</div>
+        <div class="result-sub" style="color:#777; font-size:13px; margin-bottom:4px;">[${data.spt1}]</div>
         <div class="result-sub">${cvrnmList}</div>
       </div>
     `;
   });
-
+  
+  html += '</div>';
+  
   resultsDiv.innerHTML = html;
   resultsDiv.style.display = 'block';
+}
+
+function filterSurgeryResults() {
+  const checkboxes = document.querySelectorAll('#spt1Checkboxes input[type="checkbox"]');
+  const selectedSpt1 = Array.from(checkboxes)
+    .filter(cb => cb.checked)
+    .map(cb => cb.value);
+  
+  const resultCards = document.querySelectorAll('#filteredResults .result-card');
+  
+  resultCards.forEach(card => {
+    const spt1 = card.getAttribute('data-spt1');
+    if (selectedSpt1.includes(spt1)) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+function selectAllSpt1() {
+  const checkboxes = document.querySelectorAll('#spt1Checkboxes input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = true);
+  filterSurgeryResults();
+}
+
+function deselectAllSpt1() {
+  const checkboxes = document.querySelectorAll('#spt1Checkboxes input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = false);
+  filterSurgeryResults();
 }
 
 function goBackFromSurgery() {
