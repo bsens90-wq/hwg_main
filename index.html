@@ -923,12 +923,19 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
 
 
     /* cvrnm 강조 스타일 */
-    .cvrnm-list {
+   .cvrnm-list {
       line-height: 1.6;
     }
     
     .cvrnm-item {
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      padding-left: 12px;
+      text-indent: -12px;
+    }
+    
+    .cvrnm-item::before {
+      content: "- ";
+      color: #999;
     }
     
     .cvrnm-highlight {
@@ -2356,45 +2363,32 @@ function searchSurgery() {
     return;
   }
 
-  const normalizedQuery = normalize(query);
-  const tokens = normalizedQuery.split(/\s+/).filter(t => t);
-  
   const resultsDiv = document.getElementById('surgeryResults');
   resultsDiv.innerHTML = '';
   resultsDiv.style.display = 'none';
 
   const matchedItems = [];
 
+  // 띄어쓰기로 구분된 키워드 추출
+  const keywords = query.split(/\s+/).filter(k => k.trim());
+  
+  if (keywords.length === 0) {
+    alert('검색어를 입력해주세요.');
+    return;
+  }
+  
+  // 각 키워드를 정규화
+  const normalizedKeywords = keywords.map(k => normalize(k));
+  
   surgeryData.forEach(item => {
     const normalizedOprnm = normalize(item.oprnm || '');
     
-    let isMatch = false;
+    // 모든 키워드가 포함되어 있는지 확인
+    const allKeywordsMatch = normalizedKeywords.every(keyword => 
+      normalizedOprnm.includes(keyword)
+    );
     
-    if (tokens.every(token => normalizedOprnm.includes(token))) {
-      isMatch = true;
-    }
-    
-    if (!isMatch && tokens.length === 1) {
-      const token = tokens[0];
-      if (token.length >= 3) {
-        for (let i = 2; i <= token.length - 2; i++) {
-          const left = token.substring(0, i);
-          const right = token.substring(i);
-          
-          if (left.length >= 2 && right.length >= 2) {
-            const leftPos = normalizedOprnm.indexOf(left);
-            const rightPos = normalizedOprnm.indexOf(right);
-            
-            if (leftPos >= 0 && rightPos >= 0 && leftPos < rightPos) {
-              isMatch = true;
-              break;
-            }
-          }
-        }
-      }
-    }
-
-    if (isMatch) {
+    if (allKeywordsMatch) {
       matchedItems.push(item);
     }
   });
@@ -2415,13 +2409,23 @@ function searchSurgery() {
 function displaySurgeryResults(items) {
   const resultsDiv = document.getElementById('surgeryResults');
   
+  // oprnm 기준으로 고유한 항목만 추출 (중복 제거)
+  const uniqueOprnmMap = new Map();
+  items.forEach(item => {
+    const key = `${item.spt1}|${item.spt2}|${item.disnm}|${item.oprnm}`;
+    if (!uniqueOprnmMap.has(key)) {
+      uniqueOprnmMap.set(key, item);
+    }
+  });
+  const uniqueItems = Array.from(uniqueOprnmMap.values());
+  
   // spt1, spt2, disnm 고유값 추출
-  const spt1Values = [...new Set(items.map(item => item.spt1))].sort();
+  const spt1Values = [...new Set(uniqueItems.map(item => item.spt1))].sort();
   
   let html = '';
   
   // 필터 (결과가 1개 이상일 때)
-  if (items.length >= 1) {
+  if (uniqueItems.length >= 1) {
     html += `
       <div class="surgery-filter">
         <h3>검색필터</h3>
@@ -2431,12 +2435,12 @@ function displaySurgeryResults(items) {
     if (spt1Values.length > 0) {
       html += `
         <div class="filter-stage">
-          <div class="filter-stage-title">대분류 선택</div>
+          <div class="filter-stage-title">1단계: 대분류 선택</div>
           <div class="filter-checkboxes" id="spt1Radios">
       `;
       
       spt1Values.forEach((spt1, index) => {
-        const count = items.filter(item => item.spt1 === spt1).length;
+        const count = uniqueItems.filter(item => item.spt1 === spt1).length;
         const checked = index === 0 ? 'checked' : '';
         html += `
           <div class="filter-checkbox-item">
@@ -2491,11 +2495,11 @@ function displaySurgeryResults(items) {
     matchedGroups[key].cvrnm.push(item.cvrnm);
   });
   
-  Object.keys(matchedGroups).forEach(key => {
+ Object.keys(matchedGroups).forEach(key => {
     const data = matchedGroups[key];
     const uniqueCvrnm = [...new Set(data.cvrnm)];
     
-    // cvrnm을 줄바꿈으로 구분하고 하이라이트 적용
+    // cvrnm을 줄바꿈으로 구분하고 하이라이트 적용 (- 기호는 CSS로 처리)
     const cvrnmHtml = uniqueCvrnm
       .map(cvrnm => `<div class="cvrnm-item">${highlightCvrnm(cvrnm)}</div>`)
       .join('');
@@ -2526,11 +2530,21 @@ function displaySurgeryResults(items) {
   
   const spt1Value = selectedSpt1.value;
   
-  // spt1에 해당하는 항목들 필터링
+ // spt1에 해당하는 항목들 필터링
   const filteredItems = currentSearchResults.filter(item => item.spt1 === spt1Value);
   
+  // oprnm 기준으로 중복 제거
+  const uniqueOprnmMap = new Map();
+  filteredItems.forEach(item => {
+    const key = `${item.spt1}|${item.spt2}|${item.disnm}|${item.oprnm}`;
+    if (!uniqueOprnmMap.has(key)) {
+      uniqueOprnmMap.set(key, item);
+    }
+  });
+  const uniqueFilteredItems = Array.from(uniqueOprnmMap.values());
+  
   // spt2 고유값 추출
-  const spt2Values = [...new Set(filteredItems.map(item => item.spt2))].sort();
+  const spt2Values = [...new Set(uniqueFilteredItems.map(item => item.spt2))].sort();
   
   // spt2 필터 업데이트
   const spt2Stage = document.getElementById('spt2FilterStage');
@@ -2539,7 +2553,7 @@ function displaySurgeryResults(items) {
   if (spt2Values.length > 0) {
     let html = '';
     spt2Values.forEach((spt2, index) => {
-      const count = filteredItems.filter(item => item.spt2 === spt2).length;
+      const count = uniqueFilteredItems.filter(item => item.spt2 === spt2).length;
       const checked = index === 0 ? 'checked' : '';
       html += `
         <div class="filter-checkbox-item">
