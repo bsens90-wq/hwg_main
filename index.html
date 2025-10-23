@@ -1813,6 +1813,7 @@ function hideAllScreens() {
   document.getElementById("logScreen").style.display = "none";
   document.getElementById("userManageScreen").style.display = "none";
   document.getElementById("videoScreen").style.display = "none";
+  document.getElementById("surgeryScreen").style.display = "none";
 }
 
 function showLoginSuccess() {
@@ -1969,13 +1970,15 @@ function showGuideScreen() {
   navigateToScreen('guide');
 }
 
-  function showSurgeryScreen() {
+ function showSurgeryScreen() {
+  if (!validateCurrentUserPassword()) return;
+  
+  LogManager.logUserAction(currentUser, 'menu_click', '수술비검색');
   navigateToScreen('surgery');
   document.getElementById('surgerySearchInput').value = '';
   document.getElementById('surgeryResults').style.display = 'none';
   document.getElementById('surgeryResults').innerHTML = '';
   document.getElementById('surgerySearchInput').focus();
-  LogManager.logUserAction(currentUser, 'menu_click', '수술비검색');
 }
   
 function showAnalysisScreen() {
