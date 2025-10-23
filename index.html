@@ -875,10 +875,30 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
       gap: 6px;
     }
     
-    .filter-checkbox-item input[type="checkbox"] {
+ .filter-checkbox-item input[type="checkbox"],
+    .filter-checkbox-item input[type="radio"] {
       width: auto;
       margin: 0;
       cursor: pointer;
+    }
+    
+    .filter-stage {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .filter-stage:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    .filter-stage-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--hanwha);
     }
     
     .filter-checkbox-item label {
@@ -2381,35 +2401,60 @@ function searchSurgery() {
 function displaySurgeryResults(items) {
   const resultsDiv = document.getElementById('surgeryResults');
   
-  // spt1 고유값 추출
+  // spt1, spt2, disnm 고유값 추출
   const spt1Values = [...new Set(items.map(item => item.spt1))].sort();
   
   let html = '';
   
-  // 필터 체크박스 (결과가 2개 이상일 때만)
-  if (items.length > 1 && spt1Values.length > 1) {
+  // 필터 (결과가 1개 이상일 때)
+  if (items.length >= 1) {
     html += `
       <div class="surgery-filter">
-        <h3>🏥 분류 필터</h3>
-        <div class="filter-checkboxes" id="spt1Checkboxes">
+        <h3>검색필터</h3>
     `;
     
-    spt1Values.forEach(spt1 => {
-      const count = items.filter(item => item.spt1 === spt1).length;
+    // 1단계: spt1 필터
+    if (spt1Values.length > 0) {
       html += `
-        <div class="filter-checkbox-item">
-          <input type="checkbox" id="filter_${spt1}" value="${spt1}" checked onchange="filterSurgeryResults()">
-          <label for="filter_${spt1}">${spt1} (${count})</label>
+        <div class="filter-stage">
+          <div class="filter-stage-title">대분류 선택</div>
+          <div class="filter-checkboxes" id="spt1Radios">
+      `;
+      
+      spt1Values.forEach((spt1, index) => {
+        const count = items.filter(item => item.spt1 === spt1).length;
+        const checked = index === 0 ? 'checked' : '';
+        html += `
+          <div class="filter-checkbox-item">
+            <input type="radio" name="spt1Filter" id="spt1_${index}" value="${spt1}" ${checked} onchange="filterBySpt1()">
+            <label for="spt1_${index}">${spt1} (${count})</label>
+          </div>
+        `;
+      });
+      
+      html += `
+          </div>
         </div>
       `;
-    });
+    }
+    
+    // 2단계: spt2 필터 (동적으로 추가됨)
+    html += `
+      <div class="filter-stage" id="spt2FilterStage" style="display:none;">
+        <div class="filter-stage-title">중분류 선택</div>
+        <div class="filter-checkboxes" id="spt2Radios"></div>
+      </div>
+    `;
+    
+    // 3단계: disnm 필터 (동적으로 추가됨)
+    html += `
+      <div class="filter-stage" id="disnmFilterStage" style="display:none;">
+        <div class="filter-stage-title">소분류 선택</div>
+        <div class="filter-checkboxes" id="disnmRadios"></div>
+      </div>
+    `;
     
     html += `
-        </div>
-        <div class="filter-actions">
-          <button onclick="selectAllSpt1()" class="small">전체선택</button>
-          <button onclick="deselectAllSpt1()" class="small secondary">전체해제</button>
-        </div>
       </div>
     `;
   }
@@ -2419,22 +2464,26 @@ function displaySurgeryResults(items) {
   
   const matchedGroups = {};
   items.forEach(item => {
-    if (!matchedGroups[item.oprnm]) {
-      matchedGroups[item.oprnm] = {
+    const key = `${item.spt1}|${item.spt2}|${item.disnm}|${item.oprnm}`;
+    if (!matchedGroups[key]) {
+      matchedGroups[key] = {
         spt1: item.spt1,
+        spt2: item.spt2,
+        disnm: item.disnm,
+        oprnm: item.oprnm,
         cvrnm: []
       };
     }
-    matchedGroups[item.oprnm].cvrnm.push(item.cvrnm);
+    matchedGroups[key].cvrnm.push(item.cvrnm);
   });
   
-  Object.keys(matchedGroups).forEach(oprnm => {
-    const data = matchedGroups[oprnm];
+  Object.keys(matchedGroups).forEach(key => {
+    const data = matchedGroups[key];
     const cvrnmList = [...new Set(data.cvrnm)].join(', ');
     html += `
-      <div class="result-card" data-spt1="${data.spt1}">
-        <div class="result-title">${oprnm}</div>
-        <div class="result-sub" style="color:#777; font-size:13px; margin-bottom:4px;">[${data.spt1}]</div>
+      <div class="result-card" data-spt1="${data.spt1}" data-spt2="${data.spt2}" data-disnm="${data.disnm}">
+        <div class="result-title">${data.oprnm}</div>
+        <div class="result-sub" style="color:#777; font-size:13px; margin-bottom:4px;">[${data.spt1} > ${data.spt2} > ${data.disnm}]</div>
         <div class="result-sub">${cvrnmList}</div>
       </div>
     `;
@@ -2444,37 +2493,125 @@ function displaySurgeryResults(items) {
   
   resultsDiv.innerHTML = html;
   resultsDiv.style.display = 'block';
+  
+  // 초기 필터 적용
+  if (spt1Values.length > 0) {
+    filterBySpt1();
+  }
 }
 
-function filterSurgeryResults() {
-  const checkboxes = document.querySelectorAll('#spt1Checkboxes input[type="checkbox"]');
-  const selectedSpt1 = Array.from(checkboxes)
-    .filter(cb => cb.checked)
-    .map(cb => cb.value);
+  function filterBySpt1() {
+  const selectedSpt1 = document.querySelector('input[name="spt1Filter"]:checked');
+  if (!selectedSpt1) return;
   
+  const spt1Value = selectedSpt1.value;
+  
+  // spt1에 해당하는 항목들 필터링
+  const filteredItems = currentSearchResults.filter(item => item.spt1 === spt1Value);
+  
+  // spt2 고유값 추출
+  const spt2Values = [...new Set(filteredItems.map(item => item.spt2))].sort();
+  
+  // spt2 필터 업데이트
+  const spt2Stage = document.getElementById('spt2FilterStage');
+  const spt2Radios = document.getElementById('spt2Radios');
+  
+  if (spt2Values.length > 0) {
+    let html = '';
+    spt2Values.forEach((spt2, index) => {
+      const count = filteredItems.filter(item => item.spt2 === spt2).length;
+      const checked = index === 0 ? 'checked' : '';
+      html += `
+        <div class="filter-checkbox-item">
+          <input type="radio" name="spt2Filter" id="spt2_${index}" value="${spt2}" ${checked} onchange="filterBySpt2()">
+          <label for="spt2_${index}">${spt2} (${count})</label>
+        </div>
+      `;
+    });
+    spt2Radios.innerHTML = html;
+    spt2Stage.style.display = 'block';
+    
+    // spt2 선택 후 자동으로 다음 필터 적용
+    filterBySpt2();
+  } else {
+    spt2Stage.style.display = 'none';
+    document.getElementById('disnmFilterStage').style.display = 'none';
+    updateResultsDisplay(spt1Value, null, null);
+  }
+}
+
+function filterBySpt2() {
+  const selectedSpt1 = document.querySelector('input[name="spt1Filter"]:checked');
+  const selectedSpt2 = document.querySelector('input[name="spt2Filter"]:checked');
+  
+  if (!selectedSpt1 || !selectedSpt2) return;
+  
+  const spt1Value = selectedSpt1.value;
+  const spt2Value = selectedSpt2.value;
+  
+  // spt1, spt2에 해당하는 항목들 필터링
+  const filteredItems = currentSearchResults.filter(item => 
+    item.spt1 === spt1Value && item.spt2 === spt2Value
+  );
+  
+  // disnm 고유값 추출
+  const disnmValues = [...new Set(filteredItems.map(item => item.disnm))].sort();
+  
+  // disnm 필터 업데이트
+  const disnmStage = document.getElementById('disnmFilterStage');
+  const disnmRadios = document.getElementById('disnmRadios');
+  
+  if (disnmValues.length > 0) {
+    let html = '';
+    disnmValues.forEach((disnm, index) => {
+      const count = filteredItems.filter(item => item.disnm === disnm).length;
+      const checked = index === 0 ? 'checked' : '';
+      html += `
+        <div class="filter-checkbox-item">
+          <input type="radio" name="disnmFilter" id="disnm_${index}" value="${disnm}" ${checked} onchange="filterByDisnm()">
+          <label for="disnm_${index}">${disnm} (${count})</label>
+        </div>
+      `;
+    });
+    disnmRadios.innerHTML = html;
+    disnmStage.style.display = 'block';
+    
+    // disnm 선택 후 자동으로 결과 업데이트
+    filterByDisnm();
+  } else {
+    disnmStage.style.display = 'none';
+    updateResultsDisplay(spt1Value, spt2Value, null);
+  }
+}
+
+function filterByDisnm() {
+  const selectedSpt1 = document.querySelector('input[name="spt1Filter"]:checked');
+  const selectedSpt2 = document.querySelector('input[name="spt2Filter"]:checked');
+  const selectedDisnm = document.querySelector('input[name="disnmFilter"]:checked');
+  
+  if (!selectedSpt1 || !selectedSpt2 || !selectedDisnm) return;
+  
+  updateResultsDisplay(selectedSpt1.value, selectedSpt2.value, selectedDisnm.value);
+}
+
+function updateResultsDisplay(spt1, spt2, disnm) {
   const resultCards = document.querySelectorAll('#filteredResults .result-card');
   
   resultCards.forEach(card => {
-    const spt1 = card.getAttribute('data-spt1');
-    if (selectedSpt1.includes(spt1)) {
-      card.style.display = '';
-    } else {
-      card.style.display = 'none';
-    }
+    const cardSpt1 = card.getAttribute('data-spt1');
+    const cardSpt2 = card.getAttribute('data-spt2');
+    const cardDisnm = card.getAttribute('data-disnm');
+    
+    let show = true;
+    
+    if (spt1 && cardSpt1 !== spt1) show = false;
+    if (spt2 && cardSpt2 !== spt2) show = false;
+    if (disnm && cardDisnm !== disnm) show = false;
+    
+    card.style.display = show ? '' : 'none';
   });
 }
 
-function selectAllSpt1() {
-  const checkboxes = document.querySelectorAll('#spt1Checkboxes input[type="checkbox"]');
-  checkboxes.forEach(cb => cb.checked = true);
-  filterSurgeryResults();
-}
-
-function deselectAllSpt1() {
-  const checkboxes = document.querySelectorAll('#spt1Checkboxes input[type="checkbox"]');
-  checkboxes.forEach(cb => cb.checked = false);
-  filterSurgeryResults();
-}
 
 function goBackFromSurgery() {
   navigateToScreen('menu');
