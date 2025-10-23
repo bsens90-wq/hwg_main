@@ -899,6 +899,11 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
      <button id="analysisMenuBtn" style="margin-bottom:1rem; display:none; background:#8e44ad;">
       <span style="font-size:18px; display:block; margin-bottom:4px;">나만의 보장분석 만들기</span>
       </button>
+
+
+     <button id="surgeryMenuBtn" style="margin-bottom:1rem; display:none; background:#8e44ad;">
+        <span style="font-size:18px; display:block; margin-bottom:4px;">수술비 검색하기</span>
+      </button>
       
       <button id="contactMenuBtn" style="margin-bottom:1rem;">
         <span style="font-size:18px; display:block; margin-bottom:4px;">콜센터, 보험금 청구 팩스</span>
@@ -1057,6 +1062,7 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     </div>
   </section>
 
+  
   <!-- 사용자 관리 화면 -->
   <section id="userManageScreen" class="screen" style="display:none;">
     <div class="app-title">사용자 관리</div>
@@ -1085,6 +1091,20 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     </div>
   </section>
 
+    <!-- 수술비 검색 화면 -->
+  <section id="surgeryScreen" class="screen" style="display:none;">
+    <div class="app-title">수술비 검색하기</div>
+    <div class="card container-narrow">
+      <h2>수술명 검색</h2>
+      <div class="row">
+        <input type="text" id="surgerySearchInput" placeholder="수술명 또는 질병명을 입력하세요 (예: 용종제거, 백내장)" />
+      </div>
+      <button id="surgerySearchBtn">검색</button>
+      <button id="surgeryBackBtn" class="secondary">메뉴로 돌아가기</button>
+    </div>
+    <div id="surgeryResults" class="card container-narrow results" style="display:none;"></div>
+  </section>
+
   <!-- 유튜브 비디오 화면 -->
   <section id="videoScreen" class="screen" style="display:none;">
     <div class="app-title">10분 정보미팅 다시보기</div>
@@ -1105,6 +1125,7 @@ let employees = [];
 let diseases = [];
 let guideData = [];
 let limitData = [];
+let surgeryData = [];
 let currentUser = null;
 let isAdminUser = false;
 let currentScreen = 'login';
@@ -1113,6 +1134,7 @@ const screenHistory = [];
 const EMP_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/employees.json";
 const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/diseases.json";
 const GUIDE_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/udw_dcw.json";
+const SURGERY_URL = "https://raw.githubusercontent.com/YonghoKwon/data/refs/heads/main/oprtn.json";
 
 const ADMIN_ACCOUNT = {
   empno: "8091768",
@@ -1527,10 +1549,11 @@ async function loadAllData(){
   try{
     console.log("데이터 로드 시작...");
     const timestamp = Date.now();
-    const [emp, dis, guide] = await Promise.all([
+    const [emp, dis, guide, surgery] = await Promise.all([
       loadJsonFlexible(EMP_URL + "?t=" + timestamp),
       loadJsonFlexible(DIS_URL + "?t=" + timestamp),
-      loadJsonFlexible(GUIDE_URL + "?t=" + timestamp)
+      loadJsonFlexible(GUIDE_URL + "?t=" + timestamp),
+      loadJsonFlexible(SURGERY_URL + "?t=" + timestamp)
     ]);
 
     console.log("받은 직원 데이터:", emp);
@@ -1559,7 +1582,9 @@ async function loadAllData(){
       healthType: String(g.UD_HTH || ""),
       generalType: String(g.UD_GEN || ""),
       simpleType: String(g.UD_SI || "")
-    })).filter(g => g.name || g.explanation);
+})).filter(g => g.name || g.explanation);
+
+    surgeryData = surgery;
 
     await loadLimitData();
 
@@ -1841,6 +1866,15 @@ function showGuideScreen() {
   
   LogManager.logUserAction(currentUser, 'menu_click', '통합인수가이드');
   navigateToScreen('guide');
+}
+
+  function showSurgeryScreen() {
+  navigateToScreen('surgery');
+  document.getElementById('surgerySearchInput').value = '';
+  document.getElementById('surgeryResults').style.display = 'none';
+  document.getElementById('surgeryResults').innerHTML = '';
+  document.getElementById('surgerySearchInput').focus();
+  LogManager.logUserAction(currentUser, 'menu_view', '수술비검색');
 }
   
 function showAnalysisScreen() {
@@ -2218,6 +2252,87 @@ function searchGuide(){
   `).join('');
 }
 
+
+function searchSurgery() {
+  const query = document.getElementById('surgerySearchInput').value.trim();
+  if (!query) {
+    alert('검색어를 입력해주세요.');
+    return;
+  }
+
+  const normalizedQuery = normalizeText(query);
+  const tokens = normalizedQuery.split(/\s+/).filter(t => t);
+  
+  const resultsDiv = document.getElementById('surgeryResults');
+  resultsDiv.innerHTML = '';
+  resultsDiv.style.display = 'none';
+
+  const matchedGroups = {};
+
+  surgeryData.forEach(item => {
+    const normalizedOprnm = normalizeText(item.oprnm || '');
+    
+    let isMatch = false;
+    
+    if (tokens.every(token => normalizedOprnm.includes(token))) {
+      isMatch = true;
+    }
+    
+    if (!isMatch && tokens.length === 1) {
+      const token = tokens[0];
+      if (token.length >= 3) {
+        for (let i = 2; i <= token.length - 2; i++) {
+          const left = token.substring(0, i);
+          const right = token.substring(i);
+          
+          if (left.length >= 2 && right.length >= 2) {
+            const leftPos = normalizedOprnm.indexOf(left);
+            const rightPos = normalizedOprnm.indexOf(right);
+            
+            if (leftPos >= 0 && rightPos >= 0 && leftPos < rightPos) {
+              isMatch = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (isMatch) {
+      if (!matchedGroups[item.oprnm]) {
+        matchedGroups[item.oprnm] = [];
+      }
+      matchedGroups[item.oprnm].push(item.cvrnm);
+    }
+  });
+
+  const matchedKeys = Object.keys(matchedGroups);
+  
+  if (matchedKeys.length === 0) {
+    resultsDiv.innerHTML = '<div class="result-card"><div class="result-title">검색 결과가 없습니다.</div></div>';
+    resultsDiv.style.display = 'block';
+    return;
+  }
+
+  let html = '';
+  matchedKeys.forEach(oprnm => {
+    const cvrnmList = [...new Set(matchedGroups[oprnm])].join(', ');
+    html += `
+      <div class="result-card">
+        <div class="result-title">${oprnm}</div>
+        <div class="result-sub">${cvrnmList}</div>
+      </div>
+    `;
+  });
+
+  resultsDiv.innerHTML = html;
+  resultsDiv.style.display = 'block';
+}
+
+function goBackFromSurgery() {
+  navigateToScreen('menu');
+}
+  
 function search(){
   const query = document.getElementById("searchInput").value.trim();
   const results = document.getElementById("results");
@@ -2868,8 +2983,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.key === 'Enter') login();
   });
 
-  document.getElementById('guideMenuBtn').addEventListener('click', showGuideScreen);
+document.getElementById('guideMenuBtn').addEventListener('click', showGuideScreen);
   document.getElementById('analysisMenuBtn').addEventListener('click', showAnalysisScreen);
+  document.getElementById('surgeryMenuBtn').addEventListener('click', showSurgeryScreen);
   document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
   document.getElementById('contactMenuBtn').addEventListener('click', showContactScreen);
   document.getElementById('limitMenuBtn').addEventListener('click', showLimitScreen);
@@ -2878,11 +2994,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('userManageBtn').addEventListener('click', showUserManageScreen);
   document.getElementById('logoutBtnHeader').addEventListener('click', logout);
 
-  document.getElementById('guideSearchBtn').addEventListener('click', searchGuide);
+ document.getElementById('guideSearchBtn').addEventListener('click', searchGuide);
   document.getElementById('guideSearchInput').addEventListener('keydown', e => {
     if(e.key === 'Enter') searchGuide();
   });
   document.getElementById('guideBackBtn').addEventListener('click', goBackFromGuide);
+  document.getElementById('surgerySearchBtn').addEventListener('click', searchSurgery);
+  document.getElementById('surgerySearchInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter') searchSurgery();
+  });
+  document.getElementById('surgeryBackBtn').addEventListener('click', goBackFromSurgery);
   document.getElementById('searchBtn').addEventListener('click', search);
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if(e.key === 'Enter') search();
