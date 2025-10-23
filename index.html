@@ -921,6 +921,20 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
       margin: 0;
     }
 
+
+    /* cvrnm 강조 스타일 */
+    .cvrnm-list {
+      line-height: 1.6;
+    }
+    
+    .cvrnm-item {
+      margin-bottom: 4px;
+    }
+    
+    .cvrnm-highlight {
+      font-weight: 700;
+      color: #0066cc;
+    }
     
   </style>
 </head>
@@ -2479,12 +2493,18 @@ function displaySurgeryResults(items) {
   
   Object.keys(matchedGroups).forEach(key => {
     const data = matchedGroups[key];
-    const cvrnmList = [...new Set(data.cvrnm)].join(', ');
+    const uniqueCvrnm = [...new Set(data.cvrnm)];
+    
+    // cvrnm을 줄바꿈으로 구분하고 하이라이트 적용
+    const cvrnmHtml = uniqueCvrnm
+      .map(cvrnm => `<div class="cvrnm-item">${highlightCvrnm(cvrnm)}</div>`)
+      .join('');
+    
     html += `
       <div class="result-card" data-spt1="${data.spt1}" data-spt2="${data.spt2}" data-disnm="${data.disnm}">
         <div class="result-title">${data.oprnm}</div>
-        <div class="result-sub" style="color:#777; font-size:13px; margin-bottom:4px;">[${data.spt1} > ${data.spt2} > ${data.disnm}]</div>
-        <div class="result-sub">${cvrnmList}</div>
+        <div class="result-sub" style="color:#777; font-size:13px; margin-bottom:8px;">[${data.spt1} > ${data.spt2} > ${data.disnm}]</div>
+        <div class="cvrnm-list">${cvrnmHtml}</div>
       </div>
     `;
   });
@@ -2612,6 +2632,24 @@ function updateResultsDisplay(spt1, spt2, disnm) {
   });
 }
 
+  function highlightCvrnm(cvrnmText) {
+  // 강조할 키워드 목록
+  const keywords = [
+    '30대경증', '50대경증', '7대생활', '치핵', 
+    '특정10대', '특정13대', 
+    '1종', '2종', '3종', '4종', '5종'
+  ];
+  
+  let result = cvrnmText;
+  
+  // 각 키워드를 찾아서 span으로 감싸기
+  keywords.forEach(keyword => {
+    const regex = new RegExp(keyword, 'g');
+    result = result.replace(regex, `<span class="cvrnm-highlight">${keyword}</span>`);
+  });
+  
+  return result;
+}
 
 function goBackFromSurgery() {
   navigateToScreen('menu');
