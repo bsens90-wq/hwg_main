@@ -3366,47 +3366,73 @@ document.getElementById('guideMenuBtn').addEventListener('click', showGuideScree
   document.getElementById('checkInactiveBtn').addEventListener('click', checkInactiveUsers);
   document.getElementById('loadUsersBtn').addEventListener('click', loadUsersList);
   document.getElementById('userSearchInput').addEventListener('input', searchUsers);
- // PWA 설치 기능
+// PWA 설치 기능
   let deferredPrompt;
   const installBtn = document.getElementById('installBtn');
+  const installBtnMenu = document.getElementById('installBtnMenu');
 
-  // 버튼 항상 표시
-  installBtn.style.display = 'block';
+  // 버튼 초기화 함수
+  function initButton(btn) {
+    if (!btn) return;
+    
+    btn.style.display = 'block';
 
-  // 이미 설치되었는지 확인
-  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-    installBtn.textContent = '✓ 설치됨';
-    installBtn.disabled = true;
-    installBtn.style.opacity = '0.5';
-    installBtn.style.cursor = 'not-allowed';
+    // 이미 설치되었는지 확인
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      btn.textContent = '✓ 설치됨';
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+    }
   }
+
+  // 두 버튼 모두 초기화
+  initButton(installBtn);
+  initButton(installBtnMenu);
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
   });
 
-  installBtn.addEventListener('click', async () => {
+  // 설치 핸들러 함수
+  async function handleInstallClick() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       console.log(`사용자 선택: ${outcome}`);
       if (outcome === 'accepted') {
-        installBtn.textContent = '✓ 설치됨';
-        installBtn.disabled = true;
-        installBtn.style.opacity = '0.5';
+        [installBtn, installBtnMenu].forEach(btn => {
+          if (btn) {
+            btn.textContent = '✓ 설치됨';
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+          }
+        });
       }
       deferredPrompt = null;
     } else {
       showInstallInstructions();
     }
-  });
+  }
+
+  // 두 버튼 모두에 이벤트 리스너 등록
+  if (installBtn) {
+    installBtn.addEventListener('click', handleInstallClick);
+  }
+  if (installBtnMenu) {
+    installBtnMenu.addEventListener('click', handleInstallClick);
+  }
 
   window.addEventListener('appinstalled', () => {
     console.log('PWA 설치 완료');
-    installBtn.textContent = '✓ 설치됨';
-    installBtn.disabled = true;
-    installBtn.style.opacity = '0.5';
+    [installBtn, installBtnMenu].forEach(btn => {
+      if (btn) {
+        btn.textContent = '✓ 설치됨';
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+      }
+    });
     deferredPrompt = null;
   });
 
