@@ -2322,16 +2322,13 @@ function searchSurgery() {
     return;
   }
 
-  const normalizedQuery = normalize(query);
-  const tokens = normalizedQuery.split(/\s+/).filter(t => t);
-  
   const resultsDiv = document.getElementById('surgeryResults');
   resultsDiv.innerHTML = '';
   resultsDiv.style.display = 'none';
 
   const matchedItems = [];
 
-// 검색어를 정규화하고 2글자 단위로 분리
+  // 검색어를 정규화하고 2글자 단위로 분리
   const normalizedQuery = normalize(query);
   
   // 2글자 이상일 때만 처리
@@ -2386,7 +2383,6 @@ function searchSurgery() {
   // 결과 표시
   displaySurgeryResults(matchedItems);
 }
-
 function displaySurgeryResults(items) {
   const resultsDiv = document.getElementById('surgeryResults');
   
