@@ -2260,7 +2260,7 @@ function searchSurgery() {
     return;
   }
 
-  const normalizedQuery = normalizeText(query);
+  const normalizedQuery = normalize(query);
   const tokens = normalizedQuery.split(/\s+/).filter(t => t);
   
   const resultsDiv = document.getElementById('surgeryResults');
@@ -2270,7 +2270,7 @@ function searchSurgery() {
   const matchedGroups = {};
 
   surgeryData.forEach(item => {
-    const normalizedOprnm = normalizeText(item.oprnm || '');
+    const normalizedOprnm = normalize(item.oprnm || '');
     
     let isMatch = false;
     
