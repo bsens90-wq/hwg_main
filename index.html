@@ -2123,7 +2123,7 @@ async function loadLogAnalysis() {
       if (log.userCode === '8091768') return;
       
       // 허용된 메뉴만 포함 (5개 항목)
-      const allowedMenus = ['통합인수가이드', '인수한도조회', '연락처조회', '영상다시보기', '보장분석만들기'];
+      const allowedMenus = ['통합인수가이드', '인수한도조회', '연락처조회', '영상다시보기', '보장분석만들기', '수술비검색'];
       if (!log.menu || !allowedMenus.includes(log.menu)) return;
       
       if (!userStats[log.userCode]) {
