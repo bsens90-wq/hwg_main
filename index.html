@@ -1691,7 +1691,15 @@ async function loadAllData(){
       simpleType: String(g.UD_SI || "")
 })).filter(g => g.name || g.explanation);
 
-    surgeryData = surgery;
+    surgeryData = surgery.map(s => ({
+      spt1: String(s.spt1 || "").trim(),
+      spt2: String(s.spt2 || "").trim(),
+      disnm: String(s.disnm || "").trim(),
+      oprnm: String(s.oprnm || "").trim(),
+      cvrnm: String(s.cvrnm || "").trim()
+    })).filter(s => s.oprnm);
+    
+    console.log("수술 데이터 로드 완료:", surgeryData.length + "건");
 
     await loadLimitData();
 
