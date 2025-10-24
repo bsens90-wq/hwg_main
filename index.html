@@ -2404,7 +2404,10 @@ function searchSurgery() {
     if (allKeywordsMatch) {
       matchedItems.push(item);
     }
-  });
+ });
+
+  // 검색 로그 기록
+  LogManager.logUserAction(currentUser, 'search', `수술비검색:${query}`);
 
   if (matchedItems.length === 0) {
     resultsDiv.innerHTML = '<div class="result-card"><div class="result-title">검색 결과가 없습니다.</div></div>';
