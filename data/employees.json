@@ -855,10 +855,10 @@
   },
   {
     "empno": 1300097,
-    "password": 1111,
-    "status": "active",
+    "password": "3316",
+    "status": "suspended",
     "lastActivity": "null",
-    "suspendedDate": "null"
+    "suspendedDate": "2026-03-12"
   },
   {
     "empno": 1300098,
