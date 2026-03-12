@@ -1936,33 +1936,41 @@ function updateMenuVisibility() {
   const contactMenuBtn = document.getElementById("contactMenuBtn");
   const limitMenuBtn = document.getElementById("limitMenuBtn");
   const videoMenuBtn = document.getElementById("videoMenuBtn");
-  
-  // 일반 사용자 메뉴에 주황색 스타일 적용
+  const surgeryMenuBtn = document.getElementById("surgeryMenuBtn");
+
+  // 공통 노출 메뉴 (모든 사용자)
   guideMenuBtn.className = "user-menu";
   contactMenuBtn.className = "user-menu";
-  limitMenuBtn.className = "user-menu";
-  videoMenuBtn.className = "user-menu";
-  analysisMenuBtn.className = "user-menu";
-  
-  // 보장분석 메뉴는 모든 사용자에게 표시
-  analysisMenuBtn.style.display = "block";
-  
+  guideMenuBtn.style.display = "block";
+  contactMenuBtn.style.display = "block";
+
   if (isAdminUser) {
     // 관리자 전용 메뉴에 겨자색 스타일 적용
+    analysisMenuBtn.className = "admin-only";
+    surgeryMenuBtn.className = "admin-only";
+    limitMenuBtn.className = "admin-only";
+    videoMenuBtn.className = "admin-only";
     diseaseMenuBtn.className = "admin-only";
     logMenuBtn.className = "admin-only";
     userManageBtn.className = "admin-only";
-    
+
+    analysisMenuBtn.style.display = "block";
+    surgeryMenuBtn.style.display = "block";
+    limitMenuBtn.style.display = "block";
+    videoMenuBtn.style.display = "block";
     diseaseMenuBtn.style.display = "block";
     logMenuBtn.style.display = "block";
     userManageBtn.style.display = "block";
   } else {
+    analysisMenuBtn.style.display = "none";
+    surgeryMenuBtn.style.display = "none";
+    limitMenuBtn.style.display = "none";
+    videoMenuBtn.style.display = "none";
     diseaseMenuBtn.style.display = "none";
     logMenuBtn.style.display = "none";
     userManageBtn.style.display = "none";
   }
 }
-
 function validateCurrentUserPassword() {
   if (!currentUser || isAdminUser) return true;
   
