@@ -645,10 +645,10 @@
   },
   {
     "empno": 1300122,
-    "password": 1111,
-    "status": "active",
+    "password": "1983",
+    "status": "suspended",
     "lastActivity": "null",
-    "suspendedDate": "null"
+    "suspendedDate": "2026-03-12"
   },
   {
     "empno": 1300128,
