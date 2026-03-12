@@ -1392,59 +1392,48 @@ class LogManager {
   }
   
   // 사용자 재승인 (관리자 전용)
-  static async reactivateUser(userCode) {
+ static async reactivateUser(userCode, silent = false) {
     if (!isAdminUser) {
       alert('관리자만 접근 가능합니다.');
-      return;
+      return false;
     }
-    
+
     try {
       const response = await fetch(this.PROXY_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'reactivateUser',
-          userCode: userCode
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reactivateUser', userCode: userCode })
       });
-      
+
       if (response.ok) {
-        alert(`사용자 ${userCode}가 재승인되었습니다. 패스워드가 1111로 초기화되었습니다.`);
+        if (!silent) alert(`사용자 ${userCode}가 활성화되었습니다. 패스워드가 1111로 초기화되었습니다.`);
         return true;
       }
     } catch (error) {
-      console.error('사용자 재승인 실패:', error);
+      console.error('사용자 활성화 실패:', error);
     }
     return false;
   }
-  
-  // 사용자 승인해제 (관리자 전용)
-  static async suspendUser(userCode) {
+
+  static async suspendUser(userCode, silent = false) {
     if (!isAdminUser) {
       alert('관리자만 접근 가능합니다.');
-      return;
+      return false;
     }
-    
+
     try {
       const response = await fetch(this.PROXY_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'suspendUser',
-          userCode: userCode
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'suspendUser', userCode: userCode })
       });
-      
+
       if (response.ok) {
-        alert(`사용자 ${userCode}가 승인해제되었습니다. 패스워드가 랜덤으로 변경되었습니다.`);
+        if (!silent) alert(`사용자 ${userCode}가 비활성화되었습니다. 패스워드가 랜덤으로 변경되었습니다.`);
         return true;
       }
     } catch (error) {
-      console.error('사용자 승인해제 실패:', error);
+      console.error('사용자 비활성화 실패:', error);
     }
     return false;
   }
@@ -3346,12 +3335,23 @@ async function bulkActivate() {
   if (selected.length === 0) { alert('선택된 코드가 없습니다.'); return; }
   if (!confirm(`선택한 ${selected.length}개 코드를 활성화하시겠습니까?\n패스워드가 1111로 초기화됩니다.`)) return;
 
+  const succeeded = [];
+  const failed = [];
+
   for (const empno of selected) {
-    await LogManager.reactivateUser(empno);
-    const idx = employees.findIndex(e => String(e.empno) === String(empno));
-    if (idx !== -1) { employees[idx].password = '1111'; employees[idx].status = 'active'; }
+    const ok = await LogManager.reactivateUser(empno, true);
+    if (ok) {
+      succeeded.push(empno);
+      const idx = employees.findIndex(e => String(e.empno) === String(empno));
+      if (idx !== -1) { employees[idx].password = '1111'; employees[idx].status = 'active'; }
+    } else {
+      failed.push(empno);
+    }
   }
-  alert(`${selected.length}개 코드 활성화 완료.`);
+
+  let msg = `활성화 완료: ${succeeded.length}개`;
+  if (failed.length > 0) msg += `\n실패: ${failed.length}개 (${failed.join(', ')})`;
+  alert(msg);
   setTimeout(() => loadUsersList(), 2000);
 }
 
@@ -3360,16 +3360,30 @@ async function bulkSuspend() {
   if (selected.length === 0) { alert('선택된 코드가 없습니다.'); return; }
   if (!confirm(`선택한 ${selected.length}개 코드를 비활성화하시겠습니까?\n패스워드가 랜덤으로 변경됩니다.`)) return;
 
+  const succeeded = [];
+  const failed = [];
+  let selfLogout = false;
+
   for (const empno of selected) {
-    await LogManager.suspendUser(empno);
-    const idx = employees.findIndex(e => String(e.empno) === String(empno));
-    if (idx !== -1) {
-      employees[idx].password = Math.floor(1000 + Math.random() * 9000).toString();
-      employees[idx].status = 'suspended';
+    const ok = await LogManager.suspendUser(empno, true);
+    if (ok) {
+      succeeded.push(empno);
+      const idx = employees.findIndex(e => String(e.empno) === String(empno));
+      if (idx !== -1) {
+        employees[idx].password = Math.floor(1000 + Math.random() * 9000).toString();
+        employees[idx].status = 'suspended';
+      }
+      if (currentUser === empno) selfLogout = true;
+    } else {
+      failed.push(empno);
     }
-    if (currentUser === empno) { logout(); return; }
   }
-  alert(`${selected.length}개 코드 비활성화 완료.`);
+
+  let msg = `비활성화 완료: ${succeeded.length}개`;
+  if (failed.length > 0) msg += `\n실패: ${failed.length}개 (${failed.join(', ')})`;
+  alert(msg);
+
+  if (selfLogout) { logout(); return; }
   setTimeout(() => loadUsersList(), 2000);
 }
 
