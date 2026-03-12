@@ -1710,17 +1710,44 @@ async function loadAllData(){
   }
 }
 
-function checkAutoLogin() {
+async function checkAutoLogin() {
   const savedUser = localStorage.getItem('hwg_current_user');
   const savedIsAdmin = localStorage.getItem('hwg_is_admin') === 'true';
-  
+
   if (savedUser) {
-    currentUser = savedUser;
-    isAdminUser = savedIsAdmin;
-    showLoginSuccess();
+    // 관리자는 상태 체크 없이 통과
+    if (savedIsAdmin) {
+      currentUser = savedUser;
+      isAdminUser = true;
+      showLoginSuccess();
+      return;
+    }
+
+    // 일반 사용자는 최신 employees.json에서 status 재확인
+    try {
+      const latestEmployees = await loadJsonFlexible(EMP_URL + '?t=' + Date.now());
+      const userData = latestEmployees.find(e => String(e.empno).trim() === String(savedUser).trim());
+
+      if (!userData || userData.status === 'suspended') {
+        localStorage.removeItem('hwg_current_user');
+        localStorage.removeItem('hwg_is_admin');
+        navigateToScreen('login', false);
+        return;
+      }
+
+      currentUser = savedUser;
+      isAdminUser = false;
+      showLoginSuccess();
+    } catch (err) {
+      // 네트워크 오류 시 일단 통과 (오프라인 대응)
+      console.warn('자동로그인 상태 확인 실패, 캐시 세션 유지:', err);
+      currentUser = savedUser;
+      isAdminUser = savedIsAdmin;
+      showLoginSuccess();
+    }
   } else {
     const hash = window.location.hash.substring(1);
-    if (hash && ['menu', 'guide', 'search', 'contact', 'limit','video'].includes(hash)) {
+    if (hash && ['menu', 'guide', 'search', 'contact', 'limit', 'video'].includes(hash)) {
       window.location.hash = '';
     }
     navigateToScreen('login', false);
@@ -1989,16 +2016,35 @@ function validateCurrentUserPassword() {
   return true;
 }
 
-function showGuideScreen() {
-  if (!validateCurrentUserPassword()) return;
-  
+async function checkUserStatus() {
+  if (!currentUser || isAdminUser) return true;
+
+  try {
+    const latestEmployees = await loadJsonFlexible(EMP_URL + '?t=' + Date.now());
+    const userData = latestEmployees.find(e => String(e.empno).trim() === String(currentUser).trim());
+
+    if (!userData || userData.status === 'suspended') {
+      alert('계정이 비활성화되었습니다. 다시 로그인해주세요.');
+      logout();
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('상태 확인 실패, 기존 세션 유지:', err);
+    return true;
+  }
+}
+
+async function showGuideScreen() {
+  if (!(await checkUserStatus())) return;
+
   LogManager.logUserAction(currentUser, 'menu_click', '통합인수가이드');
   navigateToScreen('guide');
 }
 
- function showSurgeryScreen() {
-  if (!validateCurrentUserPassword()) return;
-  
+async function showSurgeryScreen() {
+  if (!(await checkUserStatus())) return;
+
   LogManager.logUserAction(currentUser, 'menu_click', '수술비검색');
   navigateToScreen('surgery');
   document.getElementById('surgerySearchInput').value = '';
@@ -2006,39 +2052,38 @@ function showGuideScreen() {
   document.getElementById('surgeryResults').innerHTML = '';
   document.getElementById('surgerySearchInput').focus();
 }
-  
-function showAnalysisScreen() {
-  if (!validateCurrentUserPassword()) return;
-  
+
+async function showAnalysisScreen() {
+  if (!(await checkUserStatus())) return;
+
   LogManager.logUserAction(currentUser, 'menu_click', '보장분석만들기');
   window.open('https://hwgdcw2.netlify.app/', '_blank');
 }
 
-  
-function showDiseaseScreen() {
-  if (!validateCurrentUserPassword()) return;
-  
+async function showDiseaseScreen() {
+  if (!(await checkUserStatus())) return;
+
   LogManager.logUserAction(currentUser, 'menu_click', '즉시인수질환');
   navigateToScreen('search');
 }
 
-function showContactScreen() {
-  if (!validateCurrentUserPassword()) return;
-  
+async function showContactScreen() {
+  if (!(await checkUserStatus())) return;
+
   LogManager.logUserAction(currentUser, 'menu_click', '연락처조회');
   navigateToScreen('contact');
 }
 
-function showLimitScreen() {
-  if (!validateCurrentUserPassword()) return;
-  
+async function showLimitScreen() {
+  if (!(await checkUserStatus())) return;
+
   LogManager.logUserAction(currentUser, 'menu_click', '인수한도조회');
   navigateToScreen('limit');
 }
 
-function showVideoScreen() {
-  if (!validateCurrentUserPassword()) return;
-  
+async function showVideoScreen() {
+  if (!(await checkUserStatus())) return;
+
   LogManager.logUserAction(currentUser, 'menu_click', '영상다시보기');
   navigateToScreen('video');
 }
@@ -3226,26 +3271,44 @@ async function loadUsersList() {
 
 function displayUsersList(employees) {
   const usersList = document.getElementById('usersList');
+  const filtered = employees.filter(emp => emp.empno !== '8091768');
 
-  let usersHTML = '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
-  usersHTML += '<tr style="background:#f8f9fa;"><th style="border:1px solid #e6e6e6; padding:10px;">사용자코드</th><th style="border:1px solid #e6e6e6; padding:10px;">상태</th><th style="border:1px solid #e6e6e6; padding:10px;">마지막활동</th><th style="border:1px solid #e6e6e6; padding:10px;">관리</th></tr>';
+  let usersHTML = `
+    <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+      <button onclick="selectAllUsers(true)" style="padding:6px 12px; font-size:13px; width:auto; margin:0; background:#555;">전체선택</button>
+      <button onclick="selectAllUsers(false)" style="padding:6px 12px; font-size:13px; width:auto; margin:0; background:#555;">전체해제</button>
+      <button onclick="bulkActivate()" style="padding:6px 12px; font-size:13px; width:auto; margin:0; background:#28a745;">선택 활성화</button>
+      <button onclick="bulkSuspend()" style="padding:6px 12px; font-size:13px; width:auto; margin:0; background:#d93025;">선택 비활성화</button>
+    </div>
+    <table style="width:100%; border-collapse:collapse; font-size:14px;">
+      <tr style="background:#f8f9fa;">
+        <th style="border:1px solid #e6e6e6; padding:10px; width:40px;">
+          <input type="checkbox" id="checkAll" onchange="selectAllUsers(this.checked)" style="width:auto; margin:0;">
+        </th>
+        <th style="border:1px solid #e6e6e6; padding:10px;">사용자코드</th>
+        <th style="border:1px solid #e6e6e6; padding:10px;">상태</th>
+        <th style="border:1px solid #e6e6e6; padding:10px;">마지막활동</th>
+        <th style="border:1px solid #e6e6e6; padding:10px;">관리</th>
+      </tr>
+  `;
 
-  employees.forEach(emp => {
-    if (emp.empno === '8091768') return;
-    
-    const status = emp.status === 'suspended' ? '일시정지' : '활성';
+  filtered.forEach(emp => {
+    const status = emp.status === 'suspended' ? '비활성' : '활성';
     const statusColor = emp.status === 'suspended' ? '#d93025' : '#28a745';
     const lastActivity = emp.lastActivity || '기록없음';
-    
+
     usersHTML += `
-      <tr>
+      <tr id="userrow_${emp.empno}">
+        <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">
+          <input type="checkbox" class="user-checkbox" data-empno="${emp.empno}" style="width:auto; margin:0;" onchange="onUserCheckChange()">
+        </td>
         <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${emp.empno}</td>
         <td style="border:1px solid #e6e6e6; padding:8px; text-align:center; color:${statusColor}; font-weight:600;">${status}</td>
         <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${lastActivity}</td>
         <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">
-          ${emp.status === 'suspended' ? 
-            `<button onclick="reactivateUser('${emp.empno}')" style="padding:4px 8px; font-size:12px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer; margin-right:4px;">승인</button>` : 
-            `<button onclick="suspendUser('${emp.empno}')" style="padding:4px 8px; font-size:12px; background:#d93025; color:white; border:none; border-radius:4px; cursor:pointer; margin-right:4px;">승인해제</button>`
+          ${emp.status === 'suspended'
+            ? `<button onclick="reactivateUser('${emp.empno}')" style="padding:4px 8px; font-size:12px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">활성화</button>`
+            : `<button onclick="suspendUser('${emp.empno}')" style="padding:4px 8px; font-size:12px; background:#d93025; color:white; border:none; border-radius:4px; cursor:pointer;">비활성화</button>`
           }
         </td>
       </tr>
@@ -3256,6 +3319,60 @@ function displayUsersList(employees) {
   usersList.innerHTML = usersHTML;
 }
 
+function selectAllUsers(checked) {
+  const checkboxes = document.querySelectorAll('.user-checkbox');
+  checkboxes.forEach(cb => cb.checked = checked);
+  const checkAll = document.getElementById('checkAll');
+  if (checkAll) checkAll.checked = checked;
+}
+
+function onUserCheckChange() {
+  const checkboxes = document.querySelectorAll('.user-checkbox');
+  const checkAll = document.getElementById('checkAll');
+  if (!checkAll) return;
+  const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+  const noneChecked = Array.from(checkboxes).every(cb => !cb.checked);
+  checkAll.checked = allChecked;
+  checkAll.indeterminate = !allChecked && !noneChecked;
+}
+
+function getSelectedEmpnos() {
+  return Array.from(document.querySelectorAll('.user-checkbox:checked'))
+    .map(cb => cb.dataset.empno);
+}
+
+async function bulkActivate() {
+  const selected = getSelectedEmpnos();
+  if (selected.length === 0) { alert('선택된 코드가 없습니다.'); return; }
+  if (!confirm(`선택한 ${selected.length}개 코드를 활성화하시겠습니까?\n패스워드가 1111로 초기화됩니다.`)) return;
+
+  for (const empno of selected) {
+    await LogManager.reactivateUser(empno);
+    const idx = employees.findIndex(e => String(e.empno) === String(empno));
+    if (idx !== -1) { employees[idx].password = '1111'; employees[idx].status = 'active'; }
+  }
+  alert(`${selected.length}개 코드 활성화 완료.`);
+  setTimeout(() => loadUsersList(), 2000);
+}
+
+async function bulkSuspend() {
+  const selected = getSelectedEmpnos();
+  if (selected.length === 0) { alert('선택된 코드가 없습니다.'); return; }
+  if (!confirm(`선택한 ${selected.length}개 코드를 비활성화하시겠습니까?\n패스워드가 랜덤으로 변경됩니다.`)) return;
+
+  for (const empno of selected) {
+    await LogManager.suspendUser(empno);
+    const idx = employees.findIndex(e => String(e.empno) === String(empno));
+    if (idx !== -1) {
+      employees[idx].password = Math.floor(1000 + Math.random() * 9000).toString();
+      employees[idx].status = 'suspended';
+    }
+    if (currentUser === empno) { logout(); return; }
+  }
+  alert(`${selected.length}개 코드 비활성화 완료.`);
+  setTimeout(() => loadUsersList(), 2000);
+}
+
 function searchUsers() {
   const searchTerm = document.getElementById('userSearchInput').value.trim().toLowerCase();
 
@@ -3264,12 +3381,14 @@ function searchUsers() {
     return;
   }
 
+  const base = window.allUsers.filter(emp => emp.empno !== '8091768');
+
   if (!searchTerm) {
-    displayUsersList(window.allUsers);
+    displayUsersList(base);
     return;
   }
 
-  const filteredUsers = window.allUsers.filter(emp => 
+  const filteredUsers = base.filter(emp =>
     emp.empno && String(emp.empno).toLowerCase().includes(searchTerm)
   );
 
