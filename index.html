@@ -1007,6 +1007,12 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
         <span style="font-size:18px; display:block; margin-bottom:4px;">수술비 검색하기</span>
       </button>
       
+      <!-- 수정 후 -->
+      <button id="naverCheckMenuBtn" style="margin-bottom:1rem;">
+        <span style="font-size:18px; display:block; margin-bottom:4px;">사장님 셀프 체크리스트</span>
+        <span style="font-size:14px; opacity:0.8;">(내 사업장의 의무보험 알기)</span>
+      </button>
+
       <button id="contactMenuBtn" style="margin-bottom:1rem;">
         <span style="font-size:18px; display:block; margin-bottom:4px;">콜센터, 보험금 청구 팩스</span>
       </button>
@@ -1943,6 +1949,7 @@ function navigateToScreen(screen, addToHistory = true) {
   }
 }
 
+// 수정 후
 function updateMenuVisibility() {
   const analysisMenuBtn = document.getElementById("analysisMenuBtn");
   const diseaseMenuBtn = document.getElementById("diseaseMenuBtn");
@@ -1953,13 +1960,15 @@ function updateMenuVisibility() {
   const limitMenuBtn = document.getElementById("limitMenuBtn");
   const videoMenuBtn = document.getElementById("videoMenuBtn");
   const surgeryMenuBtn = document.getElementById("surgeryMenuBtn");
+  const naverCheckMenuBtn = document.getElementById("naverCheckMenuBtn");
 
   // 공통 노출 메뉴 (모든 사용자)
   guideMenuBtn.className = "user-menu";
   contactMenuBtn.className = "user-menu";
+  naverCheckMenuBtn.className = "user-menu";
   guideMenuBtn.style.display = "block";
   contactMenuBtn.style.display = "block";
-
+  naverCheckMenuBtn.style.display = "block";
   if (isAdminUser) {
     // 관리자 전용 메뉴에 겨자색 스타일 적용
     analysisMenuBtn.className = "admin-only";
@@ -2056,11 +2065,19 @@ async function showDiseaseScreen() {
   navigateToScreen('search');
 }
 
+// 수정 후
 async function showContactScreen() {
   if (!(await checkUserStatus())) return;
 
   LogManager.logUserAction(currentUser, 'menu_click', '연락처조회');
   navigateToScreen('contact');
+}
+
+async function showNaverCheck() {
+  if (!(await checkUserStatus())) return;
+
+  LogManager.logUserAction(currentUser, 'menu_click', '네이버건강보험자가체크');
+  window.open('https://campaign.naver.com/insurance/self_check/', '_blank');
 }
 
 async function showLimitScreen() {
@@ -3484,7 +3501,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.key === 'Enter') login();
   });
 
+// 수정 후
 document.getElementById('guideMenuBtn').addEventListener('click', showGuideScreen);
+document.getElementById('naverCheckMenuBtn').addEventListener('click', showNaverCheck);
   document.getElementById('analysisMenuBtn').addEventListener('click', showAnalysisScreen);
   document.getElementById('surgeryMenuBtn').addEventListener('click', showSurgeryScreen);
   document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
