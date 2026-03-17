@@ -1009,8 +1009,8 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
       
       <!-- 수정 후 -->
       <button id="naverCheckMenuBtn" style="margin-bottom:1rem;">
-        <span style="font-size:18px; display:block; margin-bottom:4px;">사장님 셀프 체크리스트</span>
-        <span style="font-size:14px; opacity:0.8;">(내 사업장의 의무보험 알기)</span>
+        <span style="font-size:18px; display:block; margin-bottom:4px;">내 사업 3분 셀프체크</span>
+        <span style="font-size:14px; opacity:0.8;">(내 사업장 의무보험 바로알기)</span>
       </button>
 
       <button id="contactMenuBtn" style="margin-bottom:1rem;">
@@ -1964,31 +1964,35 @@ function updateMenuVisibility() {
 
   // 공통 노출 메뉴 (모든 사용자)
   guideMenuBtn.className = "user-menu";
+surgeryMenuBtn.className = "user-menu";
+  analysisMenuBtn.className = "user-menu";
   contactMenuBtn.className = "user-menu";
   naverCheckMenuBtn.className = "user-menu";
   guideMenuBtn.style.display = "block";
+surgeryMenuBtn.style.display = "block";
+  analysisMenuBtn.style.display = "block";
   contactMenuBtn.style.display = "block";
   naverCheckMenuBtn.style.display = "block";
   if (isAdminUser) {
     // 관리자 전용 메뉴에 겨자색 스타일 적용
-    analysisMenuBtn.className = "admin-only";
-    surgeryMenuBtn.className = "admin-only";
+    //analysisMenuBtn.className = "admin-only";
+    //surgeryMenuBtn.className = "admin-only";
     limitMenuBtn.className = "admin-only";
     videoMenuBtn.className = "admin-only";
     diseaseMenuBtn.className = "admin-only";
     logMenuBtn.className = "admin-only";
     userManageBtn.className = "admin-only";
 
-    analysisMenuBtn.style.display = "block";
-    surgeryMenuBtn.style.display = "block";
+    //analysisMenuBtn.style.display = "block";
+   // surgeryMenuBtn.style.display = "block";
     limitMenuBtn.style.display = "block";
     videoMenuBtn.style.display = "block";
     diseaseMenuBtn.style.display = "block";
     logMenuBtn.style.display = "block";
     userManageBtn.style.display = "block";
   } else {
-    analysisMenuBtn.style.display = "none";
-    surgeryMenuBtn.style.display = "none";
+    //analysisMenuBtn.style.display = "none";
+   // surgeryMenuBtn.style.display = "none";
     limitMenuBtn.style.display = "none";
     videoMenuBtn.style.display = "none";
     diseaseMenuBtn.style.display = "none";
