@@ -1131,15 +1131,15 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
       padding: 20px 0;
     }
 
-    .shovel-btn {
-      width: 120px;
-      height: 120px;
+ .shovel-btn {
+      width: 160px;
+      height: 160px;
       border-radius: 50%;
       border: none;
       background: linear-gradient(135deg, #ff7f00, #e67100);
       box-shadow: 0 6px 20px rgba(255,127,0,0.4);
       cursor: pointer;
-      font-size: 60px;
+      font-size: 80px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1173,9 +1173,9 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
       100% { opacity: 0; transform: translateY(-40px) scale(2); }
     }
 
-    .shovel-icon {
+ .shovel-icon {
       display: inline-block;
-      font-size: 60px;
+      font-size: 80px;
       line-height: 1;
       pointer-events: none;
     }
@@ -1513,10 +1513,10 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     <div class="app-title">🎁 아침 보물찾기</div>
     <div class="card container-narrow">
 
-      <!-- 실시간 시계 -->
-      <div style="text-align:center; margin-bottom:16px;">
-        <div class="treasure-time-display" id="treasureClock">00:00:00</div>
-        <div style="font-size:12px; color:var(--muted);" id="treasureDateDisplay"></div>
+<!-- 수정 후 -->
+      <!-- 현재 날짜 표시 (시계 없이) -->
+      <div style="text-align:center; margin-bottom:8px;">
+        <div style="font-size:13px; color:var(--muted);" id="treasureDateDisplay"></div>
       </div>
 
       <!-- 이름 미설정 안내 (최초 1회) -->
@@ -1544,17 +1544,14 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
      <!-- 수정 후 -->
         <!-- 탐색 중 -->
         <div id="treasureSearching" class="treasure-status-box searching" style="display:none;">
-          <div style="font-size:16px; font-weight:700; color:var(--hanwha); margin-bottom:8px;">⏰ 보물을 찾아라!</div>
           <div id="treasureGpsInfo" style="font-size:11px; color:var(--muted); margin-bottom:12px;"></div>
 
           <!-- 삽질 버튼 -->
           <div class="shovel-container">
             <button class="shovel-btn" id="shovelBtn" disabled onclick="doShovel()">
-              <span class="shovel-icon" id="shovelIcon">⛏️</span>
+              <span class="shovel-icon" id="shovelIcon">🪣</span>
             </button>
-            <div class="shovel-status" id="shovelStatus">
-              <span style="color:#888;">📍 범위 내에 있어야 삽질할 수 있습니다</span>
-            </div>
+            <div class="shovel-status" id="shovelStatus"></div>
             <div class="shovel-cooltime" id="shovelCooltime"></div>
           </div>
         </div>
@@ -1574,7 +1571,9 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
         </div>
 
         <!-- 스탬프 달력 -->
-        <div style="margin-top:16px;">
+      <!-- 수정 후 -->
+        <!-- 스탬프 달력 (항상 표시) -->
+        <div id="stampCalendarSection" style="margin-top:16px;">
           <div style="font-size:15px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
             <span>📅 <span id="stampMonthTitle"></span> 출석 현황</span>
             <button id="openCouponBoxBtn" style="width:auto; padding:6px 12px; font-size:12px; margin:0; background:var(--hanwha);">🎫 내 쿠폰함</button>
@@ -3384,21 +3383,18 @@ async function loadTreasureMain() {
   checkTreasureTime();
 }
 
+// 수정 후
 function startTreasureClock() {
   if (treasureClockInterval) clearInterval(treasureClockInterval);
   function tick() {
     const now = new Date();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    const ss = String(now.getSeconds()).padStart(2, '0');
-    const clockEl = document.getElementById('treasureClock');
     const dateEl = document.getElementById('treasureDateDisplay');
-    if (clockEl) clockEl.textContent = `${hh}:${mm}:${ss}`;
     if (dateEl) dateEl.textContent = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
     checkTreasureTime();
   }
   tick();
-  treasureClockInterval = setInterval(tick, 1000);
+  // 시계 불필요 — 1분마다 시간 체크만
+  treasureClockInterval = setInterval(tick, 60000);
 }
 
 // 수정 후
@@ -3430,11 +3426,18 @@ function isInTreasureTime() {
   return now >= start && now <= end;
 }
 
+// 수정 후
 async function checkTreasureTime() {
   const notTimeEl = document.getElementById('treasureNotTime');
   const searchingEl = document.getElementById('treasureSearching');
   const foundEl = document.getElementById('treasureFound');
+  const calendarSection = document.getElementById('stampCalendarSection');
   if (!notTimeEl || !searchingEl || !foundEl) return;
+
+  // 달력 섹션 항상 표시
+  if (calendarSection) calendarSection.style.display = 'block';
+
+  // 오늘 이미 적립했으면 found 상태 유지
   if (foundEl.style.display === 'block') return;
 
   if (!isInTreasureTime()) {
@@ -3492,6 +3495,7 @@ let shovelCoolTimer = null;
 let shovelCooling = false;
 let isInRange = false;
 
+// 수정 후
 async function onTreasurePosition(pos) {
   if (!treasureConfig || !treasureConfig.lat) {
     const el = document.getElementById('treasureGpsInfo');
@@ -3514,46 +3518,46 @@ async function onTreasurePosition(pos) {
     isInRange = true;
     if (!shovelCooling && shovelBtn) {
       shovelBtn.disabled = false;
-      if (shovelStatus) shovelStatus.innerHTML = '<span style="color:var(--hanwha);">⛏️ 여기서 삽질해보세요!</span>';
+      if (shovelStatus) shovelStatus.innerHTML = '';
     }
   } else {
     isInRange = false;
     if (shovelBtn) shovelBtn.disabled = true;
-    if (shovelStatus) shovelStatus.innerHTML = '<span style="color:#888;">📍 범위 내에 있어야 삽질할 수 있습니다</span>';
+    if (shovelStatus) shovelStatus.innerHTML = '<span style="color:#888;">📍 범위 내에 있어야 합니다</span>';
   }
 }
 
+// 수정 후
 async function doShovel() {
   if (!isInRange || shovelCooling) return;
 
   const shovelBtn = document.getElementById('shovelBtn');
   const shovelIcon = document.getElementById('shovelIcon');
   const shovelStatus = document.getElementById('shovelStatus');
-  const shovelCooltime = document.getElementById('shovelCooltime');
 
   // 삽질 애니메이션
   shovelIcon.classList.remove('digging');
-  void shovelIcon.offsetWidth; // reflow
+  void shovelIcon.offsetWidth;
   shovelIcon.classList.add('digging');
 
   // 먼지 파티클
   spawnDustParticles(shovelBtn);
+
+  shovelBtn.disabled = true;
 
   // 확률 체크
   const prob = parseInt(treasureConfig?.digProb) || 30;
   const rand = Math.random() * 100;
   const success = rand <= prob;
 
-  shovelBtn.disabled = true;
-
   if (success) {
-    // 당첨
     setTimeout(async () => {
       shovelStatus.innerHTML = '<span class="shovel-result-success">🎉 보물을 찾았습니다!</span>';
       await doStampAndCoupon();
+      // 달력 갱신
+      await renderStampCalendar();
     }, 500);
   } else {
-    // 꽝 → 쿨타임
     setTimeout(() => {
       shovelStatus.innerHTML = '<span class="shovel-result-fail">💨 꽝! 다시 파보세요!</span>';
       startShovelCooltime();
@@ -3888,7 +3892,10 @@ async function loadAllStatus() {
       const userData = stamps[userCode];
       const username = userData?.username || userCoupons[userCode]?.username || userCode;
       const records = userData?.records || [];
-      const thisMonthCount = records.filter(r => r.date && r.date.startsWith(ym)).length;
+      // 수정 후
+    // 동일 날짜 중복 제거 후 카운트
+    const uniqueDates = new Set(records.filter(r => r.date && r.date.startsWith(ym)).map(r => r.date));
+    const thisMonthCount = uniqueDates.size;
       const coupons = userCoupons[userCode]?.coupons || [];
       const unusedCoupons = coupons.filter(c => !c.used);
       const couponSummary = unusedCoupons.length > 0
