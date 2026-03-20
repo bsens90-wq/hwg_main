@@ -3814,15 +3814,23 @@ async function doStampAndCoupon() {
   if (wonCoupons.length > 0) {
     const couponResultEl = document.getElementById('treasureCouponResult');
     const couponListEl = document.getElementById('treasureCouponList');
+   // after
     couponListEl.innerHTML = wonCoupons.map(name => {
       const isStreak = name.includes('근태상');
+      // config에서 해당 쿠폰 이미지 URL 찾기
+      const couponConfig = (treasureConfig?.coupons || []).find(c => c.name === name);
+      const imageUrl = couponConfig?.imageUrl || '';
       return `
-        <div class="coupon-item">
-          <div>
-            <div class="coupon-name">🎫 ${name}</div>
-            <div class="coupon-date">${today} 획득${isStreak ? ' · 🏆 주간 개근 달성!' : ''}</div>
+        <div class="coupon-item" style="flex-direction:column; align-items:flex-start; gap:8px;">
+          ${imageUrl ? `<img src="${imageUrl}" style="width:100%; max-height:120px; object-fit:contain;
+            border-radius:8px; background:#f8f8f8;" onerror="this.style.display='none'">` : ''}
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <div>
+              <div class="coupon-name">🎫 ${name}</div>
+              <div class="coupon-date">${today} 획득${isStreak ? ' · 🏆 주간 개근 달성!' : ''}</div>
+            </div>
+            <div class="coupon-badge">NEW</div>
           </div>
-          <div class="coupon-badge">NEW</div>
         </div>
       `;
     }).join('');
@@ -3841,14 +3849,17 @@ function showFoundState(playConfetti) {
 
   const fortune = getTodayFortune();
   let foundContent = '';
+  // after
   if (fortune) {
     foundContent = `
-      <div style="font-size:15px; font-weight:700; color:var(--hanwha); margin-bottom:10px;">
-        ${treasureUsername}님의 오늘의 운세를 알려드립니다! 🔮
-      </div>
       <div style="font-size:14px; color:#444; line-height:1.8; background:#fff8f0;
                   border:1px solid rgba(255,127,0,0.35); border-radius:12px;
-                  padding:14px; margin-top:4px; white-space:pre-line;">
+                  padding:14px; margin-top:4px; white-space:pre-line; position:relative;">
+        <div style="text-align:center; font-size:15px; font-weight:700; color:var(--hanwha);
+                    margin-bottom:12px; padding-bottom:10px;
+                    border-bottom:1px dashed rgba(255,127,0,0.35);">
+          ${treasureUsername}님의 오늘의 운세를 알려드립니다!
+        </div>
         ${fortune}
       </div>
     `;
@@ -3959,15 +3970,25 @@ async function openCouponBox() {
       body.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">아직 획득한 쿠폰이 없습니다.</div>';
       return;
     }
-    body.innerHTML = coupons.map(c => `
-      <div class="coupon-item">
-        <div>
-          <div class="coupon-name">🎫 ${c.name}</div>
-          <div class="coupon-date">${c.date} 획득</div>
+    // after
+    body.innerHTML = coupons.map(c => {
+      const couponConfig = (treasureConfig?.coupons || []).find(cfg => cfg.name === c.name);
+      const imageUrl = couponConfig?.imageUrl || '';
+      return `
+        <div class="coupon-item" style="flex-direction:column; align-items:flex-start; gap:8px;
+          opacity:${c.used ? '0.55' : '1'};">
+          ${imageUrl ? `<img src="${imageUrl}" style="width:100%; max-height:120px; object-fit:contain;
+            border-radius:8px; background:#f8f8f8;" onerror="this.style.display='none'">` : ''}
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <div>
+              <div class="coupon-name">🎫 ${c.name}</div>
+              <div class="coupon-date">${c.date} 획득</div>
+            </div>
+            <div class="coupon-badge">${c.used ? '사용완료' : '미사용'}</div>
+          </div>
         </div>
-        <div class="coupon-badge">${c.used ? '사용완료' : '미사용'}</div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   } catch (e) {
     body.innerHTML = '<div style="color:#d93025;">불러오기 실패</div>';
   }
@@ -3993,29 +4014,38 @@ async function saveTreasureConfig() {
   } catch (e) { alert('저장 실패.'); }
 }
 
+// after
 function renderCouponSettingList(coupons) {
   const container = document.getElementById('couponSettingList');
   container.innerHTML = coupons.map((c, i) => `
     <div class="coupon-setting-item" id="couponRow_${i}">
       <div class="coupon-setting-row">
         <span style="width:40px; font-size:12px; color:var(--muted);">이름</span>
-        <input type="text" value="${c.name}" placeholder="쿠폰명" data-idx="${i}" data-field="name" style="flex:1;">
+        <input type="text" value="${c.name || ''}" placeholder="쿠폰명" data-idx="${i}" data-field="name" style="flex:1;">
       </div>
       <div class="coupon-setting-row">
         <span style="width:40px; font-size:12px; color:var(--muted);">확률</span>
-        <input type="number" value="${c.probability}" placeholder="당첨확률(%)" data-idx="${i}" data-field="probability" style="flex:1;" min="0" max="100">
+        <input type="number" value="${c.probability || 0}" placeholder="당첨확률(%)" data-idx="${i}" data-field="probability" style="flex:1;" min="0" max="100">
         <span style="font-size:12px;">%</span>
       </div>
       <div class="coupon-setting-row">
         <span style="width:40px; font-size:12px; color:var(--muted);">수량</span>
-        <input type="number" value="${c.limit}" placeholder="제한수량(0=무제한)" data-idx="${i}" data-field="limit" style="flex:1;" min="0">
+        <input type="number" value="${c.limit || 0}" placeholder="제한수량(0=무제한)" data-idx="${i}" data-field="limit" style="flex:1;" min="0">
         <span style="font-size:12px;">개</span>
       </div>
+      <div class="coupon-setting-row">
+        <span style="width:40px; font-size:12px; color:var(--muted);">이미지</span>
+        <input type="text" value="${c.imageUrl || ''}" placeholder="https://raw.githubusercontent.com/.../images/xxx.png" data-idx="${i}" data-field="imageUrl" style="flex:1; font-size:11px;">
+      </div>
+      ${c.imageUrl ? `<div style="text-align:center; margin:6px 0;">
+        <img src="${c.imageUrl}" style="max-height:60px; border-radius:6px; object-fit:contain;" onerror="this.style.display='none'">
+      </div>` : ''}
       <button onclick="removeCouponRow(${i})" style="background:#d93025; padding:4px 8px; font-size:11px; width:auto; margin:4px 0 0 0;">삭제</button>
     </div>
   `).join('');
 }
 
+// after
 function addCouponSettingRow() {
   const container = document.getElementById('couponSettingList');
   const idx = container.children.length;
@@ -4037,6 +4067,10 @@ function addCouponSettingRow() {
       <input type="number" placeholder="제한수량(0=무제한)" data-idx="${idx}" data-field="limit" style="flex:1;" min="0">
       <span style="font-size:12px;">개</span>
     </div>
+    <div class="coupon-setting-row">
+      <span style="width:40px; font-size:12px; color:var(--muted);">이미지</span>
+      <input type="text" placeholder="https://raw.githubusercontent.com/.../images/xxx.png" data-idx="${idx}" data-field="imageUrl" style="flex:1; font-size:11px;">
+    </div>
     <button onclick="removeCouponRow(${idx})" style="background:#d93025; padding:4px 8px; font-size:11px; width:auto; margin:4px 0 0 0;">삭제</button>
   `;
   container.appendChild(div);
@@ -4051,15 +4085,18 @@ async function saveCouponSetting() {
   if (!isAdminUser) return;
   const rows = document.querySelectorAll('.coupon-setting-item');
   const coupons = [];
+// after
   rows.forEach(row => {
     const nameEl = row.querySelector('[data-field="name"]');
     const probEl = row.querySelector('[data-field="probability"]');
     const limitEl = row.querySelector('[data-field="limit"]');
+    const imageEl = row.querySelector('[data-field="imageUrl"]');
     if (nameEl && nameEl.value.trim()) {
       coupons.push({
         name: nameEl.value.trim(),
         probability: parseFloat(probEl?.value) || 0,
-        limit: parseInt(limitEl?.value) || 0
+        limit: parseInt(limitEl?.value) || 0,
+        imageUrl: imageEl?.value.trim() || ''
       });
     }
   });
@@ -4304,18 +4341,25 @@ async function refreshAdminCouponList(userCode) {
       container.innerHTML = '<div style="text-align:center;padding:10px;color:var(--muted);">보유 쿠폰 없음</div>';
       return;
     }
-    container.innerHTML = coupons.map((c, i) => `
-      <div style="display:flex;justify-content:space-between;align-items:center;
-                  padding:6px 0;border-bottom:1px solid #f0f0f0;">
-        <div>
-          <span style="font-weight:600;">${c.used ? '🔲' : '🎫'} ${c.name}</span>
-          <span style="font-size:11px;color:var(--muted);margin-left:6px;">${c.date}</span>
-          ${c.used ? '<span style="font-size:11px;color:#aaa;"> · 사용완료</span>' : ''}
-        </div>
-        <button onclick="adminRevokeCoupon(${i})"
-          style="padding:2px 8px;font-size:11px;background:#d93025;color:white;
-                 border:none;border-radius:4px;cursor:pointer;width:auto;margin:0;">회수</button>
-      </div>`).join('');
+   // after
+    container.innerHTML = coupons.map((c, i) => {
+      const couponConfig = (treasureConfig?.coupons || []).find(cfg => cfg.name === c.name);
+      const imageUrl = couponConfig?.imageUrl || '';
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;
+                    padding:8px 0;border-bottom:1px solid #f0f0f0;gap:8px;">
+          ${imageUrl ? `<img src="${imageUrl}" style="width:44px;height:44px;object-fit:contain;
+            border-radius:6px;background:#f8f8f8;flex-shrink:0;" onerror="this.style.display='none'">` : ''}
+          <div style="flex:1;">
+            <span style="font-weight:600;">${c.used ? '🔲' : '🎫'} ${c.name}</span>
+            <span style="font-size:11px;color:var(--muted);margin-left:6px;">${c.date}</span>
+            ${c.used ? '<span style="font-size:11px;color:#aaa;"> · 사용완료</span>' : ''}
+          </div>
+          <button onclick="adminRevokeCoupon(${i})"
+            style="padding:2px 8px;font-size:11px;background:#d93025;color:white;
+                   border:none;border-radius:4px;cursor:pointer;width:auto;margin:0;">회수</button>
+        </div>`;
+    }).join('');
   } catch (e) {
     container.innerHTML = '<div style="color:#d93025;text-align:center;padding:10px;">로드 실패</div>';
   }
