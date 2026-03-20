@@ -3730,23 +3730,30 @@ function startConfetti() {
   draw();
 }
 
+// 수정 후
 async function renderStampCalendar() {
   const container = document.getElementById('stampCalendarContainer');
   const titleEl = document.getElementById('stampMonthTitle');
   if (!container) return;
 
-  let stamps = [];
+  let stampDates = new Set();
   try {
     const result = await treasureAPI('getStamps', { userCode: currentUser });
-    stamps = result.stamps || [];
+    // result.stamps는 배열 또는 { username, records:[{date}] } 객체일 수 있음
+    const raw = result.stamps;
+    if (Array.isArray(raw)) {
+      // 배열인 경우
+      raw.forEach(s => { if (s.date) stampDates.add(s.date); });
+    } else if (raw && Array.isArray(raw.records)) {
+      // { username, records: [{date}] } 객체인 경우
+      raw.records.forEach(s => { if (s.date) stampDates.add(s.date); });
+    }
   } catch (e) {}
 
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
   if (titleEl) titleEl.textContent = `${year}년 ${month+1}월`;
-
-  const stampDates = new Set(stamps.map(s => s.date));
   const today = getKoreaDateStr();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month+1, 0).getDate();
