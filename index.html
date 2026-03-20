@@ -1581,7 +1581,7 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
         <!-- 스탬프 달력 -->
        <!-- 수정 후 -->
         <!-- 스탬프 달력 (항상 표시) -->
-        <div id="stampCalendarSection" style="margin-top:16px; display:block;">
+       <div id="stampCalendarSection" style="margin-top:16px;">
           <div style="font-size:15px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
             <span>📅 <span id="stampMonthTitle"></span> 출석 현황</span>
             <button id="openCouponBoxBtn" style="width:auto; padding:6px 12px; font-size:12px; margin:0; background:var(--hanwha);">🎫 내 쿠폰함</button>
@@ -3387,21 +3387,26 @@ async function saveTreasureName() {
 }
 
 // 수정 후
+// 수정 후
 async function loadTreasureMain() {
-  // 달력 섹션 강제 표시
-  const calendarSection = document.getElementById('stampCalendarSection');
-  if (calendarSection) calendarSection.style.display = 'block';
+  // 달력 섹션 강제 표시 (checkTreasureTime 호출 전에)
+  const cal = document.getElementById('stampCalendarSection');
+  if (cal) cal.style.display = 'block';
 
-  // 달력 렌더와 시간 체크 병렬 실행
-  await Promise.allSettled([
-    renderStampCalendar(),
-    checkTreasureTime()
-  ]);
+  // 달력 렌더 완료 후 시간 체크 (순서 보장)
+  await renderStampCalendar();
 
-  // 병렬 실행 후 달력 섹션 재확인 (혹시 숨겨졌을 경우 대비)
-  if (calendarSection) calendarSection.style.display = 'block';
+  // 다시 한번 달력 보장
+  if (cal) cal.style.display = 'block';
+
+  // 시간 체크는 달력 렌더 완료 후 실행
+  await checkTreasureTime();
+
+  // 시간 체크 후에도 달력 유지
+  if (cal) cal.style.display = 'block';
 }
 
+// 수정 후
 function startTreasureClock() {
   if (treasureClockInterval) clearInterval(treasureClockInterval);
   function tick() {
@@ -3413,12 +3418,15 @@ function startTreasureClock() {
     const dateEl = document.getElementById('treasureDateDisplay');
     if (clockEl) clockEl.textContent = `${hh}:${mm}:${ss}`;
     if (dateEl) dateEl.textContent = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
-    checkTreasureTime();
+    // 매초 checkTreasureTime 호출 제거 — 1분 단위로만 체크
   }
   tick();
   treasureClockInterval = setInterval(tick, 1000);
+  // 1분마다 시간 체크
+  setInterval(() => { checkTreasureTime(); }, 60000);
 }
 
+// 수정 후
 // 수정 후
 function stopTreasure() {
   if (treasureClockInterval) { clearInterval(treasureClockInterval); treasureClockInterval = null; }
@@ -3428,6 +3436,7 @@ function stopTreasure() {
   if (shovelCoolTimer) { clearInterval(shovelCoolTimer); shovelCoolTimer = null; }
   shovelCooling = false;
   isInRange = false;
+  _checkingTreasureTime = false;
 }
 
 function getKoreaTimeStr() {
@@ -3448,11 +3457,21 @@ function isInTreasureTime() {
   return now >= start && now <= end;
 }
 
+// 수정 후
+let _checkingTreasureTime = false;
+
 async function checkTreasureTime() {
+  if (_checkingTreasureTime) return;
+
   const notTimeEl = document.getElementById('treasureNotTime');
   const searchingEl = document.getElementById('treasureSearching');
   const foundEl = document.getElementById('treasureFound');
-  if (!notTimeEl || !searchingEl || !foundEl) return;
+  // treasureMain이 없거나 숨겨져 있으면 실행하지 않음
+  const mainEl = document.getElementById('treasureMain');
+  if (!notTimeEl || !searchingEl || !foundEl || !mainEl) return;
+  if (mainEl.style.display === 'none') return;
+
+  // 오늘 이미 적립했으면 found 상태 유지
   if (foundEl.style.display === 'block') return;
 
   if (!isInTreasureTime()) {
@@ -3464,19 +3483,23 @@ async function checkTreasureTime() {
     const end = treasureConfig?.endTime || '08:55';
     const timeInfoEl = document.getElementById('treasureTimeInfo');
     if (timeInfoEl) timeInfoEl.textContent = `인증 가능 시간: ${start} ~ ${end}`;
+    // 달력은 건드리지 않음
     return;
   }
 
   notTimeEl.style.display = 'none';
 
+  _checkingTreasureTime = true;
   try {
     const result = await treasureAPI('getStamps', { userCode: currentUser });
     const stamps = result.stamps || [];
     if (stamps.some(s => s.date === getKoreaDateStr())) {
       showFoundState(false);
+      _checkingTreasureTime = false;
       return;
     }
   } catch (e) {}
+  _checkingTreasureTime = false;
 
   if (treasureWatchId === null) {
     searchingEl.style.display = 'block';
