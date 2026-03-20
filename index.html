@@ -1672,10 +1672,14 @@ const DIS_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data
 const GUIDE_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/udw_dcw.json";
 const SURGERY_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/oprtn.json";
 
+// after
 const ADMIN_ACCOUNT = {
   empno: "8091768",
   password: "dcw8091"
 };
+
+const FORTUNE_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/fortune.json";
+let fortuneData = [];
 
 // 로그 관리 시스템
 class LogManager {
@@ -3336,8 +3340,12 @@ async function showTreasureScreen() {
 }
 
 // 수정 후
+// after
 async function initTreasureScreen() {
   startTreasureClock();
+
+  // 운세 데이터 비동기 선제 로드
+  loadFortuneData();
 
   // config + username 병렬 호출
   const [configResult, usernameResult] = await Promise.allSettled([
@@ -3564,8 +3572,11 @@ async function onTreasurePosition(pos) {
   }
 }
 
+// after
 async function doShovel() {
   if (!isInRange || shovelCooling) return;
+  // 당일 인증 완료 상태이면 삽질 불가
+  if (document.getElementById('treasureFound').style.display === 'block') return;
 
   const shovelBtn = document.getElementById('shovelBtn');
   const shovelIcon = document.getElementById('shovelIcon');
@@ -3656,14 +3667,17 @@ async function doStampAndCoupon() {
     if (stampResult.duplicate) { showFoundState(false); return; }
   } catch (e) { console.error('스탬프 적립 실패:', e); }
 
+// after
   let wonCoupons = [];
   try {
     const couponResult = await treasureAPI('issueCoupon', {
       userCode: currentUser,
       username: treasureUsername,
-      date: today
+      date: today,
+      coupons: (treasureConfig?.coupons || []).filter(c => c.name && c.probability > 0)
     });
     wonCoupons = couponResult.wonCoupons || [];
+    console.log('쿠폰 추첨 결과:', JSON.stringify(couponResult));
   } catch (e) { console.error('쿠폰 추첨 실패:', e); }
 
   await renderStampCalendar();
@@ -3686,11 +3700,30 @@ async function doStampAndCoupon() {
   showFoundState(true);
 }
 
+// after
 function showFoundState(playConfetti) {
   document.getElementById('treasureSearching').style.display = 'none';
   document.getElementById('treasureNotTime').style.display = 'none';
   document.getElementById('treasureFound').style.display = 'block';
-  document.getElementById('treasureFoundName').textContent = `${treasureUsername}님, 오늘도 일찍 오셨네요! 🌟`;
+  stopGpsWatch();
+
+  const fortune = getTodayFortune();
+  let foundContent = '';
+  if (fortune) {
+    foundContent = `
+      <div style="font-size:15px; font-weight:700; color:var(--hanwha); margin-bottom:10px;">
+        ${treasureUsername}님의 오늘의 운세를 알려드립니다! 🔮
+      </div>
+      <div style="font-size:14px; color:#444; line-height:1.8; background:#fff8f0;
+                  border:1px solid rgba(255,127,0,0.35); border-radius:12px;
+                  padding:14px; margin-top:4px; white-space:pre-line;">
+        ${fortune}
+      </div>
+    `;
+  } else {
+    foundContent = `<div style="font-size:14px; color:#555; margin-top:6px;">${treasureUsername}님, 오늘도 일찍 오셨네요! 🌟</div>`;
+  }
+  document.getElementById('treasureFoundName').innerHTML = foundContent;
   if (playConfetti) startConfetti();
 }
 
@@ -3988,6 +4021,49 @@ function getDistanceMeters(lat1, lng1, lat2, lng2) {
     Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLng/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
+
+  // after
+async function loadFortuneData() {
+  try {
+    const res = await fetch(FORTUNE_URL + "?t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json();
+    fortuneData = Array.isArray(data) ? data : [];
+    console.log("운세 데이터 로드:", fortuneData.length + "건");
+  } catch (e) {
+    console.error("운세 데이터 로드 실패:", e);
+    fortuneData = [];
+  }
+}
+
+function getTodayFortune() {
+  if (!fortuneData.length) return null;
+  const today = getKoreaDateStr();
+  const cacheKey = 'mudra_fortune_' + today;
+
+  // 오늘 날짜 캐시 확인
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) return cached;
+
+  // 이전 날짜 캐시 정리
+  Object.keys(localStorage)
+    .filter(k => k.startsWith('mudra_fortune_') && k !== cacheKey)
+    .forEach(k => localStorage.removeItem(k));
+
+  // 날짜 기반 해시로 오늘 인덱스 고정
+  const seed = today.replace(/-/g, '');
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  const idx = Math.abs(hash) % fortuneData.length;
+  const fortune = fortuneData[idx];
+  localStorage.setItem(cacheKey, fortune);
+  return fortune;
+}
+
+// ===================== 보물찾기 끝 =====================
 // ===================== 보물찾기 끝 =====================
 
 // 인수한도 관련 함수들
