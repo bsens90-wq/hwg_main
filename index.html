@@ -3489,24 +3489,13 @@ async function checkTreasureTime() {
 
   notTimeEl.style.display = 'none';
 
- // 수정 후
   _checkingTreasureTime = true;
   try {
     const result = await treasureAPI('getStamps', { userCode: currentUser });
-    const raw = result.stamps;
-    let records = [];
-    if (Array.isArray(raw)) {
-      records = raw;
-    } else if (raw && Array.isArray(raw.records)) {
-      records = raw.records;
-    }
-    if (records.some(s => s.date === getKoreaDateStr())) {
+    const stamps = result.stamps || [];
+    if (stamps.some(s => s.date === getKoreaDateStr())) {
       showFoundState(false);
       _checkingTreasureTime = false;
-      return;
-    }
-  } catch (e) {}
-  _checkingTreasureTime = false;
       return;
     }
   } catch (e) {}
