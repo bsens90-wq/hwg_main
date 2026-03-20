@@ -944,9 +944,181 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
       color: #999;
     }
     
-    .cvrnm-highlight {
+ .cvrnm-highlight {
       font-weight: 700;
       color: #0066cc;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .treasure-spinner {
+      width: 60px;
+      height: 60px;
+      border: 6px solid #f0f0f0;
+      border-top: 6px solid var(--hanwha);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px auto;
+    }
+
+    .stamp-calendar {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .stamp-calendar th {
+      background: var(--hanwha);
+      color: white;
+      padding: 6px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .stamp-calendar td {
+      border: 1px solid var(--border);
+      padding: 6px;
+      text-align: center;
+      vertical-align: top;
+      height: 36px;
+      font-size: 12px;
+      background: white;
+    }
+
+    .stamp-calendar td.today {
+      background: rgba(255,127,0,0.08);
+      font-weight: 700;
+    }
+
+    .stamp-calendar td.stamped {
+      background: rgba(255,127,0,0.15);
+    }
+
+    .stamp-calendar td .stamp-mark {
+      font-size: 16px;
+      display: block;
+    }
+
+    .stamp-calendar td.other-month {
+      color: #ccc;
+      background: #fafafa;
+    }
+
+    .coupon-item {
+      background: linear-gradient(135deg, #fff8f0, #fff);
+      border: 1px solid var(--hanwha);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .coupon-item .coupon-name {
+      font-weight: 700;
+      color: var(--hanwha);
+      font-size: 15px;
+    }
+
+    .coupon-item .coupon-date {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .coupon-item .coupon-badge {
+      background: var(--hanwha);
+      color: white;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .treasure-status-box {
+      text-align: center;
+      padding: 24px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .treasure-status-box.searching {
+      background: rgba(255,127,0,0.05);
+      border: 1px dashed var(--hanwha);
+    }
+
+    .treasure-status-box.not-time {
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+    }
+
+    .treasure-status-box.found {
+      background: rgba(255,127,0,0.08);
+      border: 2px solid var(--hanwha);
+      animation: fadeIn 0.5s ease;
+    }
+
+    .treasure-time-display {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--hanwha);
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
+
+    .admin-section {
+      background: #f8f0ff;
+      border: 1px solid #c39bd3;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+
+    .admin-section h3 {
+      color: #8e44ad;
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+    }
+
+    .admin-sub-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #555;
+      margin: 12px 0 6px 0;
+    }
+
+    .coupon-setting-item {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .coupon-setting-item .coupon-setting-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .coupon-setting-item input {
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 6px;
     }
     
 /* 수정 후 */
@@ -1319,6 +1491,131 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
         </div>
         <button id="saveTreasureCoordBtn" style="background:#8e44ad; margin-bottom:8px;">좌표 저장</button>
         <button id="resetStampsBtn" style="background:#d93025; margin-bottom:8px;">스탬프 전체 초기화</button>
+      </div>
+
+      <button id="treasureBackBtn" class="secondary" style="margin-top:16px;">뒤로가기</button>
+      <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+    </div>
+  </section>
+
+<!-- 수정 후 -->
+  <!-- 보물찾기 화면 -->
+  <section id="treasureScreen" class="screen" style="display:none;">
+    <div class="app-title">🎁 아침 보물찾기</div>
+    <div class="card container-narrow">
+
+      <!-- 실시간 시계 -->
+      <div style="text-align:center; margin-bottom:16px;">
+        <div class="treasure-time-display" id="treasureClock">00:00:00</div>
+        <div style="font-size:12px; color:var(--muted);" id="treasureDateDisplay"></div>
+      </div>
+
+      <!-- 이름 미설정 안내 (최초 1회) -->
+      <div id="treasureNameSetup" style="display:none;">
+        <div style="font-size:15px; font-weight:700; margin-bottom:10px; text-align:center;">
+          📝 이름을 설정해주세요 (최초 1회)
+        </div>
+        <div class="row">
+          <input id="treasureNameInput" type="text" placeholder="이름 입력 (예: 홍길동)">
+        </div>
+        <button id="treasureNameSaveBtn">이름 저장 후 시작</button>
+      </div>
+
+      <!-- 메인 콘텐츠 (이름 설정 후 표시) -->
+      <div id="treasureMain" style="display:none;">
+
+        <!-- 인증 가능 시간 외 -->
+        <div id="treasureNotTime" class="treasure-status-box not-time" style="display:none;">
+          <div style="font-size:40px; margin-bottom:8px;">😅</div>
+          <div style="font-size:18px; font-weight:700; color:#555; margin-bottom:4px;">아직 시간이 아닙니다.</div>
+          <div style="font-size:15px; color:#888;">일 하세요.</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:8px;" id="treasureTimeInfo"></div>
+        </div>
+
+        <!-- 탐색 중 -->
+        <div id="treasureSearching" class="treasure-status-box searching" style="display:none;">
+          <div style="font-size:16px; font-weight:700; color:var(--hanwha); margin-bottom:16px;">보물을 찾는 중...</div>
+          <div class="treasure-spinner"></div>
+          <div id="treasureNotHere" style="display:none; font-size:14px; color:#d93025; font-weight:600; margin-top:8px;">
+            📍 여기에 없습니다
+          </div>
+          <div id="treasureGpsInfo" style="font-size:11px; color:var(--muted); margin-top:6px;"></div>
+        </div>
+
+        <!-- 보물 발견 -->
+        <div id="treasureFound" class="treasure-status-box found" style="display:none;">
+          <div style="font-size:36px; margin-bottom:8px;">🎉</div>
+          <div style="font-size:20px; font-weight:900; color:var(--hanwha); margin-bottom:4px;">보물을 찾았습니다!</div>
+          <div id="treasureFoundName" style="font-size:14px; color:#555;"></div>
+          <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
+        </div>
+
+        <!-- 쿠폰 당첨 결과 -->
+        <div id="treasureCouponResult" style="display:none; margin-bottom:16px; animation:fadeIn 0.5s ease;">
+          <div style="font-size:15px; font-weight:700; text-align:center; margin-bottom:10px; color:var(--hanwha);">🎊 추가 획득!</div>
+          <div id="treasureCouponList"></div>
+        </div>
+
+        <!-- 스탬프 달력 -->
+        <div style="margin-top:16px;">
+          <div style="font-size:15px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+            <span>📅 <span id="stampMonthTitle"></span> 출석 현황</span>
+            <button id="openCouponBoxBtn" style="width:auto; padding:6px 12px; font-size:12px; margin:0; background:var(--hanwha);">🎫 내 쿠폰함</button>
+          </div>
+          <div id="stampCalendarContainer"></div>
+        </div>
+
+      </div>
+
+      <!-- 쿠폰함 모달 -->
+      <div id="couponBoxModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title" id="couponBoxTitle">쿠폰함</h3>
+            <span class="close" id="closeCouponBox">&times;</span>
+          </div>
+          <div class="modal-body" id="couponBoxBody"></div>
+        </div>
+      </div>
+
+      <!-- 관리자 패널 -->
+      <div id="treasureAdminPanel" class="admin-section" style="display:none;">
+        <h3>⚙️ 관리자 설정</h3>
+
+        <div class="admin-sub-title">📍 위치 및 시간 설정</div>
+        <div class="row">
+          <input id="treasureLat" type="number" step="any" placeholder="위도 (예: 35.123456)">
+        </div>
+        <div class="row">
+          <input id="treasureLng" type="number" step="any" placeholder="경도 (예: 128.123456)">
+        </div>
+        <div class="row">
+          <input id="treasureRadius" type="number" placeholder="허용 반경 (미터, 기본 50)" value="50">
+        </div>
+        <div class="row">
+          <input id="treasureStartTime" type="time" value="08:50">
+        </div>
+        <div class="row">
+          <input id="treasureEndTime" type="time" value="08:55">
+        </div>
+        <button id="saveTreasureConfigBtn" style="background:#8e44ad; margin-bottom:12px;">위치/시간 설정 저장</button>
+
+        <div class="admin-sub-title">🎫 쿠폰 설정</div>
+        <div id="couponSettingList"></div>
+        <button id="addCouponSettingBtn" style="background:#555; margin-bottom:8px; font-size:14px;">+ 쿠폰 추가</button>
+        <button id="saveCouponSettingBtn" style="background:#8e44ad; margin-bottom:12px;">쿠폰 설정 저장</button>
+
+        <div class="admin-sub-title">👥 사용자 현황 조회</div>
+        <button id="loadAllStatusBtn" style="background:#555; margin-bottom:8px; font-size:14px;">전체 현황 불러오기</button>
+        <div id="allStatusContainer" style="display:none;">
+          <div id="allStatusContent"></div>
+        </div>
+
+        <div class="admin-sub-title">🗑️ 스탬프 초기화</div>
+        <div class="row">
+          <input id="resetTargetUser" type="text" placeholder="초기화할 이름 (비워두면 전체 초기화)">
+        </div>
+        <button id="resetStampsBtn" style="background:#d93025; margin-bottom:8px;">스탬프 초기화</button>
       </div>
 
       <button id="treasureBackBtn" class="secondary" style="margin-top:16px;">뒤로가기</button>
@@ -1937,6 +2234,7 @@ async function login(){
   }
 }
 
+
 // 수정 후
 function hideAllScreens() {
   document.getElementById("loginScreen").style.display = "none";
@@ -1950,7 +2248,7 @@ function hideAllScreens() {
   document.getElementById("videoScreen").style.display = "none";
   document.getElementById("surgeryScreen").style.display = "none";
   document.getElementById("treasureScreen").style.display = "none";
-  stopTreasureSearch();
+  stopTreasure();
 }
 
 function showLoginSuccess() {
@@ -2044,9 +2342,10 @@ function navigateToScreen(screen, addToHistory = true) {
     case 'userManage':
       document.getElementById("userManageScreen").style.display = "flex";
       break;
+// 수정 후
     case 'treasure':
       document.getElementById("treasureScreen").style.display = "flex";
-      startTreasureSearch();
+      initTreasureScreen();
       break;
   }
 }
@@ -2978,11 +3277,25 @@ function goBackFromUserManage() {
 }
 
 // 수정 후
-
 // ===================== 보물찾기 기능 =====================
+const TREASURE_URL = 'https://hwg-treasure.netlify.app/.netlify/functions/treasure';
+
+let treasureClockInterval = null;
 let treasureWatchId = null;
 let treasureNotHereTimer = null;
-let confettiInterval = null;
+let treasureConfettiFrame = null;
+let treasureUsername = null;
+let treasureConfig = null;
+
+async function treasureAPI(action, data = {}) {
+  const res = await fetch(TREASURE_URL + '?t=' + Date.now(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, ...data })
+  });
+  if (!res.ok) throw new Error('API 오류: ' + res.status);
+  return res.json();
+}
 
 async function showTreasureScreen() {
   if (!(await checkUserStatus())) return;
@@ -2990,117 +3303,246 @@ async function showTreasureScreen() {
   navigateToScreen('treasure');
 }
 
-function startTreasureSearch() {
-  // 화면 초기화
-  document.getElementById('treasureSearching').style.display = 'block';
-  document.getElementById('treasureFound').style.display = 'none';
-  document.getElementById('treasureNotHere').style.display = 'none';
-  document.getElementById('treasureSpinner').style.display = 'block';
+async function initTreasureScreen() {
+  startTreasureClock();
 
-  // 관리자 패널 표시 여부
+  try {
+    treasureConfig = await treasureAPI('getConfig');
+  } catch (e) {
+    treasureConfig = {};
+  }
+
   document.getElementById('treasureAdminPanel').style.display = isAdminUser ? 'block' : 'none';
 
-  // 저장된 좌표 불러오기 (관리자용 입력창에도 반영)
-  if (isAdminUser) {
-    const saved = getSavedTreasureCoord();
-    if (saved) {
-      document.getElementById('treasureLat').value = saved.lat;
-      document.getElementById('treasureLng').value = saved.lng;
-      document.getElementById('treasureRadius').value = saved.radius || 50;
+  if (isAdminUser && treasureConfig) {
+    document.getElementById('treasureLat').value = treasureConfig.lat || '';
+    document.getElementById('treasureLng').value = treasureConfig.lng || '';
+    document.getElementById('treasureRadius').value = treasureConfig.radius || 50;
+    document.getElementById('treasureStartTime').value = treasureConfig.startTime || '08:50';
+    document.getElementById('treasureEndTime').value = treasureConfig.endTime || '08:55';
+    renderCouponSettingList(treasureConfig.coupons || []);
+  }
+
+  try {
+    const result = await treasureAPI('getUsername', { userCode: currentUser });
+    treasureUsername = result.username;
+  } catch (e) {
+    treasureUsername = null;
+  }
+
+  if (!treasureUsername) {
+    document.getElementById('treasureNameSetup').style.display = 'block';
+    document.getElementById('treasureMain').style.display = 'none';
+  } else {
+    document.getElementById('treasureNameSetup').style.display = 'none';
+    document.getElementById('treasureMain').style.display = 'block';
+    await loadTreasureMain();
+  }
+}
+
+async function saveTreasureName() {
+  const name = document.getElementById('treasureNameInput').value.trim();
+  if (!name) { alert('이름을 입력해주세요.'); return; }
+  try {
+    await treasureAPI('setUsername', { userCode: currentUser, username: name });
+    treasureUsername = name;
+    document.getElementById('treasureNameSetup').style.display = 'none';
+    document.getElementById('treasureMain').style.display = 'block';
+    await loadTreasureMain();
+  } catch (e) {
+    alert('저장 실패. 다시 시도해주세요.');
+  }
+}
+
+async function loadTreasureMain() {
+  await renderStampCalendar();
+  checkTreasureTime();
+}
+
+function startTreasureClock() {
+  if (treasureClockInterval) clearInterval(treasureClockInterval);
+  function tick() {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    const clockEl = document.getElementById('treasureClock');
+    const dateEl = document.getElementById('treasureDateDisplay');
+    if (clockEl) clockEl.textContent = `${hh}:${mm}:${ss}`;
+    if (dateEl) dateEl.textContent = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
+    checkTreasureTime();
+  }
+  tick();
+  treasureClockInterval = setInterval(tick, 1000);
+}
+
+function stopTreasure() {
+  if (treasureClockInterval) { clearInterval(treasureClockInterval); treasureClockInterval = null; }
+  if (treasureWatchId !== null) { navigator.geolocation.clearWatch(treasureWatchId); treasureWatchId = null; }
+  if (treasureNotHereTimer) { clearTimeout(treasureNotHereTimer); treasureNotHereTimer = null; }
+  if (treasureConfettiFrame) { cancelAnimationFrame(treasureConfettiFrame); treasureConfettiFrame = null; }
+}
+
+function getKoreaTimeStr() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+}
+
+function getKoreaDateStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
+
+function isInTreasureTime() {
+  if (!treasureConfig) return false;
+  const start = treasureConfig.startTime || '08:50';
+  const end = treasureConfig.endTime || '08:55';
+  const now = getKoreaTimeStr();
+  return now >= start && now <= end;
+}
+
+async function checkTreasureTime() {
+  const notTimeEl = document.getElementById('treasureNotTime');
+  const searchingEl = document.getElementById('treasureSearching');
+  const foundEl = document.getElementById('treasureFound');
+  if (!notTimeEl || !searchingEl || !foundEl) return;
+  if (foundEl.style.display === 'block') return;
+
+  if (!isInTreasureTime()) {
+    notTimeEl.style.display = 'block';
+    searchingEl.style.display = 'none';
+    foundEl.style.display = 'none';
+    stopGpsWatch();
+    const start = treasureConfig?.startTime || '08:50';
+    const end = treasureConfig?.endTime || '08:55';
+    const timeInfoEl = document.getElementById('treasureTimeInfo');
+    if (timeInfoEl) timeInfoEl.textContent = `인증 가능 시간: ${start} ~ ${end}`;
+    return;
+  }
+
+  notTimeEl.style.display = 'none';
+
+  try {
+    const result = await treasureAPI('getStamps', { userCode: currentUser });
+    const stamps = result.stamps || [];
+    if (stamps.some(s => s.date === getKoreaDateStr())) {
+      showFoundState(false);
+      return;
     }
+  } catch (e) {}
+
+  if (treasureWatchId === null) {
+    searchingEl.style.display = 'block';
+    foundEl.style.display = 'none';
+    startGpsWatch();
   }
+}
 
-  renderStamps();
-
-  // 이미 오늘 찾았으면 바로 found 상태로
-  if (isTodayStamped()) {
-    showFoundState();
-    return;
-  }
-
-  // GPS 감시 시작
+function startGpsWatch() {
   if (!navigator.geolocation) {
-    document.getElementById('treasureNotHere').textContent = 'GPS를 지원하지 않는 기기입니다.';
-    document.getElementById('treasureNotHere').style.display = 'block';
+    document.getElementById('treasureGpsInfo').textContent = 'GPS를 지원하지 않는 기기입니다.';
     return;
   }
-
   treasureWatchId = navigator.geolocation.watchPosition(
-    (pos) => onTreasurePosition(pos),
-    (err) => {
-      document.getElementById('treasureNotHere').textContent = 'GPS 권한이 필요합니다.';
-      document.getElementById('treasureNotHere').style.display = 'block';
+    onTreasurePosition,
+    () => {
+      const el = document.getElementById('treasureGpsInfo');
+      if (el) el.textContent = 'GPS 권한이 필요합니다.';
     },
     { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }
   );
 }
 
-function stopTreasureSearch() {
-  if (treasureWatchId !== null) {
-    navigator.geolocation.clearWatch(treasureWatchId);
-    treasureWatchId = null;
-  }
-  if (treasureNotHereTimer) {
-    clearTimeout(treasureNotHereTimer);
-    treasureNotHereTimer = null;
-  }
-  if (confettiInterval) {
-    clearInterval(confettiInterval);
-    confettiInterval = null;
-  }
+function stopGpsWatch() {
+  if (treasureWatchId !== null) { navigator.geolocation.clearWatch(treasureWatchId); treasureWatchId = null; }
+  if (treasureNotHereTimer) { clearTimeout(treasureNotHereTimer); treasureNotHereTimer = null; }
 }
 
-function onTreasurePosition(pos) {
-  if (isTodayStamped()) return;
-
-  const coord = getSavedTreasureCoord();
-  if (!coord) {
-    document.getElementById('treasureNotHere').textContent = '관리자가 좌표를 설정하지 않았습니다.';
-    document.getElementById('treasureNotHere').style.display = 'block';
+async function onTreasurePosition(pos) {
+  if (!treasureConfig || !treasureConfig.lat) {
+    const el = document.getElementById('treasureGpsInfo');
+    if (el) el.textContent = '관리자가 위치를 설정하지 않았습니다.';
     return;
   }
 
-  const dist = getDistanceMeters(pos.coords.latitude, pos.coords.longitude, coord.lat, coord.lng);
-  const radius = coord.radius || 50;
+  const dist = getDistanceMeters(
+    pos.coords.latitude, pos.coords.longitude,
+    parseFloat(treasureConfig.lat), parseFloat(treasureConfig.lng)
+  );
+  const radius = parseInt(treasureConfig.radius) || 50;
+  const el = document.getElementById('treasureGpsInfo');
+  if (el) el.textContent = `현재 거리: 약 ${Math.round(dist)}m`;
 
   if (dist <= radius) {
-    // 보물 발견
-    if (treasureNotHereTimer) {
-      clearTimeout(treasureNotHereTimer);
-      treasureNotHereTimer = null;
-    }
+    stopGpsWatch();
+    if (treasureNotHereTimer) { clearTimeout(treasureNotHereTimer); treasureNotHereTimer = null; }
     document.getElementById('treasureNotHere').style.display = 'none';
-    addTodayStamp();
-    renderStamps();
-    showFoundState();
+    await doStampAndCoupon();
   } else {
-    // 범위 밖 — 2초 후 "여기에 없습니다" 표시
     if (treasureNotHereTimer) clearTimeout(treasureNotHereTimer);
     treasureNotHereTimer = setTimeout(() => {
-      document.getElementById('treasureNotHere').style.display = 'block';
+      const el = document.getElementById('treasureNotHere');
+      if (el) el.style.display = 'block';
     }, 2000);
   }
 }
 
-function showFoundState() {
-  stopTreasureSearch();
+async function doStampAndCoupon() {
+  const today = getKoreaDateStr();
 
-  // 검색중 UI 숨기고 found UI 표시
-  document.getElementById('treasureSearching').style.display = 'none';
-  document.getElementById('treasureFound').style.display = 'block';
+  try {
+    const stampResult = await treasureAPI('addStamp', {
+      userCode: currentUser,
+      username: treasureUsername,
+      date: today
+    });
+    if (stampResult.duplicate) { showFoundState(false); return; }
+  } catch (e) { console.error('스탬프 적립 실패:', e); }
 
-  // 폭죽 애니메이션
-  startConfetti();
+  let wonCoupons = [];
+  try {
+    const couponResult = await treasureAPI('issueCoupon', {
+      userCode: currentUser,
+      username: treasureUsername,
+      date: today
+    });
+    wonCoupons = couponResult.wonCoupons || [];
+  } catch (e) { console.error('쿠폰 추첨 실패:', e); }
+
+  await renderStampCalendar();
+
+  if (wonCoupons.length > 0) {
+    const couponResultEl = document.getElementById('treasureCouponResult');
+    const couponListEl = document.getElementById('treasureCouponList');
+    couponListEl.innerHTML = wonCoupons.map(name => `
+      <div class="coupon-item">
+        <div>
+          <div class="coupon-name">🎫 ${name}</div>
+          <div class="coupon-date">${today} 획득</div>
+        </div>
+        <div class="coupon-badge">NEW</div>
+      </div>
+    `).join('');
+    couponResultEl.style.display = 'block';
+  }
+
+  showFoundState(true);
 }
 
-// ---- 폭죽 (canvas confetti) ----
+function showFoundState(playConfetti) {
+  document.getElementById('treasureSearching').style.display = 'none';
+  document.getElementById('treasureNotTime').style.display = 'none';
+  document.getElementById('treasureFound').style.display = 'block';
+  document.getElementById('treasureFoundName').textContent = `${treasureUsername}님, 오늘도 일찍 오셨네요! 🌟`;
+  if (playConfetti) startConfetti();
+}
+
 function startConfetti() {
   const canvas = document.getElementById('confettiCanvas');
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-
-  const pieces = Array.from({ length: 120 }, () => ({
+  const pieces = Array.from({ length: 150 }, () => ({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height - canvas.height,
     w: 8 + Math.random() * 8,
@@ -3111,114 +3553,272 @@ function startConfetti() {
     vy: 2 + Math.random() * 4,
     vr: (Math.random() - 0.5) * 6
   }));
-
   let frame = 0;
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     pieces.forEach(p => {
       ctx.save();
-      ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
-      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.translate(p.x + p.w/2, p.y + p.h/2);
+      ctx.rotate(p.rot * Math.PI/180);
       ctx.fillStyle = p.color;
-      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
       ctx.restore();
-      p.x += p.vx;
-      p.y += p.vy;
-      p.rot += p.vr;
-      if (p.y > canvas.height) {
-        p.y = -p.h;
-        p.x = Math.random() * canvas.width;
-      }
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      if (p.y > canvas.height) { p.y = -p.h; p.x = Math.random() * canvas.width; }
     });
     frame++;
-    if (frame < 300) {
-      confettiInterval = requestAnimationFrame(draw);
-    } else {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
+    if (frame < 300) { treasureConfettiFrame = requestAnimationFrame(draw); }
+    else { ctx.clearRect(0, 0, canvas.width, canvas.height); }
   }
   draw();
 }
 
-// ---- 스탬프 ----
-function getStampKey() {
-  return `treasure_stamps_${currentUser}`;
-}
+async function renderStampCalendar() {
+  const container = document.getElementById('stampCalendarContainer');
+  const titleEl = document.getElementById('stampMonthTitle');
+  if (!container) return;
 
-function getStamps() {
+  let stamps = [];
   try {
-    return JSON.parse(localStorage.getItem(getStampKey()) || '[]');
-  } catch { return []; }
-}
+    const result = await treasureAPI('getStamps', { userCode: currentUser });
+    stamps = result.stamps || [];
+  } catch (e) {}
 
-function isTodayStamped() {
-  const today = new Date().toISOString().split('T')[0];
-  return getStamps().some(s => s.date === today);
-}
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  if (titleEl) titleEl.textContent = `${year}년 ${month+1}월`;
 
-function addTodayStamp() {
-  const stamps = getStamps();
-  const today = new Date().toISOString().split('T')[0];
-  if (!stamps.some(s => s.date === today)) {
-    stamps.push({ date: today, day: stamps.length + 1 });
-    // 최대 5칸
-    const limited = stamps.slice(-5);
-    localStorage.setItem(getStampKey(), JSON.stringify(limited));
+  const stampDates = new Set(stamps.map(s => s.date));
+  const today = getKoreaDateStr();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+
+  let html = `<table class="stamp-calendar"><thead><tr>
+    <th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th>
+  </tr></thead><tbody><tr>`;
+
+  for (let i = 0; i < firstDay; i++) html += '<td class="other-month"></td>';
+
+  let dayCount = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr === today;
+    const isStamped = stampDates.has(dateStr);
+    const cls = isStamped ? 'stamped' : (isToday ? 'today' : '');
+    html += `<td class="${cls}"><div>${d}</div>${isStamped ? '<span class="stamp-mark">🏅</span>' : ''}</td>`;
+    dayCount = (firstDay + d - 1) % 7;
+    if (dayCount === 6 && d < daysInMonth) html += '</tr><tr>';
   }
+  if (dayCount < 6) for (let i = 0; i < 6 - dayCount; i++) html += '<td class="other-month"></td>';
+  html += '</tr></tbody></table>';
+  html += `<div style="text-align:right; font-size:12px; color:var(--muted); margin-top:6px;">이번 달 ${stampDates.size}회 출석</div>`;
+  container.innerHTML = html;
 }
 
-function renderStamps() {
-  const stamps = getStamps();
-  const grid = document.getElementById('stampGrid');
-  grid.innerHTML = '';
-  for (let i = 0; i < 5; i++) {
-    const box = document.createElement('div');
-    box.className = 'stamp-box' + (stamps[i] ? ' filled' : '');
-    box.innerHTML = stamps[i]
-      ? `<div class="stamp-icon">🏅</div><div>${stamps[i].day}일차</div>`
-      : `<div class="stamp-icon" style="opacity:0.2">🏅</div><div>${i+1}일차</div>`;
-    grid.appendChild(box);
-  }
-}
-
-function resetStamps() {
-  if (!isAdminUser) return;
-  if (!confirm('모든 사용자의 스탬프를 초기화하시겠습니까?\n(현재 접속자 기준으로 초기화됩니다)')) return;
-  // 모든 treasure_stamps_ 키 삭제
-  Object.keys(localStorage)
-    .filter(k => k.startsWith('treasure_stamps_'))
-    .forEach(k => localStorage.removeItem(k));
-  renderStamps();
-  alert('스탬프가 초기화되었습니다.');
-}
-
-// ---- 좌표 저장/불러오기 ----
-function getSavedTreasureCoord() {
+async function openCouponBox() {
+  const modal = document.getElementById('couponBoxModal');
+  const title = document.getElementById('couponBoxTitle');
+  const body = document.getElementById('couponBoxBody');
+  title.textContent = `🎫 ${treasureUsername}의 쿠폰함`;
+  body.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">불러오는 중...</div>';
+  modal.style.display = 'block';
   try {
-    return JSON.parse(localStorage.getItem('treasure_coord') || 'null');
-  } catch { return null; }
-}
-
-function saveTreasureCoord() {
-  if (!isAdminUser) return;
-  const lat = parseFloat(document.getElementById('treasureLat').value);
-  const lng = parseFloat(document.getElementById('treasureLng').value);
-  const radius = parseInt(document.getElementById('treasureRadius').value) || 50;
-  if (isNaN(lat) || isNaN(lng)) {
-    alert('올바른 좌표를 입력해주세요.');
-    return;
+    const result = await treasureAPI('getUserCoupons', { userCode: currentUser });
+    const coupons = result.coupons || [];
+    if (coupons.length === 0) {
+      body.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">아직 획득한 쿠폰이 없습니다.</div>';
+      return;
+    }
+    body.innerHTML = coupons.map(c => `
+      <div class="coupon-item">
+        <div>
+          <div class="coupon-name">🎫 ${c.name}</div>
+          <div class="coupon-date">${c.date} 획득</div>
+        </div>
+        <div class="coupon-badge">${c.used ? '사용완료' : '미사용'}</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    body.innerHTML = '<div style="color:#d93025;">불러오기 실패</div>';
   }
-  localStorage.setItem('treasure_coord', JSON.stringify({ lat, lng, radius }));
-  alert(`좌표 저장 완료\n위도: ${lat}\n경도: ${lng}\n반경: ${radius}m`);
 }
 
-// ---- 거리 계산 (Haversine) ----
+async function saveTreasureConfig() {
+  if (!isAdminUser) return;
+  const config = {
+    lat: parseFloat(document.getElementById('treasureLat').value),
+    lng: parseFloat(document.getElementById('treasureLng').value),
+    radius: parseInt(document.getElementById('treasureRadius').value) || 50,
+    startTime: document.getElementById('treasureStartTime').value,
+    endTime: document.getElementById('treasureEndTime').value
+  };
+  if (isNaN(config.lat) || isNaN(config.lng)) { alert('올바른 좌표를 입력해주세요.'); return; }
+  try {
+    await treasureAPI('setConfig', { config });
+    treasureConfig = { ...treasureConfig, ...config };
+    alert('설정이 저장되었습니다.');
+  } catch (e) { alert('저장 실패.'); }
+}
+
+function renderCouponSettingList(coupons) {
+  const container = document.getElementById('couponSettingList');
+  container.innerHTML = coupons.map((c, i) => `
+    <div class="coupon-setting-item" id="couponRow_${i}">
+      <div class="coupon-setting-row">
+        <span style="width:40px; font-size:12px; color:var(--muted);">이름</span>
+        <input type="text" value="${c.name}" placeholder="쿠폰명" data-idx="${i}" data-field="name" style="flex:1;">
+      </div>
+      <div class="coupon-setting-row">
+        <span style="width:40px; font-size:12px; color:var(--muted);">확률</span>
+        <input type="number" value="${c.probability}" placeholder="당첨확률(%)" data-idx="${i}" data-field="probability" style="flex:1;" min="0" max="100">
+        <span style="font-size:12px;">%</span>
+      </div>
+      <div class="coupon-setting-row">
+        <span style="width:40px; font-size:12px; color:var(--muted);">수량</span>
+        <input type="number" value="${c.limit}" placeholder="제한수량(0=무제한)" data-idx="${i}" data-field="limit" style="flex:1;" min="0">
+        <span style="font-size:12px;">개</span>
+      </div>
+      <button onclick="removeCouponRow(${i})" style="background:#d93025; padding:4px 8px; font-size:11px; width:auto; margin:4px 0 0 0;">삭제</button>
+    </div>
+  `).join('');
+}
+
+function addCouponSettingRow() {
+  const container = document.getElementById('couponSettingList');
+  const idx = container.children.length;
+  const div = document.createElement('div');
+  div.className = 'coupon-setting-item';
+  div.id = `couponRow_${idx}`;
+  div.innerHTML = `
+    <div class="coupon-setting-row">
+      <span style="width:40px; font-size:12px; color:var(--muted);">이름</span>
+      <input type="text" placeholder="쿠폰명" data-idx="${idx}" data-field="name" style="flex:1;">
+    </div>
+    <div class="coupon-setting-row">
+      <span style="width:40px; font-size:12px; color:var(--muted);">확률</span>
+      <input type="number" placeholder="당첨확률(%)" data-idx="${idx}" data-field="probability" style="flex:1;" min="0" max="100">
+      <span style="font-size:12px;">%</span>
+    </div>
+    <div class="coupon-setting-row">
+      <span style="width:40px; font-size:12px; color:var(--muted);">수량</span>
+      <input type="number" placeholder="제한수량(0=무제한)" data-idx="${idx}" data-field="limit" style="flex:1;" min="0">
+      <span style="font-size:12px;">개</span>
+    </div>
+    <button onclick="removeCouponRow(${idx})" style="background:#d93025; padding:4px 8px; font-size:11px; width:auto; margin:4px 0 0 0;">삭제</button>
+  `;
+  container.appendChild(div);
+}
+
+function removeCouponRow(idx) {
+  const el = document.getElementById(`couponRow_${idx}`);
+  if (el) el.remove();
+}
+
+async function saveCouponSetting() {
+  if (!isAdminUser) return;
+  const rows = document.querySelectorAll('.coupon-setting-item');
+  const coupons = [];
+  rows.forEach(row => {
+    const nameEl = row.querySelector('[data-field="name"]');
+    const probEl = row.querySelector('[data-field="probability"]');
+    const limitEl = row.querySelector('[data-field="limit"]');
+    if (nameEl && nameEl.value.trim()) {
+      coupons.push({
+        name: nameEl.value.trim(),
+        probability: parseFloat(probEl?.value) || 0,
+        limit: parseInt(limitEl?.value) || 0
+      });
+    }
+  });
+  try {
+    await treasureAPI('setCoupons', { coupons });
+    if (treasureConfig) treasureConfig.coupons = coupons;
+    alert(`쿠폰 ${coupons.length}개 저장 완료`);
+  } catch (e) { alert('저장 실패.'); }
+}
+
+async function loadAllStatus() {
+  if (!isAdminUser) return;
+  const container = document.getElementById('allStatusContainer');
+  const content = document.getElementById('allStatusContent');
+  content.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">불러오는 중...</div>';
+  container.style.display = 'block';
+  try {
+    const result = await treasureAPI('getAllStatus');
+    const stamps = result.stamps || {};
+    const userCoupons = result.userCoupons || {};
+
+    const allUsers = new Set([...Object.keys(stamps), ...Object.keys(userCoupons)]);
+    if (allUsers.size === 0) {
+      content.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">데이터가 없습니다.</div>';
+      return;
+    }
+
+    let html = `<table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:10px;">
+      <tr style="background:#f8f9fa;">
+        <th style="border:1px solid #e6e6e6; padding:8px;">이름</th>
+        <th style="border:1px solid #e6e6e6; padding:8px;">이번달 출석</th>
+        <th style="border:1px solid #e6e6e6; padding:8px;">보유쿠폰</th>
+      </tr>`;
+
+    const now = new Date();
+    const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+    allUsers.forEach(userCode => {
+      const userData = stamps[userCode];
+      const username = userData?.username || userCoupons[userCode]?.username || userCode;
+      const records = userData?.records || [];
+      const thisMonthCount = records.filter(r => r.date && r.date.startsWith(ym)).length;
+      const coupons = userCoupons[userCode]?.coupons || [];
+      const unusedCoupons = coupons.filter(c => !c.used);
+      const couponSummary = unusedCoupons.length > 0
+        ? unusedCoupons.map(c => c.name).join(', ')
+        : '-';
+
+      html += `<tr>
+        <td style="border:1px solid #e6e6e6; padding:8px; font-weight:600;">${username}</td>
+        <td style="border:1px solid #e6e6e6; padding:8px; text-align:center;">${thisMonthCount}회</td>
+        <td style="border:1px solid #e6e6e6; padding:8px; font-size:12px;">${couponSummary}</td>
+      </tr>`;
+    });
+
+    html += '</table>';
+    content.innerHTML = html;
+  } catch (e) {
+    content.innerHTML = '<div style="color:#d93025;">불러오기 실패</div>';
+  }
+}
+
+async function resetStamps() {
+  if (!isAdminUser) return;
+  const targetName = document.getElementById('resetTargetUser').value.trim();
+  const confirmMsg = targetName
+    ? `"${targetName}" 사용자의 스탬프를 초기화하시겠습니까?`
+    : '모든 사용자의 스탬프를 초기화하시겠습니까?';
+  if (!confirm(confirmMsg)) return;
+
+  try {
+    let targetUserCode = null;
+    if (targetName) {
+      const result = await treasureAPI('getAllStatus');
+      const stamps = result.stamps || {};
+      const found = Object.entries(stamps).find(([, v]) => v.username === targetName);
+      if (!found) { alert('해당 이름의 사용자를 찾을 수 없습니다.'); return; }
+      targetUserCode = found[0];
+    }
+    await treasureAPI('resetStamps', { targetUserCode });
+    alert('초기화 완료');
+    await renderStampCalendar();
+  } catch (e) { alert('초기화 실패'); }
+}
+
 function getDistanceMeters(lat1, lng1, lat2, lng2) {
   const R = 6371000;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLng = (lng2 - lng1) * Math.PI / 180;
   const a = Math.sin(dLat/2)**2 +
-            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLng/2)**2;
+    Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLng/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 // ===================== 보물찾기 끝 =====================
@@ -3855,9 +4455,21 @@ document.addEventListener('DOMContentLoaded', () => {
 // 수정 후
 document.getElementById('guideMenuBtn').addEventListener('click', showGuideScreen);
 document.getElementById('naverCheckMenuBtn').addEventListener('click', showNaverCheck);
+// 수정 후
 document.getElementById('treasureMenuBtn').addEventListener('click', showTreasureScreen);
-document.getElementById('saveTreasureCoordBtn').addEventListener('click', saveTreasureCoord);
+document.getElementById('treasureNameSaveBtn').addEventListener('click', saveTreasureName);
+document.getElementById('saveTreasureConfigBtn').addEventListener('click', saveTreasureConfig);
+document.getElementById('addCouponSettingBtn').addEventListener('click', addCouponSettingRow);
+document.getElementById('saveCouponSettingBtn').addEventListener('click', saveCouponSetting);
+document.getElementById('loadAllStatusBtn').addEventListener('click', loadAllStatus);
 document.getElementById('resetStampsBtn').addEventListener('click', resetStamps);
+document.getElementById('openCouponBoxBtn').addEventListener('click', openCouponBox);
+document.getElementById('closeCouponBox').addEventListener('click', () => {
+  document.getElementById('couponBoxModal').style.display = 'none';
+});
+document.getElementById('couponBoxModal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
   document.getElementById('analysisMenuBtn').addEventListener('click', showAnalysisScreen);
   document.getElementById('surgeryMenuBtn').addEventListener('click', showSurgeryScreen);
   document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
