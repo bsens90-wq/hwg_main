@@ -1743,25 +1743,28 @@ function getWeekDates(dateStr) {
   });
 }
 
+// after
 async function checkWeeklyStreakCoupon(stampDates) {
   const today = getKoreaDateStr();
   const weekDates = getWeekDates(today); // [월, 화, 수, 목, 금]
 
-  // 오늘까지의 필수 출근일 (공휴일 제외)
-  const required = weekDates.filter(d => !KR_HOLIDAYS.has(d) && d <= today);
-  if (required.length === 0) return null;
+  // 이번 주 전체 근무일 (공휴일 제외)
+  const workDays = weekDates.filter(d => !KR_HOLIDAYS.has(d));
+  if (workDays.length === 0) return null;
 
-  // 이번 주 아직 남은 근무일이 있으면 주간 완성 아님
-  const future = weekDates.filter(d => !KR_HOLIDAYS.has(d) && d > today);
-  if (future.length > 0) return null;
+  // 이번 주의 마지막 근무일
+  const lastWorkDay = workDays[workDays.length - 1];
+
+  // 오늘이 마지막 근무일이 아니면 아직 지급 시점 아님
+  if (today !== lastWorkDay) return null;
 
   // 이번 주 중복 지급 방지 (월요일 날짜 기준 로컬 캐시)
   const weekKey = 'mudra_weekly_coupon_' + weekDates[0];
   if (localStorage.getItem(weekKey)) return null;
 
-  // 모든 필수 출근일에 스탬프 있는지 확인
+  // 이번 주 모든 근무일에 스탬프가 있는지 확인
   const stampSet = new Set(stampDates);
-  if (!required.every(d => stampSet.has(d))) return null;
+  if (!workDays.every(d => stampSet.has(d))) return null;
 
   // 쿠폰 지급 (확률 100%, 수량 무제한)
   try {
