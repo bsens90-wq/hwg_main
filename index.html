@@ -1115,12 +1115,109 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
       margin-bottom: 4px;
     }
 
+ /* 수정 후 */
     .coupon-setting-item input {
       padding: 6px 10px;
       font-size: 13px;
       border-radius: 6px;
     }
-    
+
+    /* 삽질 버튼 */
+    .shovel-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 0;
+    }
+
+    .shovel-btn {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #ff7f00, #e67100);
+      box-shadow: 0 6px 20px rgba(255,127,0,0.4);
+      cursor: pointer;
+      font-size: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shovel-btn:disabled {
+      background: #ccc;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .shovel-btn:not(:disabled):active {
+      transform: scale(0.92);
+      box-shadow: 0 2px 8px rgba(255,127,0,0.3);
+    }
+
+    @keyframes shovelSwing {
+      0%   { transform: rotate(0deg) scale(1); }
+      20%  { transform: rotate(-30deg) scale(1.1); }
+      50%  { transform: rotate(20deg) scale(1.05); }
+      70%  { transform: rotate(-15deg) scale(1.08); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    @keyframes digDust {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-40px) scale(2); }
+    }
+
+    .shovel-icon {
+      display: inline-block;
+      font-size: 60px;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .shovel-icon.digging {
+      animation: shovelSwing 0.5s ease;
+    }
+
+    .dust-particle {
+      position: absolute;
+      font-size: 16px;
+      pointer-events: none;
+      animation: digDust 0.6s ease forwards;
+    }
+
+    .shovel-status {
+      margin-top: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      min-height: 24px;
+    }
+
+    .shovel-cooltime {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      min-height: 18px;
+    }
+
+    .shovel-result-fail {
+      color: #d93025;
+    }
+
+    .shovel-result-success {
+      color: var(--hanwha);
+    }
+
+    .shovel-result-out {
+      color: #888;
+    }
   </style>
 </head>
 <body>
@@ -1444,14 +1541,22 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
           <div style="font-size:12px; color:var(--muted); margin-top:8px;" id="treasureTimeInfo"></div>
         </div>
 
+     <!-- 수정 후 -->
         <!-- 탐색 중 -->
         <div id="treasureSearching" class="treasure-status-box searching" style="display:none;">
-          <div style="font-size:16px; font-weight:700; color:var(--hanwha); margin-bottom:16px;">보물을 찾는 중...</div>
-          <div class="treasure-spinner"></div>
-          <div id="treasureNotHere" style="display:none; font-size:14px; color:#d93025; font-weight:600; margin-top:8px;">
-            📍 여기에 없습니다
+          <div style="font-size:16px; font-weight:700; color:var(--hanwha); margin-bottom:8px;">⏰ 보물을 찾아라!</div>
+          <div id="treasureGpsInfo" style="font-size:11px; color:var(--muted); margin-bottom:12px;"></div>
+
+          <!-- 삽질 버튼 -->
+          <div class="shovel-container">
+            <button class="shovel-btn" id="shovelBtn" disabled onclick="doShovel()">
+              <span class="shovel-icon" id="shovelIcon">⛏️</span>
+            </button>
+            <div class="shovel-status" id="shovelStatus">
+              <span style="color:#888;">📍 범위 내에 있어야 삽질할 수 있습니다</span>
+            </div>
+            <div class="shovel-cooltime" id="shovelCooltime"></div>
           </div>
-          <div id="treasureGpsInfo" style="font-size:11px; color:var(--muted); margin-top:6px;"></div>
         </div>
 
         <!-- 보물 발견 -->
@@ -1494,6 +1599,7 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
       <div id="treasureAdminPanel" class="admin-section" style="display:none;">
         <h3>⚙️ 관리자 설정</h3>
 
+       <!-- 수정 후 -->
         <div class="admin-sub-title">📍 위치 및 시간 설정</div>
         <div class="row">
           <input id="treasureLat" type="number" step="any" placeholder="위도 (예: 35.123456)">
@@ -1510,7 +1616,14 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
         <div class="row">
           <input id="treasureEndTime" type="time" value="08:55">
         </div>
-        <button id="saveTreasureConfigBtn" style="background:#8e44ad; margin-bottom:12px;">위치/시간 설정 저장</button>
+        <div class="admin-sub-title">⛏️ 삽질 설정</div>
+        <div class="row">
+          <input id="treasureDigProb" type="number" placeholder="인증 확률 (%, 기본 30)" value="30" min="1" max="100">
+        </div>
+        <div class="row">
+          <input id="treasureDigCooltime" type="number" placeholder="쿨타임 (초, 기본 5)" value="5" min="1">
+        </div>
+        <button id="saveTreasureConfigBtn" style="background:#8e44ad; margin-bottom:12px;">위치/시간/삽질 설정 저장</button>
 
         <div class="admin-sub-title">🎫 쿠폰 설정</div>
         <div id="couponSettingList"></div>
@@ -3230,12 +3343,15 @@ async function initTreasureScreen() {
 
   document.getElementById('treasureAdminPanel').style.display = isAdminUser ? 'block' : 'none';
 
+ // 수정 후
   if (isAdminUser && treasureConfig) {
     document.getElementById('treasureLat').value = treasureConfig.lat || '';
     document.getElementById('treasureLng').value = treasureConfig.lng || '';
     document.getElementById('treasureRadius').value = treasureConfig.radius || 50;
     document.getElementById('treasureStartTime').value = treasureConfig.startTime || '08:50';
     document.getElementById('treasureEndTime').value = treasureConfig.endTime || '08:55';
+    document.getElementById('treasureDigProb').value = treasureConfig.digProb || 30;
+    document.getElementById('treasureDigCooltime').value = treasureConfig.digCooltime || 5;
     renderCouponSettingList(treasureConfig.coupons || []);
   }
 
@@ -3285,11 +3401,15 @@ function startTreasureClock() {
   treasureClockInterval = setInterval(tick, 1000);
 }
 
+// 수정 후
 function stopTreasure() {
   if (treasureClockInterval) { clearInterval(treasureClockInterval); treasureClockInterval = null; }
   if (treasureWatchId !== null) { navigator.geolocation.clearWatch(treasureWatchId); treasureWatchId = null; }
   if (treasureNotHereTimer) { clearTimeout(treasureNotHereTimer); treasureNotHereTimer = null; }
   if (treasureConfettiFrame) { cancelAnimationFrame(treasureConfettiFrame); treasureConfettiFrame = null; }
+  if (shovelCoolTimer) { clearInterval(shovelCoolTimer); shovelCoolTimer = null; }
+  shovelCooling = false;
+  isInRange = false;
 }
 
 function getKoreaTimeStr() {
@@ -3367,6 +3487,11 @@ function stopGpsWatch() {
   if (treasureNotHereTimer) { clearTimeout(treasureNotHereTimer); treasureNotHereTimer = null; }
 }
 
+// 수정 후
+let shovelCoolTimer = null;
+let shovelCooling = false;
+let isInRange = false;
+
 async function onTreasurePosition(pos) {
   if (!treasureConfig || !treasureConfig.lat) {
     const el = document.getElementById('treasureGpsInfo');
@@ -3379,21 +3504,103 @@ async function onTreasurePosition(pos) {
     parseFloat(treasureConfig.lat), parseFloat(treasureConfig.lng)
   );
   const radius = parseInt(treasureConfig.radius) || 50;
-  const el = document.getElementById('treasureGpsInfo');
-  if (el) el.textContent = `현재 거리: 약 ${Math.round(dist)}m`;
+  const gpsEl = document.getElementById('treasureGpsInfo');
+  if (gpsEl) gpsEl.textContent = `현재 거리: 약 ${Math.round(dist)}m`;
+
+  const shovelBtn = document.getElementById('shovelBtn');
+  const shovelStatus = document.getElementById('shovelStatus');
 
   if (dist <= radius) {
-    stopGpsWatch();
-    if (treasureNotHereTimer) { clearTimeout(treasureNotHereTimer); treasureNotHereTimer = null; }
-    document.getElementById('treasureNotHere').style.display = 'none';
-    await doStampAndCoupon();
+    isInRange = true;
+    if (!shovelCooling && shovelBtn) {
+      shovelBtn.disabled = false;
+      if (shovelStatus) shovelStatus.innerHTML = '<span style="color:var(--hanwha);">⛏️ 여기서 삽질해보세요!</span>';
+    }
   } else {
-    if (treasureNotHereTimer) clearTimeout(treasureNotHereTimer);
-    treasureNotHereTimer = setTimeout(() => {
-      const el = document.getElementById('treasureNotHere');
-      if (el) el.style.display = 'block';
-    }, 2000);
+    isInRange = false;
+    if (shovelBtn) shovelBtn.disabled = true;
+    if (shovelStatus) shovelStatus.innerHTML = '<span style="color:#888;">📍 범위 내에 있어야 삽질할 수 있습니다</span>';
   }
+}
+
+async function doShovel() {
+  if (!isInRange || shovelCooling) return;
+
+  const shovelBtn = document.getElementById('shovelBtn');
+  const shovelIcon = document.getElementById('shovelIcon');
+  const shovelStatus = document.getElementById('shovelStatus');
+  const shovelCooltime = document.getElementById('shovelCooltime');
+
+  // 삽질 애니메이션
+  shovelIcon.classList.remove('digging');
+  void shovelIcon.offsetWidth; // reflow
+  shovelIcon.classList.add('digging');
+
+  // 먼지 파티클
+  spawnDustParticles(shovelBtn);
+
+  // 확률 체크
+  const prob = parseInt(treasureConfig?.digProb) || 30;
+  const rand = Math.random() * 100;
+  const success = rand <= prob;
+
+  shovelBtn.disabled = true;
+
+  if (success) {
+    // 당첨
+    setTimeout(async () => {
+      shovelStatus.innerHTML = '<span class="shovel-result-success">🎉 보물을 찾았습니다!</span>';
+      await doStampAndCoupon();
+    }, 500);
+  } else {
+    // 꽝 → 쿨타임
+    setTimeout(() => {
+      shovelStatus.innerHTML = '<span class="shovel-result-fail">💨 꽝! 다시 파보세요!</span>';
+      startShovelCooltime();
+    }, 500);
+  }
+}
+
+function spawnDustParticles(btn) {
+  const particles = ['💨', '🪨', '💫', '✨'];
+  for (let i = 0; i < 4; i++) {
+    const span = document.createElement('span');
+    span.className = 'dust-particle';
+    span.textContent = particles[i % particles.length];
+    span.style.left = (20 + Math.random() * 60) + '%';
+    span.style.top = (20 + Math.random() * 40) + '%';
+    span.style.animationDelay = (Math.random() * 0.2) + 's';
+    btn.appendChild(span);
+    setTimeout(() => span.remove(), 800);
+  }
+}
+
+function startShovelCooltime() {
+  const coolSec = parseInt(treasureConfig?.digCooltime) || 5;
+  const shovelBtn = document.getElementById('shovelBtn');
+  const shovelCoolEl = document.getElementById('shovelCooltime');
+  shovelCooling = true;
+  shovelBtn.disabled = true;
+
+  let remaining = coolSec;
+  if (shovelCoolEl) shovelCoolEl.textContent = `${remaining}초 후 재시도 가능`;
+
+  shovelCoolTimer = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(shovelCoolTimer);
+      shovelCoolTimer = null;
+      shovelCooling = false;
+      if (shovelCoolEl) shovelCoolEl.textContent = '';
+      if (isInRange) {
+        shovelBtn.disabled = false;
+        const shovelStatus = document.getElementById('shovelStatus');
+        if (shovelStatus) shovelStatus.innerHTML = '<span style="color:var(--hanwha);">⛏️ 여기서 삽질해보세요!</span>';
+      }
+    } else {
+      if (shovelCoolEl) shovelCoolEl.textContent = `${remaining}초 후 재시도 가능`;
+    }
+  }, 1000);
 }
 
 async function doStampAndCoupon() {
@@ -3553,6 +3760,7 @@ async function openCouponBox() {
   }
 }
 
+// 수정 후
 async function saveTreasureConfig() {
   if (!isAdminUser) return;
   const config = {
@@ -3560,7 +3768,9 @@ async function saveTreasureConfig() {
     lng: parseFloat(document.getElementById('treasureLng').value),
     radius: parseInt(document.getElementById('treasureRadius').value) || 50,
     startTime: document.getElementById('treasureStartTime').value,
-    endTime: document.getElementById('treasureEndTime').value
+    endTime: document.getElementById('treasureEndTime').value,
+    digProb: parseInt(document.getElementById('treasureDigProb').value) || 30,
+    digCooltime: parseInt(document.getElementById('treasureDigCooltime').value) || 5
   };
   if (isNaN(config.lat) || isNaN(config.lng)) { alert('올바른 좌표를 입력해주세요.'); return; }
   try {
