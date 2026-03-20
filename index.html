@@ -3215,14 +3215,18 @@ async function showTreasureScreen() {
   navigateToScreen('treasure');
 }
 
+// 수정 후
 async function initTreasureScreen() {
   startTreasureClock();
 
-  try {
-    treasureConfig = await treasureAPI('getConfig');
-  } catch (e) {
-    treasureConfig = {};
-  }
+  // config + username 병렬 호출
+  const [configResult, usernameResult] = await Promise.allSettled([
+    treasureAPI('getConfig'),
+    treasureAPI('getUsername', { userCode: currentUser })
+  ]);
+
+  treasureConfig = configResult.status === 'fulfilled' ? configResult.value : {};
+  treasureUsername = usernameResult.status === 'fulfilled' ? usernameResult.value.username : null;
 
   document.getElementById('treasureAdminPanel').style.display = isAdminUser ? 'block' : 'none';
 
@@ -3233,13 +3237,6 @@ async function initTreasureScreen() {
     document.getElementById('treasureStartTime').value = treasureConfig.startTime || '08:50';
     document.getElementById('treasureEndTime').value = treasureConfig.endTime || '08:55';
     renderCouponSettingList(treasureConfig.coupons || []);
-  }
-
-  try {
-    const result = await treasureAPI('getUsername', { userCode: currentUser });
-    treasureUsername = result.username;
-  } catch (e) {
-    treasureUsername = null;
   }
 
   if (!treasureUsername) {
