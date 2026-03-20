@@ -1548,8 +1548,18 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
 
           <!-- 삽질 버튼 -->
           <div class="shovel-container">
+         <!-- 수정 후 -->
             <button class="shovel-btn" id="shovelBtn" disabled onclick="doShovel()">
-              <span class="shovel-icon" id="shovelIcon">🪣</span>
+              <span class="shovel-icon" id="shovelIcon">
+                <svg viewBox="0 0 100 100" width="90" height="90" xmlns="http://www.w3.org/2000/svg">
+                  <!-- 삽 손잡이 -->
+                  <rect x="46" y="5" width="8" height="45" rx="4" fill="white" opacity="0.95"/>
+                  <!-- 삽 날 -->
+                  <path d="M25 50 Q25 85 50 92 Q75 85 75 50 Z" fill="white" opacity="0.95"/>
+                  <!-- 삽 날 연결부 -->
+                  <rect x="38" y="47" width="24" height="10" rx="3" fill="white" opacity="0.95"/>
+                </svg>
+              </span>
             </button>
             <div class="shovel-status" id="shovelStatus"></div>
             <div class="shovel-cooltime" id="shovelCooltime"></div>
@@ -3378,9 +3388,14 @@ async function saveTreasureName() {
   }
 }
 
+// 수정 후
 async function loadTreasureMain() {
+  // 달력 섹션 먼저 강제 표시
+  const calendarSection = document.getElementById('stampCalendarSection');
+  if (calendarSection) calendarSection.style.display = 'block';
+
   await renderStampCalendar();
-  checkTreasureTime();
+  await checkTreasureTime();
 }
 
 // 수정 후
@@ -3398,6 +3413,7 @@ function startTreasureClock() {
 }
 
 // 수정 후
+// 수정 후
 function stopTreasure() {
   if (treasureClockInterval) { clearInterval(treasureClockInterval); treasureClockInterval = null; }
   if (treasureWatchId !== null) { navigator.geolocation.clearWatch(treasureWatchId); treasureWatchId = null; }
@@ -3406,6 +3422,7 @@ function stopTreasure() {
   if (shovelCoolTimer) { clearInterval(shovelCoolTimer); shovelCoolTimer = null; }
   shovelCooling = false;
   isInRange = false;
+  treasureTimeChecking = false;
 }
 
 function getKoreaTimeStr() {
@@ -3427,7 +3444,11 @@ function isInTreasureTime() {
 }
 
 // 수정 후
+// 수정 후
+let treasureTimeChecking = false;
+
 async function checkTreasureTime() {
+  if (treasureTimeChecking) return;
   const notTimeEl = document.getElementById('treasureNotTime');
   const searchingEl = document.getElementById('treasureSearching');
   const foundEl = document.getElementById('treasureFound');
@@ -3454,14 +3475,18 @@ async function checkTreasureTime() {
 
   notTimeEl.style.display = 'none';
 
+  // API 중복 호출 방지
+  treasureTimeChecking = true;
   try {
     const result = await treasureAPI('getStamps', { userCode: currentUser });
     const stamps = result.stamps || [];
     if (stamps.some(s => s.date === getKoreaDateStr())) {
       showFoundState(false);
+      treasureTimeChecking = false;
       return;
     }
   } catch (e) {}
+  treasureTimeChecking = false;
 
   if (treasureWatchId === null) {
     searchingEl.style.display = 'block';
