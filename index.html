@@ -1647,7 +1647,44 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
         <div class="row">
           <input id="resetTargetUser" type="text" placeholder="초기화할 이름 (비워두면 전체 초기화)">
         </div>
-        <button id="resetStampsBtn" style="background:#d93025; margin-bottom:8px;">스탬프 초기화</button>
+        <!-- after -->
+<button id="resetStampsBtn" style="background:#d93025; margin-bottom:8px;">스탬프 초기화</button>
+
+        <div class="admin-sub-title">🎖️ 스탬프 관리</div>
+        <div class="row">
+          <select id="adminStampUserSelect" onchange="onAdminStampUserChange()">
+            <option value="">사용자 선택...</option>
+          </select>
+        </div>
+        <div id="adminStampCurrentList" style="display:none; max-height:180px; overflow-y:auto;
+             border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:8px;
+             background:white; font-size:13px;"></div>
+        <div style="display:flex; gap:6px; margin-bottom:12px; align-items:center;">
+          <input id="adminStampDate" type="date"
+            style="flex:1; padding:8px 10px; border:1px solid var(--border); border-radius:8px;
+                   font-size:14px; outline:none;">
+          <button onclick="adminAddStamp()"
+            style="width:auto; padding:8px 14px; font-size:13px; margin:0; background:#28a745;">+ 추가</button>
+          <button onclick="adminRemoveStampByDate()"
+            style="width:auto; padding:8px 14px; font-size:13px; margin:0; background:#d93025;">- 삭제</button>
+        </div>
+
+        <div class="admin-sub-title">🎫 쿠폰 관리</div>
+        <div class="row">
+          <select id="adminCouponUserSelect" onchange="onAdminCouponUserChange()">
+            <option value="">사용자 선택...</option>
+          </select>
+        </div>
+        <div id="adminCouponCurrentList" style="display:none; max-height:200px; overflow-y:auto;
+             border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:8px;
+             background:white; font-size:13px;"></div>
+        <div style="display:flex; gap:6px; margin-bottom:4px; align-items:center;">
+          <input id="adminCouponName" type="text" placeholder="지급할 쿠폰명"
+            style="flex:1; padding:8px 10px; border:1px solid var(--border); border-radius:8px;
+                   font-size:14px; outline:none;">
+          <button onclick="adminIssueCoupon()"
+            style="width:auto; padding:8px 14px; font-size:13px; margin:0; background:#28a745;">지급</button>
+        </div>
       </div>
 
       <button id="treasureBackBtn" class="secondary" style="margin-top:16px;">뒤로가기</button>
@@ -1679,7 +1716,72 @@ const ADMIN_ACCOUNT = {
 };
 
 const FORTUNE_URL = "https://raw.githubusercontent.com/bsens90-wq/hwg_main/main/data/fortune.json";
+// after
 let fortuneData = [];
+
+// 한국 공휴일 (2025~2026)
+const KR_HOLIDAYS = new Set([
+  '2025-01-01','2025-01-28','2025-01-29','2025-01-30',
+  '2025-03-01','2025-05-05','2025-05-06','2025-05-15',
+  '2025-06-06','2025-08-15','2025-10-03','2025-10-06',
+  '2025-10-07','2025-10-08','2025-10-09','2025-12-25',
+  '2026-01-01','2026-02-17','2026-02-18','2026-02-19',
+  '2026-03-01','2026-05-05','2026-05-24','2026-06-06',
+  '2026-08-15','2026-09-24','2026-09-25','2026-09-26',
+  '2026-10-03','2026-10-09','2026-12-25'
+]);
+
+function getWeekDates(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  return Array.from({ length: 5 }, (_, i) => {
+    const wd = new Date(monday);
+    wd.setDate(monday.getDate() + i);
+    return `${wd.getFullYear()}-${String(wd.getMonth()+1).padStart(2,'0')}-${String(wd.getDate()).padStart(2,'0')}`;
+  });
+}
+
+async function checkWeeklyStreakCoupon(stampDates) {
+  const today = getKoreaDateStr();
+  const weekDates = getWeekDates(today); // [월, 화, 수, 목, 금]
+
+  // 오늘까지의 필수 출근일 (공휴일 제외)
+  const required = weekDates.filter(d => !KR_HOLIDAYS.has(d) && d <= today);
+  if (required.length === 0) return null;
+
+  // 이번 주 아직 남은 근무일이 있으면 주간 완성 아님
+  const future = weekDates.filter(d => !KR_HOLIDAYS.has(d) && d > today);
+  if (future.length > 0) return null;
+
+  // 이번 주 중복 지급 방지 (월요일 날짜 기준 로컬 캐시)
+  const weekKey = 'mudra_weekly_coupon_' + weekDates[0];
+  if (localStorage.getItem(weekKey)) return null;
+
+  // 모든 필수 출근일에 스탬프 있는지 확인
+  const stampSet = new Set(stampDates);
+  if (!required.every(d => stampSet.has(d))) return null;
+
+  // 쿠폰 지급 (확률 100%, 수량 무제한)
+  try {
+    const result = await treasureAPI('issueCoupon', {
+      userCode: currentUser,
+      username: treasureUsername,
+      date: today,
+      coupons: [{ name: '서타벅스 아메 1잔(근태상)', probability: 100, limit: 0 }]
+    });
+    const won = result.wonCoupons || [];
+    if (won.length > 0) {
+      localStorage.setItem(weekKey, today);
+      console.log('근태 쿠폰 지급 완료:', won);
+      return '서타벅스 아메 1잔(근태상)';
+    }
+  } catch (e) {
+    console.error('주간 근태 쿠폰 지급 실패:', e);
+  }
+  return null;
+}
 
 // 로그 관리 시스템
 class LogManager {
@@ -3367,7 +3469,9 @@ async function initTreasureScreen() {
     document.getElementById('treasureEndTime').value = treasureConfig.endTime || '08:55';
     document.getElementById('treasureDigProb').value = treasureConfig.digProb || 30;
     document.getElementById('treasureDigCooltime').value = treasureConfig.digCooltime || 5;
+    // after
     renderCouponSettingList(treasureConfig.coupons || []);
+    loadAdminUserSelects();
   }
 
   if (!treasureUsername) {
@@ -3655,9 +3759,11 @@ function startShovelCooltime() {
   }, 1000);
 }
 
+// after
 async function doStampAndCoupon() {
   const today = getKoreaDateStr();
 
+  // 1. 스탬프 적립
   try {
     const stampResult = await treasureAPI('addStamp', {
       userCode: currentUser,
@@ -3667,8 +3773,9 @@ async function doStampAndCoupon() {
     if (stampResult.duplicate) { showFoundState(false); return; }
   } catch (e) { console.error('스탬프 적립 실패:', e); }
 
-// after
   let wonCoupons = [];
+
+  // 2. 일반 쿠폰 추첨
   try {
     const couponResult = await treasureAPI('issueCoupon', {
       userCode: currentUser,
@@ -3677,23 +3784,45 @@ async function doStampAndCoupon() {
       coupons: (treasureConfig?.coupons || []).filter(c => c.name && c.probability > 0)
     });
     wonCoupons = couponResult.wonCoupons || [];
-    console.log('쿠폰 추첨 결과:', JSON.stringify(couponResult));
+    console.log('일반 쿠폰 추첨 결과:', JSON.stringify(couponResult));
   } catch (e) { console.error('쿠폰 추첨 실패:', e); }
 
+  // 3. 주간 연속 출석 근태 쿠폰 체크
+  try {
+    const sr = await treasureAPI('getStamps', { userCode: currentUser });
+    const raw = sr.stamps;
+    let stampDates = [];
+    if (Array.isArray(raw)) {
+      stampDates = raw.map(s => s.date).filter(Boolean);
+    } else if (raw?.records) {
+      stampDates = raw.records.map(s => s.date).filter(Boolean);
+    }
+    const streakCoupon = await checkWeeklyStreakCoupon(stampDates);
+    if (streakCoupon) {
+      wonCoupons = [...wonCoupons, streakCoupon];
+      console.log('주간 근태 쿠폰 추가:', streakCoupon);
+    }
+  } catch (e) { console.error('근태 쿠폰 체크 실패:', e); }
+
+  // 4. 달력 갱신
   await renderStampCalendar();
 
+  // 5. 쿠폰 결과 표시
   if (wonCoupons.length > 0) {
     const couponResultEl = document.getElementById('treasureCouponResult');
     const couponListEl = document.getElementById('treasureCouponList');
-    couponListEl.innerHTML = wonCoupons.map(name => `
-      <div class="coupon-item">
-        <div>
-          <div class="coupon-name">🎫 ${name}</div>
-          <div class="coupon-date">${today} 획득</div>
+    couponListEl.innerHTML = wonCoupons.map(name => {
+      const isStreak = name.includes('근태상');
+      return `
+        <div class="coupon-item">
+          <div>
+            <div class="coupon-name">🎫 ${name}</div>
+            <div class="coupon-date">${today} 획득${isStreak ? ' · 🏆 주간 개근 달성!' : ''}</div>
+          </div>
+          <div class="coupon-badge">NEW</div>
         </div>
-        <div class="coupon-badge">NEW</div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
     couponResultEl.style.display = 'block';
   }
 
@@ -4062,9 +4191,167 @@ function getTodayFortune() {
   localStorage.setItem(cacheKey, fortune);
   return fortune;
 }
+// after
+// ─── 관리자 스탬프/쿠폰 관리 ────────────────────────────────
+
+async function loadAdminUserSelects() {
+  try {
+    const result = await treasureAPI('getAllStatus');
+    const stamps = result.stamps || {};
+    const userCoupons = result.userCoupons || {};
+    const allUsers = new Set([...Object.keys(stamps), ...Object.keys(userCoupons)]);
+
+    const options = ['<option value="">사용자 선택...</option>'];
+    allUsers.forEach(userCode => {
+      const username = stamps[userCode]?.username
+        || userCoupons[userCode]?.username
+        || userCode;
+      options.push(`<option value="${userCode}">${username} (${userCode})</option>`);
+    });
+    const html = options.join('');
+    const s1 = document.getElementById('adminStampUserSelect');
+    const s2 = document.getElementById('adminCouponUserSelect');
+    if (s1) s1.innerHTML = html;
+    if (s2) s2.innerHTML = html;
+  } catch (e) {
+    console.error('관리자 사용자 목록 로드 실패:', e);
+  }
+}
+
+async function onAdminStampUserChange() {
+  const userCode = document.getElementById('adminStampUserSelect').value;
+  const container = document.getElementById('adminStampCurrentList');
+  if (!userCode) { container.style.display = 'none'; return; }
+  container.style.display = 'block';
+  container.innerHTML = '<div style="text-align:center;padding:10px;color:var(--muted);">로딩 중...</div>';
+  try {
+    const result = await treasureAPI('getStamps', { userCode });
+    const raw = result.stamps;
+    let dates = [];
+    if (Array.isArray(raw)) dates = raw.map(s => s.date).filter(Boolean);
+    else if (raw?.records) dates = raw.records.map(s => s.date).filter(Boolean);
+    dates = dates.sort().reverse();
+
+    if (!dates.length) {
+      container.innerHTML = '<div style="text-align:center;padding:10px;color:var(--muted);">스탬프 없음</div>';
+      return;
+    }
+    container.innerHTML = dates.map(d => `
+      <div style="display:flex;justify-content:space-between;align-items:center;
+                  padding:5px 0;border-bottom:1px solid #f0f0f0;">
+        <span>🏅 ${d}</span>
+        <button onclick="adminRemoveStampDirect('${d}')"
+          style="padding:2px 8px;font-size:11px;background:#d93025;color:white;
+                 border:none;border-radius:4px;cursor:pointer;width:auto;margin:0;">삭제</button>
+      </div>`).join('');
+  } catch (e) {
+    container.innerHTML = '<div style="color:#d93025;text-align:center;padding:10px;">로드 실패</div>';
+  }
+}
+
+async function adminAddStamp() {
+  const sel = document.getElementById('adminStampUserSelect');
+  const userCode = sel.value;
+  const date = document.getElementById('adminStampDate').value;
+  if (!userCode) { alert('사용자를 선택해주세요.'); return; }
+  if (!date) { alert('날짜를 선택해주세요.'); return; }
+  const username = sel.selectedOptions[0]?.text?.split(' (')[0] || userCode;
+  try {
+    const result = await treasureAPI('addStamp', { userCode, username, date });
+    if (result.duplicate) { alert(`${date}에 이미 스탬프가 있습니다.`); return; }
+    alert(`✅ ${date} 스탬프 추가 완료`);
+    await onAdminStampUserChange();
+  } catch (e) { alert('스탬프 추가 실패'); }
+}
+
+async function adminRemoveStampByDate() {
+  const userCode = document.getElementById('adminStampUserSelect').value;
+  const date = document.getElementById('adminStampDate').value;
+  if (!userCode) { alert('사용자를 선택해주세요.'); return; }
+  if (!date) { alert('삭제할 날짜를 선택해주세요.'); return; }
+  if (!confirm(`${date} 스탬프를 삭제하시겠습니까?`)) return;
+  await adminRemoveStampDirect(date);
+}
+
+async function adminRemoveStampDirect(date) {
+  const userCode = document.getElementById('adminStampUserSelect').value;
+  if (!userCode) return;
+  try {
+    await treasureAPI('removeStamp', { userCode, date });
+    alert(`🗑️ ${date} 스탬프 삭제 완료`);
+    await onAdminStampUserChange();
+  } catch (e) { alert('스탬프 삭제 실패: ' + e.message); }
+}
+
+async function onAdminCouponUserChange() {
+  const userCode = document.getElementById('adminCouponUserSelect').value;
+  const container = document.getElementById('adminCouponCurrentList');
+  if (!userCode) { container.style.display = 'none'; return; }
+  container.style.display = 'block';
+  await refreshAdminCouponList(userCode);
+}
+
+async function refreshAdminCouponList(userCode) {
+  const container = document.getElementById('adminCouponCurrentList');
+  container.innerHTML = '<div style="text-align:center;padding:10px;color:var(--muted);">로딩 중...</div>';
+  try {
+    const result = await treasureAPI('getUserCoupons', { userCode });
+    const coupons = result.coupons || [];
+    if (!coupons.length) {
+      container.innerHTML = '<div style="text-align:center;padding:10px;color:var(--muted);">보유 쿠폰 없음</div>';
+      return;
+    }
+    container.innerHTML = coupons.map((c, i) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;
+                  padding:6px 0;border-bottom:1px solid #f0f0f0;">
+        <div>
+          <span style="font-weight:600;">${c.used ? '🔲' : '🎫'} ${c.name}</span>
+          <span style="font-size:11px;color:var(--muted);margin-left:6px;">${c.date}</span>
+          ${c.used ? '<span style="font-size:11px;color:#aaa;"> · 사용완료</span>' : ''}
+        </div>
+        <button onclick="adminRevokeCoupon(${i})"
+          style="padding:2px 8px;font-size:11px;background:#d93025;color:white;
+                 border:none;border-radius:4px;cursor:pointer;width:auto;margin:0;">회수</button>
+      </div>`).join('');
+  } catch (e) {
+    container.innerHTML = '<div style="color:#d93025;text-align:center;padding:10px;">로드 실패</div>';
+  }
+}
+
+async function adminIssueCoupon() {
+  const sel = document.getElementById('adminCouponUserSelect');
+  const userCode = sel.value;
+  const name = document.getElementById('adminCouponName').value.trim();
+  if (!userCode) { alert('사용자를 선택해주세요.'); return; }
+  if (!name) { alert('쿠폰명을 입력해주세요.'); return; }
+  const username = sel.selectedOptions[0]?.text?.split(' (')[0] || userCode;
+  try {
+    await treasureAPI('issueCoupon', {
+      userCode, username,
+      date: getKoreaDateStr(),
+      coupons: [{ name, probability: 100, limit: 0 }]
+    });
+    alert(`🎫 "${name}" 쿠폰 지급 완료`);
+    document.getElementById('adminCouponName').value = '';
+    await refreshAdminCouponList(userCode);
+  } catch (e) { alert('쿠폰 지급 실패'); }
+}
+
+async function adminRevokeCoupon(couponIndex) {
+  const userCode = document.getElementById('adminCouponUserSelect').value;
+  if (!userCode) return;
+  if (!confirm('이 쿠폰을 회수하시겠습니까?')) return;
+  try {
+    await treasureAPI('revokeCoupon', { userCode, couponIndex });
+    alert('✅ 쿠폰 회수 완료');
+    await refreshAdminCouponList(userCode);
+  } catch (e) { alert('쿠폰 회수 실패: ' + e.message); }
+}
+
+// ─── 관리자 스탬프/쿠폰 관리 끝 ────────────────────────────
 
 // ===================== 보물찾기 끝 =====================
-// ===================== 보물찾기 끝 =====================
+
 
 // 인수한도 관련 함수들
 function extractProductsAndPlans() {
