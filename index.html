@@ -1121,39 +1121,6 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
       border-radius: 6px;
     }
     
-/* 수정 후 */
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .stamp-box {
-      width: 56px;
-      height: 56px;
-      border-radius: 12px;
-      border: 2px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      color: var(--muted);
-      background: #fff;
-      transition: all 0.3s ease;
-    }
-
-    .stamp-box.filled {
-      border-color: var(--hanwha);
-      background: rgba(255,127,0,0.08);
-      color: var(--hanwha);
-      font-weight: 700;
-    }
-
-    .stamp-box .stamp-icon {
-      font-size: 22px;
-      line-height: 1;
-      margin-bottom: 2px;
-    }
   </style>
 </head>
 <body>
@@ -1443,62 +1410,7 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     </div>
   </section>
 
-<!-- 수정 후 -->
-  <!-- 보물찾기 화면 -->
-  <section id="treasureScreen" class="screen" style="display:none;">
-    <div class="app-title">🎁 아침 보물찾기</div>
-    <div class="card container-narrow">
 
-      <!-- 진행중 상태 -->
-      <div id="treasureSearching" style="text-align:center; padding:20px;">
-        <div style="font-size:18px; font-weight:700; color:var(--hanwha); margin-bottom:20px;">보물을 찾는 중...</div>
-        <div id="treasureSpinner" style="
-          width:60px; height:60px;
-          border:6px solid #f0f0f0;
-          border-top:6px solid var(--hanwha);
-          border-radius:50%;
-          animation:spin 1s linear infinite;
-          margin:0 auto 20px auto;
-        "></div>
-        <div id="treasureNotHere" style="display:none; font-size:16px; color:#d93025; font-weight:600; margin-bottom:10px;">
-          여기에 없습니다
-        </div>
-      </div>
-
-      <!-- 보물 발견 상태 -->
-      <div id="treasureFound" style="display:none; text-align:center; padding:20px;">
-        <div style="font-size:24px; font-weight:900; color:var(--hanwha); margin-bottom:10px;">🎉 보물을 찾았습니다!</div>
-        <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
-      </div>
-
-      <!-- 스탬프 카드 -->
-      <div style="margin-top:20px;">
-        <div style="font-size:16px; font-weight:700; margin-bottom:12px; text-align:center; color:var(--text);">📅 출석 스탬프</div>
-        <div id="stampGrid" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"></div>
-      </div>
-
-      <!-- 관리자 전용 -->
-      <div id="treasureAdminPanel" style="display:none; margin-top:24px; border-top:1px solid var(--border); padding-top:16px;">
-        <div style="font-size:15px; font-weight:700; margin-bottom:10px; color:#8e44ad;">관리자 설정</div>
-        <div class="row">
-          <input id="treasureLat" type="number" step="any" placeholder="위도 (예: 35.123456)">
-        </div>
-        <div class="row">
-          <input id="treasureLng" type="number" step="any" placeholder="경도 (예: 128.123456)">
-        </div>
-        <div class="row">
-          <input id="treasureRadius" type="number" placeholder="허용 반경 (미터, 기본 50)" value="50">
-        </div>
-        <button id="saveTreasureCoordBtn" style="background:#8e44ad; margin-bottom:8px;">좌표 저장</button>
-        <button id="resetStampsBtn" style="background:#d93025; margin-bottom:8px;">스탬프 전체 초기화</button>
-      </div>
-
-      <button id="treasureBackBtn" class="secondary" style="margin-top:16px;">뒤로가기</button>
-      <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
-    </div>
-  </section>
-
-<!-- 수정 후 -->
   <!-- 보물찾기 화면 -->
   <section id="treasureScreen" class="screen" style="display:none;">
     <div class="app-title">🎁 아침 보물찾기</div>
