@@ -3421,7 +3421,9 @@ function goBackFromUserManage() {
 // ===================== 보물찾기 기능 =====================
 const TREASURE_URL = 'https://hwgdcw-edu.netlify.app/.netlify/functions/treasure';
 
+// after
 let treasureClockInterval = null;
+let treasureMinuteTimer = null;
 let treasureWatchId = null;
 let treasureNotHereTimer = null;
 let treasureConfettiFrame = null;
@@ -3446,17 +3448,27 @@ async function showTreasureScreen() {
 
 // 수정 후
 // after
+// after
 async function initTreasureScreen() {
   startTreasureClock();
-
-  // 운세 데이터 비동기 선제 로드
   loadFortuneData();
 
-  // config + username 병렬 호출
+  // 로딩 표시
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'treasureLoadingMsg';
+  loadingDiv.style.cssText = 'text-align:center;padding:20px;color:var(--muted);font-size:14px;';
+  loadingDiv.textContent = '⏳ 불러오는 중...';
+  const card = document.querySelector('#treasureScreen .card');
+  if (card) card.insertBefore(loadingDiv, card.children[1]);
+
   const [configResult, usernameResult] = await Promise.allSettled([
     treasureAPI('getConfig'),
     treasureAPI('getUsername', { userCode: currentUser })
   ]);
+
+  // 로딩 표시 제거
+  const loadingEl = document.getElementById('treasureLoadingMsg');
+  if (loadingEl) loadingEl.remove();
 
   treasureConfig = configResult.status === 'fulfilled' ? configResult.value : {};
   treasureUsername = usernameResult.status === 'fulfilled' ? usernameResult.value.username : null;
@@ -3536,15 +3548,18 @@ function startTreasureClock() {
     // 매초 checkTreasureTime 호출 제거 — 1분 단위로만 체크
   }
   tick();
+// after
   treasureClockInterval = setInterval(tick, 1000);
-  // 1분마다 시간 체크
-  setInterval(() => { checkTreasureTime(); }, 60000);
+  if (treasureMinuteTimer) clearInterval(treasureMinuteTimer);
+  treasureMinuteTimer = setInterval(() => { checkTreasureTime(); }, 60000);
 }
 
 // 수정 후
 // 수정 후
+// after
 function stopTreasure() {
   if (treasureClockInterval) { clearInterval(treasureClockInterval); treasureClockInterval = null; }
+  if (treasureMinuteTimer) { clearInterval(treasureMinuteTimer); treasureMinuteTimer = null; }
   if (treasureWatchId !== null) { navigator.geolocation.clearWatch(treasureWatchId); treasureWatchId = null; }
   if (treasureNotHereTimer) { clearTimeout(treasureNotHereTimer); treasureNotHereTimer = null; }
   if (treasureConfettiFrame) { cancelAnimationFrame(treasureConfettiFrame); treasureConfettiFrame = null; }
@@ -3604,16 +3619,23 @@ async function checkTreasureTime() {
 
   notTimeEl.style.display = 'none';
 
+// after
   _checkingTreasureTime = true;
   try {
     const result = await treasureAPI('getStamps', { userCode: currentUser });
-    const stamps = result.stamps || [];
-    if (stamps.some(s => s.date === getKoreaDateStr())) {
+    const raw = result.stamps;
+    let stampDates = [];
+    if (Array.isArray(raw)) {
+      stampDates = raw.map(s => s.date).filter(Boolean);
+    } else if (raw?.records) {
+      stampDates = raw.records.map(s => s.date).filter(Boolean);
+    }
+    if (stampDates.includes(getKoreaDateStr())) {
       showFoundState(false);
       _checkingTreasureTime = false;
       return;
     }
-  } catch (e) {}
+  } catch (e) { console.error('스탬프 확인 오류:', e); }
   _checkingTreasureTime = false;
 
   if (treasureWatchId === null) {
