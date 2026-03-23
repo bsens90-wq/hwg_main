@@ -1759,7 +1759,9 @@ async function checkWeeklyStreakCoupon(stampDates) {
   if (today !== lastWorkDay) return null;
 
   // 이번 주 중복 지급 방지 (월요일 날짜 기준 로컬 캐시)
-  const weekKey = 'mudra_weekly_coupon_' + weekDates[0];
+// after
+  // 이번 주 중복 지급 방지 (월요일 날짜 + 사용자 uid 기준 로컬 캐시)
+  const weekKey = 'mudra_weekly_coupon_' + weekDates[0] + '_' + getTreasureUserId();
   if (localStorage.getItem(weekKey)) return null;
 
   // 이번 주 모든 근무일에 스탬프가 있는지 확인
