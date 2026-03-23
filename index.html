@@ -1768,8 +1768,9 @@ async function checkWeeklyStreakCoupon(stampDates) {
 
   // 쿠폰 지급 (확률 100%, 수량 무제한)
   try {
+   // after
     const result = await treasureAPI('issueCoupon', {
-      userCode: currentUser,
+      userCode: getTreasureUserId(),
       username: treasureUsername,
       date: today,
       coupons: [{ name: '서타벅스 아메 1잔(근태상)', probability: 100, limit: 0 }]
@@ -3427,8 +3428,23 @@ let treasureMinuteTimer = null;
 let treasureWatchId = null;
 let treasureNotHereTimer = null;
 let treasureConfettiFrame = null;
+// after
 let treasureUsername = null;
 let treasureConfig = null;
+let _treasureUserId = null;
+
+function getTreasureUserId() {
+  if (_treasureUserId) return _treasureUserId;
+  const storageKey = 'hwg_treasure_uid_' + currentUser;
+  let uid = localStorage.getItem(storageKey);
+  if (!uid) {
+    // 로그인 코드 + 랜덤 6자리로 고유 ID 생성
+    uid = currentUser + '_' + Math.random().toString(36).substring(2, 8);
+    localStorage.setItem(storageKey, uid);
+  }
+  _treasureUserId = uid;
+  return uid;
+}
 
 async function treasureAPI(action, data = {}) {
   const res = await fetch(TREASURE_URL + '?t=' + Date.now(), {
@@ -3461,16 +3477,16 @@ async function initTreasureScreen() {
   const card = document.querySelector('#treasureScreen .card');
   if (card) card.insertBefore(loadingDiv, card.children[1]);
 
-  const [configResult, usernameResult] = await Promise.allSettled([
+ const [configResult, usernameResult] = await Promise.allSettled([
     treasureAPI('getConfig'),
-    treasureAPI('getUsername', { userCode: currentUser })
+    treasureAPI('getUsername', { userCode: getTreasureUserId() })
   ]);
 
   // 로딩 표시 제거
   const loadingEl = document.getElementById('treasureLoadingMsg');
   if (loadingEl) loadingEl.remove();
 
-  treasureConfig = configResult.status === 'fulfilled' ? configResult.value : {};
+ treasureConfig = configResult.status === 'fulfilled' ? configResult.value : {};
   treasureUsername = usernameResult.status === 'fulfilled' ? usernameResult.value.username : null;
 
   document.getElementById('treasureAdminPanel').style.display = isAdminUser ? 'block' : 'none';
@@ -3503,7 +3519,8 @@ async function saveTreasureName() {
   const name = document.getElementById('treasureNameInput').value.trim();
   if (!name) { alert('이름을 입력해주세요.'); return; }
   try {
-    await treasureAPI('setUsername', { userCode: currentUser, username: name });
+    // after
+    await treasureAPI('setUsername', { userCode: getTreasureUserId(), username: name });
     treasureUsername = name;
     document.getElementById('treasureNameSetup').style.display = 'none';
     document.getElementById('treasureMain').style.display = 'block';
@@ -3557,7 +3574,9 @@ function startTreasureClock() {
 // 수정 후
 // 수정 후
 // after
+// after
 function stopTreasure() {
+  _treasureUserId = null;
   if (treasureClockInterval) { clearInterval(treasureClockInterval); treasureClockInterval = null; }
   if (treasureMinuteTimer) { clearInterval(treasureMinuteTimer); treasureMinuteTimer = null; }
   if (treasureWatchId !== null) { navigator.geolocation.clearWatch(treasureWatchId); treasureWatchId = null; }
@@ -3622,7 +3641,9 @@ async function checkTreasureTime() {
 // after
   _checkingTreasureTime = true;
   try {
-    const result = await treasureAPI('getStamps', { userCode: currentUser });
+    // after
+    // after
+    const result = await treasureAPI('getStamps', { userCode: getTreasureUserId() });
     const raw = result.stamps;
     let stampDates = [];
     if (Array.isArray(raw)) {
@@ -3790,8 +3811,9 @@ async function doStampAndCoupon() {
 
   // 1. 스탬프 적립
   try {
+   // after
     const stampResult = await treasureAPI('addStamp', {
-      userCode: currentUser,
+      userCode: getTreasureUserId(),
       username: treasureUsername,
       date: today
     });
@@ -3802,8 +3824,9 @@ async function doStampAndCoupon() {
 
   // 2. 일반 쿠폰 추첨
   try {
+    // after
     const couponResult = await treasureAPI('issueCoupon', {
-      userCode: currentUser,
+      userCode: getTreasureUserId(),
       username: treasureUsername,
       date: today,
       coupons: (treasureConfig?.coupons || []).filter(c => c.name && c.probability > 0)
@@ -3814,7 +3837,8 @@ async function doStampAndCoupon() {
 
   // 3. 주간 연속 출석 근태 쿠폰 체크
   try {
-    const sr = await treasureAPI('getStamps', { userCode: currentUser });
+   // after
+    const sr = await treasureAPI('getStamps', { userCode: getTreasureUserId() });
     const raw = sr.stamps;
     let stampDates = [];
     if (Array.isArray(raw)) {
@@ -3986,7 +4010,8 @@ async function openCouponBox() {
   body.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">불러오는 중...</div>';
   modal.style.display = 'block';
   try {
-    const result = await treasureAPI('getUserCoupons', { userCode: currentUser });
+// after
+    const result = await treasureAPI('getUserCoupons', { userCode: getTreasureUserId() });
     const coupons = result.coupons || [];
     if (coupons.length === 0) {
       body.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">아직 획득한 쿠폰이 없습니다.</div>';
@@ -4264,11 +4289,14 @@ async function loadAdminUserSelects() {
     const allUsers = new Set([...Object.keys(stamps), ...Object.keys(userCoupons)]);
 
     const options = ['<option value="">사용자 선택...</option>'];
+    // after
     allUsers.forEach(userCode => {
       const username = stamps[userCode]?.username
         || userCoupons[userCode]?.username
         || userCode;
-      options.push(`<option value="${userCode}">${username} (${userCode})</option>`);
+      // uid 형식(loginCode_randomId)에서 로그인 코드 추출해 표시
+      const loginCode = userCode.includes('_') ? userCode.split('_')[0] : userCode;
+      options.push(`<option value="${userCode}">${username} (코드:${loginCode})</option>`);
     });
     const html = options.join('');
     const s1 = document.getElementById('adminStampUserSelect');
