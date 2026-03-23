@@ -4252,22 +4252,26 @@ async function loadFortuneData() {
   }
 }
 
+// after
 function getTodayFortune() {
   if (!fortuneData.length) return null;
   const today = getKoreaDateStr();
-  const cacheKey = 'mudra_fortune_' + today;
+  const username = treasureUsername || getTreasureUserId();
 
-  // 오늘 날짜 캐시 확인
+  // 사용자별 + 날짜별 캐시 키
+  const cacheKey = 'mudra_fortune_' + today + '_' + username;
+
+  // 오늘+이름 캐시 확인
   const cached = localStorage.getItem(cacheKey);
   if (cached) return cached;
 
-  // 이전 날짜 캐시 정리
+  // 다른 날짜/사용자 캐시 정리
   Object.keys(localStorage)
     .filter(k => k.startsWith('mudra_fortune_') && k !== cacheKey)
     .forEach(k => localStorage.removeItem(k));
 
-  // 날짜 기반 해시로 오늘 인덱스 고정
-  const seed = today.replace(/-/g, '');
+  // 날짜 + 사용자 이름 합산 해시로 인덱스 고정
+  const seed = today.replace(/-/g, '') + username;
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
     hash = ((hash << 5) - hash) + seed.charCodeAt(i);
