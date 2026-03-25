@@ -3448,6 +3448,29 @@ function getTreasureUserId() {
   return uid;
 }
 
+// after
+function getLocalStampKey() {
+  return 'hwg_stamps_' + getTreasureUserId();
+}
+
+function saveLocalStamp(date) {
+  try {
+    const key = getLocalStampKey();
+    const existing = JSON.parse(localStorage.getItem(key) || '[]');
+    if (!existing.includes(date)) {
+      existing.push(date);
+      localStorage.setItem(key, JSON.stringify(existing));
+    }
+  } catch (e) {}
+}
+
+function getLocalStamps() {
+  try {
+    const key = getLocalStampKey();
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  } catch (e) { return []; }
+}
+
 async function treasureAPI(action, data = {}) {
   const res = await fetch(TREASURE_URL + '?t=' + Date.now(), {
     method: 'POST',
@@ -3641,10 +3664,17 @@ async function checkTreasureTime() {
   notTimeEl.style.display = 'none';
 
 // after
-  _checkingTreasureTime = true;
+ _checkingTreasureTime = true;
   try {
-    // after
-    // after
+    const today = getKoreaDateStr();
+
+    // 로컬 캐시 먼저 확인 (빠른 응답)
+    if (getLocalStamps().includes(today)) {
+      showFoundState(false);
+      _checkingTreasureTime = false;
+      return;
+    }
+
     const result = await treasureAPI('getStamps', { userCode: getTreasureUserId() });
     const raw = result.stamps;
     let stampDates = [];
@@ -3653,7 +3683,9 @@ async function checkTreasureTime() {
     } else if (raw?.records) {
       stampDates = raw.records.map(s => s.date).filter(Boolean);
     }
-    if (stampDates.includes(getKoreaDateStr())) {
+    if (stampDates.includes(today)) {
+      // 서버에 있으면 로컬에도 동기화
+      saveLocalStamp(today);
       showFoundState(false);
       _checkingTreasureTime = false;
       return;
@@ -3812,14 +3844,16 @@ async function doStampAndCoupon() {
   const today = getKoreaDateStr();
 
   // 1. 스탬프 적립
+  // after
   try {
-   // after
     const stampResult = await treasureAPI('addStamp', {
       userCode: getTreasureUserId(),
       username: treasureUsername,
       date: today
     });
     if (stampResult.duplicate) { showFoundState(false); return; }
+    // 로컬에도 저장 (GitHub 캐시 지연 대응)
+    saveLocalStamp(today);
   } catch (e) { console.error('스탬프 적립 실패:', e); }
 
   let wonCoupons = [];
@@ -3955,21 +3989,21 @@ function startConfetti() {
 }
 
 // 수정 후
-async function renderStampCalendar() {
+// after
+// after
+async function renderStampCalendar(forceDates = []) {
   const container = document.getElementById('stampCalendarContainer');
   const titleEl = document.getElementById('stampMonthTitle');
   if (!container) return;
 
-  let stampDates = new Set();
+  // 로컬 저장 스탬프 + forceDates 먼저 병합 (GitHub 캐시 지연 완전 대응)
+  let stampDates = new Set([...forceDates, ...getLocalStamps()]);
   try {
-    const result = await treasureAPI('getStamps', { userCode: currentUser });
-    // result.stamps는 배열 또는 { username, records:[{date}] } 객체일 수 있음
+    const result = await treasureAPI('getStamps', { userCode: getTreasureUserId() });
     const raw = result.stamps;
     if (Array.isArray(raw)) {
-      // 배열인 경우
       raw.forEach(s => { if (s.date) stampDates.add(s.date); });
     } else if (raw && Array.isArray(raw.records)) {
-      // { username, records: [{date}] } 객체인 경우
       raw.records.forEach(s => { if (s.date) stampDates.add(s.date); });
     }
   } catch (e) {}
@@ -4227,7 +4261,7 @@ async function resetStamps() {
     }
     await treasureAPI('resetStamps', { targetUserCode });
     alert('초기화 완료');
-    await renderStampCalendar();
+     await renderStampCalendar([today]);
   } catch (e) { alert('초기화 실패'); }
 }
 
