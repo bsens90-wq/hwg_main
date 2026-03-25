@@ -3453,6 +3453,7 @@ function getLocalStampKey() {
   return 'hwg_stamps_' + getTreasureUserId();
 }
 
+// after
 function saveLocalStamp(date) {
   try {
     const key = getLocalStampKey();
@@ -3461,6 +3462,15 @@ function saveLocalStamp(date) {
       existing.push(date);
       localStorage.setItem(key, JSON.stringify(existing));
     }
+  } catch (e) {}
+}
+
+function syncLocalStamps(dates) {
+  try {
+    const key = getLocalStampKey();
+    const existing = new Set(JSON.parse(localStorage.getItem(key) || '[]'));
+    dates.forEach(d => { if (d) existing.add(d); });
+    localStorage.setItem(key, JSON.stringify(Array.from(existing)));
   } catch (e) {}
 }
 
@@ -3998,14 +4008,18 @@ async function renderStampCalendar(forceDates = []) {
 
   // 로컬 저장 스탬프 + forceDates 먼저 병합 (GitHub 캐시 지연 완전 대응)
   let stampDates = new Set([...forceDates, ...getLocalStamps()]);
-  try {
+   try {
     const result = await treasureAPI('getStamps', { userCode: getTreasureUserId() });
     const raw = result.stamps;
+    let serverDates = [];
     if (Array.isArray(raw)) {
-      raw.forEach(s => { if (s.date) stampDates.add(s.date); });
+      serverDates = raw.map(s => s.date).filter(Boolean);
     } else if (raw && Array.isArray(raw.records)) {
-      raw.records.forEach(s => { if (s.date) stampDates.add(s.date); });
+      serverDates = raw.records.map(s => s.date).filter(Boolean);
     }
+    // 서버 데이터 전체를 localStorage에 동기화 (자동 반영)
+    if (serverDates.length > 0) syncLocalStamps(serverDates);
+    serverDates.forEach(d => stampDates.add(d));
   } catch (e) {}
 
   const now = new Date();
