@@ -1669,13 +1669,30 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
             style="width:auto; padding:8px 14px; font-size:13px; margin:0; background:#d93025;">- 삭제</button>
         </div>
 
-        <div class="admin-sub-title">🎫 쿠폰 관리</div>
+     <!-- after -->
+        <div class="admin-sub-title">🎫 쿠폰 현황 관리</div>
+        <div style="display:flex; gap:6px; margin-bottom:8px; align-items:center;">
+          <select id="adminCouponFilter"
+            style="flex:1; padding:8px 10px; border:1px solid var(--border);
+                   border-radius:8px; font-size:13px; outline:none;">
+            <option value="">전체 쿠폰</option>
+          </select>
+          <button onclick="loadAdminCouponTable()"
+            style="width:auto; padding:8px 14px; font-size:13px; margin:0; background:#555;">
+            조회
+          </button>
+        </div>
+        <div id="adminCouponTable" style="display:none; max-height:320px; overflow-y:auto;
+             border:1px solid var(--border); border-radius:8px; background:white;
+             font-size:12px; margin-bottom:12px;"></div>
+
+        <div class="admin-sub-title">🎫 쿠폰 임의 지급</div>
         <div class="row">
           <select id="adminCouponUserSelect" onchange="onAdminCouponUserChange()">
             <option value="">사용자 선택...</option>
           </select>
         </div>
-        <div id="adminCouponCurrentList" style="display:none; max-height:200px; overflow-y:auto;
+        <div id="adminCouponCurrentList" style="display:none; max-height:160px; overflow-y:auto;
              border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:8px;
              background:white; font-size:13px;"></div>
         <div style="display:flex; gap:6px; margin-bottom:4px; align-items:center;">
@@ -4335,6 +4352,7 @@ function getTodayFortune() {
 // after
 // ─── 관리자 스탬프/쿠폰 관리 ────────────────────────────────
 
+// after
 async function loadAdminUserSelects() {
   try {
     const result = await treasureAPI('getAllStatus');
@@ -4342,21 +4360,29 @@ async function loadAdminUserSelects() {
     const userCoupons = result.userCoupons || {};
     const allUsers = new Set([...Object.keys(stamps), ...Object.keys(userCoupons)]);
 
-    const options = ['<option value="">사용자 선택...</option>'];
-    // after
+    const userOptions = ['<option value="">사용자 선택...</option>'];
     allUsers.forEach(userCode => {
       const username = stamps[userCode]?.username
         || userCoupons[userCode]?.username
         || userCode;
-      // uid 형식(loginCode_randomId)에서 로그인 코드 추출해 표시
       const loginCode = userCode.includes('_') ? userCode.split('_')[0] : userCode;
-      options.push(`<option value="${userCode}">${username} (코드:${loginCode})</option>`);
+      userOptions.push(`<option value="${userCode}">${username} (코드:${loginCode})</option>`);
     });
-    const html = options.join('');
+    const userHtml = userOptions.join('');
     const s1 = document.getElementById('adminStampUserSelect');
     const s2 = document.getElementById('adminCouponUserSelect');
-    if (s1) s1.innerHTML = html;
-    if (s2) s2.innerHTML = html;
+    if (s1) s1.innerHTML = userHtml;
+    if (s2) s2.innerHTML = userHtml;
+
+    // 쿠폰 필터 드롭다운 업데이트
+    const couponFilter = document.getElementById('adminCouponFilter');
+    if (couponFilter && treasureConfig?.coupons?.length > 0) {
+      const filterOptions = ['<option value="">전체 쿠폰</option>'];
+      treasureConfig.coupons.forEach(c => {
+        filterOptions.push(`<option value="${c.name}">${c.name}</option>`);
+      });
+      couponFilter.innerHTML = filterOptions.join('');
+    }
   } catch (e) {
     console.error('관리자 사용자 목록 로드 실패:', e);
   }
@@ -4504,6 +4530,107 @@ async function adminRevokeCoupon(couponIndex) {
 }
 
 // after
+// after
+async function loadAdminCouponTable() {
+  const filterName = document.getElementById('adminCouponFilter')?.value || '';
+  const tableEl = document.getElementById('adminCouponTable');
+  if (!tableEl) return;
+
+  tableEl.style.display = 'block';
+  tableEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted);">불러오는 중...</div>';
+
+  try {
+    const result = await treasureAPI('getAllStatus');
+    const userCoupons = result.userCoupons || {};
+
+    // 전체 쿠폰 flatten
+    const rows = [];
+    Object.entries(userCoupons).forEach(([userCode, userData]) => {
+      const username = userData.username || userCode;
+      (userData.coupons || []).forEach((c, idx) => {
+        if (!filterName || c.name === filterName) {
+          rows.push({ userCode, username, couponIndex: idx, name: c.name, date: c.date, used: c.used });
+        }
+      });
+    });
+
+    if (rows.length === 0) {
+      tableEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted);">해당 쿠폰 보유자가 없습니다.</div>';
+      return;
+    }
+
+    // 날짜 내림차순 정렬
+    rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+    let html = `
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#f8f9fa;position:sticky;top:0;">
+            <th style="border:1px solid var(--border);padding:7px 6px;text-align:center;white-space:nowrap;">획득일자</th>
+            <th style="border:1px solid var(--border);padding:7px 6px;text-align:center;">쿠폰명</th>
+            <th style="border:1px solid var(--border);padding:7px 6px;text-align:center;white-space:nowrap;">이름</th>
+            <th style="border:1px solid var(--border);padding:7px 6px;text-align:center;white-space:nowrap;">지급여부</th>
+            <th style="border:1px solid var(--border);padding:7px 6px;text-align:center;white-space:nowrap;">관리</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    rows.forEach(r => {
+      const dateShort = r.date ? r.date.replace(/^20/, '').replace(/-/g, '.') : '-';
+      const usedLabel = r.used
+        ? '<span style="color:#28a745;font-weight:700;">Y</span>'
+        : '<span style="color:#d93025;font-weight:700;">N</span>';
+
+      html += `
+        <tr>
+          <td style="border:1px solid var(--border);padding:6px;text-align:center;white-space:nowrap;">${dateShort}</td>
+          <td style="border:1px solid var(--border);padding:6px;text-align:left;">${r.name}</td>
+          <td style="border:1px solid var(--border);padding:6px;text-align:center;white-space:nowrap;">${r.username}</td>
+          <td style="border:1px solid var(--border);padding:6px;text-align:center;">${usedLabel}</td>
+          <td style="border:1px solid var(--border);padding:6px;text-align:center;white-space:nowrap;">
+            ${!r.used ? `
+              <button onclick="adminMarkCouponUsedByTable('${r.userCode}',${r.couponIndex})"
+                style="padding:2px 6px;font-size:11px;background:#28a745;color:white;
+                       border:none;border-radius:4px;cursor:pointer;margin:0 2px 0 0;">지급완료</button>
+            ` : ''}
+            <button onclick="adminRevokeCouponByTable('${r.userCode}',${r.couponIndex})"
+              style="padding:2px 6px;font-size:11px;background:#d93025;color:white;
+                     border:none;border-radius:4px;cursor:pointer;margin:0;">회수</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+    html += `<div style="text-align:right;font-size:11px;color:var(--muted);padding:6px 8px;">
+      총 ${rows.length}건 (미지급 ${rows.filter(r => !r.used).length}건)
+    </div>`;
+    tableEl.innerHTML = html;
+
+  } catch (e) {
+    tableEl.innerHTML = '<div style="color:#d93025;text-align:center;padding:16px;">불러오기 실패</div>';
+  }
+}
+
+async function adminMarkCouponUsedByTable(userCode, couponIndex) {
+  if (!confirm('지급완료 처리하시겠습니까?')) return;
+  try {
+    await treasureAPI('markCouponUsed', { userCode, couponIndex });
+    alert('✅ 지급완료 처리되었습니다.');
+    await loadAdminCouponTable();
+  } catch (e) { alert('처리 실패: ' + e.message); }
+}
+
+async function adminRevokeCouponByTable(userCode, couponIndex) {
+  if (!confirm('이 쿠폰을 회수하시겠습니까?')) return;
+  try {
+    await treasureAPI('revokeCoupon', { userCode, couponIndex });
+    alert('✅ 쿠폰 회수 완료');
+    await loadAdminCouponTable();
+  } catch (e) { alert('쿠폰 회수 실패: ' + e.message); }
+}
+
 async function adminMarkCouponUsed(couponIndex) {
   const userCode = document.getElementById('adminCouponUserSelect').value;
   if (!userCode) return;
