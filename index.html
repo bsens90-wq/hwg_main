@@ -1312,6 +1312,11 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
         <span style="font-size:18px; display:block; margin-bottom:4px;">코드 관리 (관리자)</span>
       </button>
 
+
+            <button id="menuConfigBtn" style="margin-bottom:1rem; display:none; background:#16a085;">
+        <span style="font-size:18px; display:block; margin-bottom:4px;">메뉴 노출 관리 (관리자)</span>
+      </button>
+      
       <button id="installBtnMenu" class="secondary" style="margin-top:1rem;">
         <span style="font-size:16px;">홈화면에 추가</span>
       </button>
@@ -1474,6 +1479,23 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
       </div>
       
       <button id="userManageBackBtn" class="secondary" style="margin-top:20px;">뒤로가기</button>
+      <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+    </div>
+  </section>
+
+</section>
+
+  <!-- 메뉴 노출 관리 화면 (관리자) -->
+  <section id="menuConfigScreen" class="screen" style="display:none;">
+    <div class="app-title">메뉴 노출 관리</div>
+    <div class="card container-narrow">
+      <h2 style="margin-bottom:.5rem;">일반 사용자 메뉴 노출 설정</h2>
+      <div class="hint" style="margin-bottom:1rem;">
+        체크된 메뉴만 일반 사용자에게 노출됩니다. 체크 해제된 메뉴는 관리자에게만 보입니다.
+      </div>
+      <div id="menuConfigList"></div>
+      <button id="saveMenuConfigBtn" style="margin-top:8px; background:#8e44ad;">설정 저장</button>
+      <button id="menuConfigBackBtn" class="secondary" style="margin-top:8px;">뒤로가기</button>
       <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
     </div>
   </section>
@@ -2432,7 +2454,8 @@ function hideAllScreens() {
   document.getElementById("logScreen").style.display = "none";
   document.getElementById("userManageScreen").style.display = "none";
   document.getElementById("videoScreen").style.display = "none";
-  document.getElementById("surgeryScreen").style.display = "none";
+document.getElementById("surgeryScreen").style.display = "none";
+  document.getElementById("menuConfigScreen").style.display = "none";
   document.getElementById("treasureScreen").style.display = "none";
   stopTreasure();
 }
@@ -2481,9 +2504,10 @@ function navigateToScreen(screen, addToHistory = true) {
       document.getElementById("loginScreen").style.display = "flex";
       document.getElementById("userInfoHeader").style.display = "none";
       break;
-    case 'menu':
+case 'menu':
       document.getElementById("menuScreen").style.display = "flex";
       updateMenuVisibility();
+      loadMenuVisibility();
       if (currentUser) {
         document.getElementById("userInfoHeader").style.display = "inline-flex";
         document.getElementById("userTextHeader").textContent = `${currentUser}${isAdminUser ? ' (관리자)' : ''}`;
@@ -2528,6 +2552,10 @@ function navigateToScreen(screen, addToHistory = true) {
     case 'userManage':
       document.getElementById("userManageScreen").style.display = "flex";
       break;
+    case 'menuConfig':
+      document.getElementById("menuConfigScreen").style.display = "flex";
+      initMenuConfigScreen();
+      break;
 // 수정 후
     case 'treasure':
       document.getElementById("treasureScreen").style.display = "flex";
@@ -2536,54 +2564,136 @@ function navigateToScreen(screen, addToHistory = true) {
   }
 }
 
-// 수정 후
+// 일반 사용자에게 노출 토글 가능한 메뉴 정의
+let menuVisibilityConfig = null;
+
+const MENU_CONFIG_ITEMS = [
+  { key: 'guide',      id: 'guideMenuBtn',      label: '통합 인수 가이드' },
+  { key: 'surgery',    id: 'surgeryMenuBtn',    label: '수술비 검색하기' },
+  { key: 'analysis',   id: 'analysisMenuBtn',   label: '나만의 보장분석 만들기' },
+  { key: 'contact',    id: 'contactMenuBtn',    label: '콜센터, 보험금 청구 팩스' },
+  { key: 'naverCheck', id: 'naverCheckMenuBtn', label: '내 사업 3분 셀프체크' },
+  { key: 'treasure',   id: 'treasureMenuBtn',   label: '아침 보물찾기' }
+];
+
 function updateMenuVisibility() {
-  const analysisMenuBtn = document.getElementById("analysisMenuBtn");
   const diseaseMenuBtn = document.getElementById("diseaseMenuBtn");
   const logMenuBtn = document.getElementById("logMenuBtn");
   const userManageBtn = document.getElementById("userManageBtn");
-  const guideMenuBtn = document.getElementById("guideMenuBtn");
-  const contactMenuBtn = document.getElementById("contactMenuBtn");
   const limitMenuBtn = document.getElementById("limitMenuBtn");
   const videoMenuBtn = document.getElementById("videoMenuBtn");
-  const surgeryMenuBtn = document.getElementById("surgeryMenuBtn");
-  const naverCheckMenuBtn = document.getElementById("naverCheckMenuBtn");
+  const menuConfigBtn = document.getElementById("menuConfigBtn");
 
-  // 공통 노출 메뉴 (모든 사용자)
-  guideMenuBtn.className = "user-menu";
-surgeryMenuBtn.className = "user-menu";
-  analysisMenuBtn.className = "user-menu";
-  contactMenuBtn.className = "user-menu";
-  naverCheckMenuBtn.className = "user-menu";
-  guideMenuBtn.style.display = "block";
-surgeryMenuBtn.style.display = "block";
-  analysisMenuBtn.style.display = "block";
-  contactMenuBtn.style.display = "block";
-  naverCheckMenuBtn.style.display = "block";
- // 수정 후
-  const treasureMenuBtn = document.getElementById("treasureMenuBtn");
-  treasureMenuBtn.className = "user-menu";
-  treasureMenuBtn.style.display = "block";
+  const vis = menuVisibilityConfig || {};
 
+  // 일반 사용자 토글 대상 메뉴
+  MENU_CONFIG_ITEMS.forEach(item => {
+    const btn = document.getElementById(item.id);
+    if (!btn) return;
+    const enabledForUsers = vis[item.key] !== false; // 기본값: 노출
+    if (isAdminUser) {
+      // 관리자는 항상 노출. 일반 사용자에게 숨긴 메뉴는 보라색(admin-only)으로 구분
+      btn.className = enabledForUsers ? 'user-menu' : 'admin-only';
+      btn.style.display = 'block';
+    } else {
+      btn.className = 'user-menu';
+      btn.style.display = enabledForUsers ? 'block' : 'none';
+    }
+  });
+
+  // 항상 관리자 전용 메뉴
   if (isAdminUser) {
     limitMenuBtn.className = "admin-only";
     videoMenuBtn.className = "admin-only";
     diseaseMenuBtn.className = "admin-only";
     logMenuBtn.className = "admin-only";
     userManageBtn.className = "admin-only";
+    menuConfigBtn.className = "admin-only";
 
     limitMenuBtn.style.display = "block";
     videoMenuBtn.style.display = "block";
     diseaseMenuBtn.style.display = "block";
     logMenuBtn.style.display = "block";
     userManageBtn.style.display = "block";
+    menuConfigBtn.style.display = "block";
   } else {
     limitMenuBtn.style.display = "none";
     videoMenuBtn.style.display = "none";
     diseaseMenuBtn.style.display = "none";
     logMenuBtn.style.display = "none";
     userManageBtn.style.display = "none";
+    menuConfigBtn.style.display = "none";
   }
+}
+
+// 서버(보물찾기 config)에서 메뉴 노출 설정 로드 후 메뉴 재렌더
+async function loadMenuVisibility() {
+  try {
+    const cfg = await treasureAPI('getConfig');
+    menuVisibilityConfig = (cfg && cfg.menuVisibility) ? cfg.menuVisibility : {};
+  } catch (e) {
+    if (menuVisibilityConfig === null) menuVisibilityConfig = {};
+  }
+  if (currentScreen === 'menu') updateMenuVisibility();
+}
+
+// 메뉴 노출 관리 화면 진입 시 최신 설정 로드
+async function initMenuConfigScreen() {
+  const container = document.getElementById('menuConfigList');
+  if (container) container.innerHTML = '<div class="hint">불러오는 중...</div>';
+  try {
+    const cfg = await treasureAPI('getConfig');
+    menuVisibilityConfig = (cfg && cfg.menuVisibility) ? cfg.menuVisibility : {};
+  } catch (e) {
+    if (menuVisibilityConfig === null) menuVisibilityConfig = {};
+  }
+  renderMenuConfigList();
+}
+
+function renderMenuConfigList() {
+  const container = document.getElementById('menuConfigList');
+  if (!container) return;
+  const vis = menuVisibilityConfig || {};
+  container.innerHTML = MENU_CONFIG_ITEMS.map(item => {
+    const checked = vis[item.key] !== false ? 'checked' : '';
+    return `
+      <label style="display:flex; align-items:center; justify-content:space-between;
+                    padding:12px 14px; border:1px solid var(--border); border-radius:10px;
+                    margin-bottom:8px; cursor:pointer; background:#fff;">
+        <span style="font-size:15px; font-weight:600;">${item.label}</span>
+        <input type="checkbox" id="menuCfg_${item.key}" ${checked}
+               style="width:auto; margin:0; transform:scale(1.4);">
+      </label>
+    `;
+  }).join('');
+}
+
+async function saveMenuVisibility() {
+  if (!isAdminUser) { alert('관리자만 접근 가능합니다.'); return; }
+  const menuVisibility = {};
+  MENU_CONFIG_ITEMS.forEach(item => {
+    const cb = document.getElementById('menuCfg_' + item.key);
+    menuVisibility[item.key] = cb ? cb.checked : true;
+  });
+  const saveBtn = document.getElementById('saveMenuConfigBtn');
+  saveBtn.textContent = '저장 중...';
+  saveBtn.disabled = true;
+  try {
+    await treasureAPI('setConfig', { config: { menuVisibility } });
+    menuVisibilityConfig = menuVisibility;
+    alert('메뉴 노출 설정이 저장되었습니다.');
+  } catch (e) {
+    alert('저장 실패. 다시 시도해주세요.');
+  } finally {
+    saveBtn.textContent = '설정 저장';
+    saveBtn.disabled = false;
+  }
+}
+
+async function showMenuConfigScreen() {
+  if (!isAdminUser) { alert('관리자만 접근 가능합니다.'); return; }
+  LogManager.logUserAction(currentUser, 'menu_click', '메뉴노출관리');
+  navigateToScreen('menuConfig');
 }
 function validateCurrentUserPassword() {
   if (!currentUser || isAdminUser) return true;
@@ -5450,7 +5560,10 @@ document.getElementById('couponBoxModal').addEventListener('click', function(e) 
   document.getElementById('limitMenuBtn').addEventListener('click', showLimitScreen);
   document.getElementById('videoMenuBtn').addEventListener('click', showVideoScreen);
   document.getElementById('logMenuBtn').addEventListener('click', showLogScreen);
-  document.getElementById('userManageBtn').addEventListener('click', showUserManageScreen);
+document.getElementById('userManageBtn').addEventListener('click', showUserManageScreen);
+  document.getElementById('menuConfigBtn').addEventListener('click', showMenuConfigScreen);
+  document.getElementById('saveMenuConfigBtn').addEventListener('click', saveMenuVisibility);
+  document.getElementById('menuConfigBackBtn').addEventListener('click', () => navigateToScreen('menu'));
   document.getElementById('logoutBtnHeader').addEventListener('click', logout);
 
  document.getElementById('guideSearchBtn').addEventListener('click', searchGuide);
