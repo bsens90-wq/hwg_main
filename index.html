@@ -2565,7 +2565,12 @@ case 'menu':
 }
 
 // 일반 사용자에게 노출 토글 가능한 메뉴 정의
-let menuVisibilityConfig = null;
+let menuVisibilityConfig = (function () {
+  try {
+    const cached = localStorage.getItem('hwg_menu_visibility');
+    return cached ? JSON.parse(cached) : null;
+  } catch (e) { return null; }
+})();
 
 const MENU_CONFIG_ITEMS = [
   { key: 'guide',      id: 'guideMenuBtn',      label: '통합 인수 가이드' },
@@ -2591,13 +2596,18 @@ function updateMenuVisibility() {
     const btn = document.getElementById(item.id);
     if (!btn) return;
     const enabledForUsers = vis[item.key] !== false; // 기본값: 노출
-    if (isAdminUser) {
+if (isAdminUser) {
       // 관리자는 항상 노출. 일반 사용자에게 숨긴 메뉴는 보라색(admin-only)으로 구분
       btn.className = enabledForUsers ? 'user-menu' : 'admin-only';
       btn.style.display = 'block';
     } else {
       btn.className = 'user-menu';
-      btn.style.display = enabledForUsers ? 'block' : 'none';
+      // 설정 로드 전(null)에는 토글 대상 메뉴를 숨겨 깜빡임 방지
+      if (menuVisibilityConfig === null) {
+        btn.style.display = 'none';
+      } else {
+        btn.style.display = enabledForUsers ? 'block' : 'none';
+      }
     }
   });
 
@@ -2631,6 +2641,7 @@ async function loadMenuVisibility() {
   try {
     const cfg = await treasureAPI('getConfig');
     menuVisibilityConfig = (cfg && cfg.menuVisibility) ? cfg.menuVisibility : {};
+    try { localStorage.setItem('hwg_menu_visibility', JSON.stringify(menuVisibilityConfig)); } catch (e) {}
   } catch (e) {
     if (menuVisibilityConfig === null) menuVisibilityConfig = {};
   }
@@ -2679,8 +2690,9 @@ async function saveMenuVisibility() {
   saveBtn.textContent = '저장 중...';
   saveBtn.disabled = true;
   try {
-    await treasureAPI('setConfig', { config: { menuVisibility } });
+await treasureAPI('setConfig', { config: { menuVisibility } });
     menuVisibilityConfig = menuVisibility;
+    try { localStorage.setItem('hwg_menu_visibility', JSON.stringify(menuVisibility)); } catch (e) {}
     alert('메뉴 노출 설정이 저장되었습니다.');
   } catch (e) {
     alert('저장 실패. 다시 시도해주세요.');
