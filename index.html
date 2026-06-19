@@ -249,7 +249,7 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     #silsonApp .sl-fsec ul{margin:0; padding-left:18px;}
     #silsonApp .sl-fsec li{font-size:13.5px; line-height:1.55; color:var(--sl-txt); margin:3px 0;}
     #silsonApp .sl-tbl{border:1px solid var(--sl-line); border-radius:10px; overflow:hidden;}
-    #silsonApp .sl-tr{display:grid; grid-template-columns:40px 1fr 1fr;}
+    #silsonApp .sl-tr{display:grid; grid-template-columns:60px 1fr 1fr;}
     #silsonApp .sl-tr+.sl-tr{border-top:1px solid var(--sl-line);}
     #silsonApp .sl-th{background:var(--sl-surf2); border-bottom:1px solid var(--sl-line);}
     #silsonApp .sl-c{padding:10px 9px; font-size:12.5px; line-height:1.5; border-left:1px solid var(--sl-line);}
@@ -280,7 +280,8 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     .silson-modal .sm-bar h3{font-size:17px; font-weight:700; margin:0;}
     .silson-modal .sm-x{width:36px; height:36px; border:none; background:#f1efea; border-radius:8px; font-size:17px; cursor:pointer; color:#333;}
     .silson-modal .sm-hint{font-size:11.5px; color:#999; margin:0 0 10px;}
-    .silson-modal .sm-cap{background:#fff; border:1px solid #e7e4df; border-radius:10px; padding:16px; overflow-x:auto;}
+    .silson-modal .sm-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px;}
+    .silson-modal .sm-cap{display:inline-block; min-width:100%; background:#fff; border:1px solid #e7e4df; border-radius:10px; padding:16px;}
     .silson-modal .sm-title{font-size:18px; font-weight:700; color:#ff7f00; margin-bottom:12px; text-align:center;}
     .silson-modal table{border-collapse:collapse; width:100%; min-width:1080px; font-size:12px;}
     .silson-modal th, .silson-modal td{border:1px solid #e0ddd6; padding:8px 10px; line-height:1.5; vertical-align:top; text-align:left;}
@@ -2925,7 +2926,7 @@ function goBackFromSilson() {
 /* ===== 실손 세대 비교 모듈 (데이터: 한권에 총정리 변경 History / 세대별 특징·한계 / 4·5세대 사례) ===== */
 const SilsonCompare = (function(){
   const GENS = {
-    "1": { name:"1세대", cg:"1세대", cy:"~'09.7", sub:"표준화 이전", period:"~2009.07",
+    "1": { name:"1세대", cg:"1세대", cy:"~'09", sub:"표준화 이전", period:"~2009.07",
       feat:["입원 시 자기부담금 없음","해외치료비 보장"],
       renew:["3년·5년 자동 갱신"],
       struct:["상해의료비","상해·질병 입/통원"],
@@ -2936,7 +2937,7 @@ const SilsonCompare = (function(){
       deduct:["5천/1만"],
       pros:["비급여 포함 거의 모든 의료비 전액 보장","입원·통원 100%, 자기부담 없음 — 가장 넓은 보장"],
       cons:["갱신 시 보험료 인상 상한이 없음","가입 기간이 길수록 월 보험료 부담이 급증"] },
-    "2a": { name:"2세대 1차", cg:"2세대", cy:"1차 '09.8~'12.12", sub:"표준화 실손", period:"2009.08~2012.12",
+    "2a": { name:"2세대 1차", cg:"2세대", cy:"1차 '09~'12", sub:"표준화 실손", period:"2009.08~2012.12",
       feat:["자기부담률 신설","손·생보 판매(표준약관 적용)","해외치료비 면책"],
       renew:["3년 자동 갱신"],
       struct:["상해/질병 입/통원","종합 입/통원"],
@@ -2947,7 +2948,7 @@ const SilsonCompare = (function(){
       deduct:["병원급별 공제(회/건당)","외래: 의원 1만 / 병원 1.5만 / 상급·종합전문 2만","처방조제 0.8만"],
       pros:["표준화 약관 도입으로 보장 구조 안정화","비급여 80% 보장 유지로 실질 보장성 높음"],
       cons:["해외치료비 면책으로 전환","의료비 증가에 따른 갱신 보험료 상승 시작"] },
-    "2b": { name:"2세대 2차", cg:"2세대", cy:"2차 '13.1~'17.3", sub:"표준화 실손", period:"2013.01~2017.03",
+    "2b": { name:"2세대 2차", cg:"2세대", cy:"2차 '13~'17", sub:"표준화 실손", period:"2013.01~2017.03",
       feat:["실손 단독상품 판매","자동갱신 → 재가입으로 변경"],
       renew:["1년 갱신","15년 만기 재가입"],
       struct:["상해/질병 입/통원"],
@@ -2958,7 +2959,7 @@ const SilsonCompare = (function(){
       deduct:["병원급별 공제(회/건당)","외래: 의원 1만 / 병원 1.5만 / 상급·종합전문 2만","처방조제 0.8만"],
       pros:["실손 단독상품으로 판매","비급여 80% 보장 유지로 실질 보장성 높음"],
       cons:["자동갱신 → 재가입(15년 만기)으로 변경","장기 유지 시 보험료 부담 누적"] },
-    "3": { name:"3세대", cg:"3세대", cy:"'17.4~'21.6", sub:"착한 실손", period:"2017.04~2021.06",
+    "3": { name:"3세대", cg:"3세대", cy:"'17~'21", sub:"착한 실손", period:"2017.04~2021.06",
       feat:["단독 실손만 가입 가능","3대 비급여를 특약으로 분리"],
       renew:["1년 갱신","15년 만기 재가입"],
       struct:["기본: 상해/질병 입/통원","특약(3대 비급여)"],
@@ -2969,7 +2970,7 @@ const SilsonCompare = (function(){
       deduct:["기본: 외래 1회당 병원급별 공제액·공제기준금액 중 큰 금액","처방조제: 1건당 8천원·공제기준 중 큰 금액","특약(3대): 입/통원 1회당 2만원·의료비 30% 중 큰 금액"],
       pros:["급여·비급여 보장 구조 최초 분리","도수치료·MRI 등 고빈도 비급여에 연간 한도 도입"],
       cons:["한도 소진 이후 자기부담 발생","이전 세대 대비 실질 보장 범위 축소 시작"] },
-    "4": { name:"4세대", cg:"4세대", cy:"'21.7~'26.4", sub:"-", period:"2021.07~2026.04",
+    "4": { name:"4세대", cg:"4세대", cy:"'21~'26", sub:"新실손", period:"2021.07~2026.04",
       feat:["기본: 상해/질병 입·통원 급여","특약: 상해/질병 입·통원 비급여","특약: 3대 비급여","보험료 차등제 적용(2024년 이후)"],
       renew:["1년 갱신","5년 만기 재가입"],
       struct:["기본(급여): 상해/질병 입/통원","특약(비급여): 상해/질병 입/통원","특약(3대 비급여)"],
@@ -2980,7 +2981,7 @@ const SilsonCompare = (function(){
       deduct:["기본: 1회당 의·병원 1만 / 종합·상급종합 2만·의료비 20% 중 큰 금액","특약(비급여): 1회당 3만·의료비 30% 중 큰 금액","특약(3대): 입/통원 1회당 3만·의료비 30% 중 큰 금액"],
       pros:["급여·비급여 특약 완전 분리","의료 이용 억제를 통한 손해율 관리 목적 할증제도 도입"],
       cons:["이용량이 많을수록 갱신 보험료 할증 심화","‘아파서 쓰면 더 오른다’는 역차별 구조 비판 지속"] },
-    "5": { name:"5세대", cg:"5세대", cy:"'26.5~", sub:"-", period:"2026.5~",
+    "5": { name:"5세대", cg:"5세대", cy:"'26~", sub:"현행 실손", period:"2026.5~",
       feat:["기본: 상해/질병 입·통원 급여","특약1: 상해/질병 중증 비급여","특약2: 상해/질병 비중증 비급여","건보 본인부담률 기준 적용"],
       renew:["1년 갱신","5년 만기 재가입"],
       struct:["기본(급여): 상해/질병 입/통원 급여","특약1: 상해/질병·3대 중증 비급여","특약2: 상해/질병·3대 비중증 비급여"],
@@ -3153,18 +3154,34 @@ const SilsonCompare = (function(){
     return '<thead>'+head+'</thead><tbody>'+body+'</tbody>';
   }
 
-  function closeHistModal(){
+  function removeHistModal(){
     const m=document.getElementById('silsonHistModal');
     if(m) m.remove();
+    window.removeEventListener('popstate', onHistPop);
+  }
+  function onHistPop(){ removeHistModal(); }
+  function dismissHistModal(){
+    if(history.state && history.state.silsonModal){ history.back(); }
+    else { removeHistModal(); }
   }
 
   function saveHist(){
     const cap=document.getElementById('slHistCap');
+    if(!cap) return;
     if(typeof html2canvas==='undefined'){
       alert('이미지 저장 모듈을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
       return;
     }
-    html2canvas(cap, {scale:2, backgroundColor:'#ffffff'}).then(function(canvas){
+    html2canvas(cap, {
+      scale:2,
+      backgroundColor:'#ffffff',
+      width:cap.scrollWidth,
+      height:cap.scrollHeight,
+      windowWidth:cap.scrollWidth,
+      windowHeight:cap.scrollHeight,
+      scrollX:0,
+      scrollY:0
+    }).then(function(canvas){
       const a=document.createElement('a');
       a.download='실손_변천사_한눈에보기.png';
       a.href=canvas.toDataURL('image/png');
@@ -3173,7 +3190,7 @@ const SilsonCompare = (function(){
   }
 
   function openHistModal(){
-    closeHistModal();
+    removeHistModal();
     const ov=document.createElement('div');
     ov.className='silson-modal';
     ov.id='silsonHistModal';
@@ -3181,17 +3198,21 @@ const SilsonCompare = (function(){
       +'<div class="sm-inner">'
         +'<div class="sm-bar"><h3>실손 변천사 한 눈에 보기</h3>'
           +'<button class="sm-x" id="slHistX" aria-label="닫기">✕</button></div>'
-        +'<p class="sm-hint">표가 넓어요. 좌우로 밀어 보거나 아래 버튼으로 이미지 저장하세요.</p>'
-        +'<div class="sm-cap" id="slHistCap">'
-          +'<div class="sm-title">실손의료보험 세대별 변천사</div>'
-          +'<table>'+histTableHtml()+'</table>'
-          +'<div class="sm-foot">1~4세대는 한화손해보험 사내 교육자료(2024) 기준, 5세대는 2026.1.15 금융위 입법예고안(감독규정) 기준입니다.</div>'
+        +'<p class="sm-hint">표가 넓어요. 좌우로 밀어 보거나 아래 버튼으로 전체를 이미지 저장하세요.</p>'
+        +'<div class="sm-scroll">'
+          +'<div class="sm-cap" id="slHistCap">'
+            +'<div class="sm-title">실손의료보험 세대별 변천사</div>'
+            +'<table>'+histTableHtml()+'</table>'
+            +'<div class="sm-foot">1~4세대는 한화손해보험 사내 교육자료(2024) 기준, 5세대는 2026.1.15 금융위 입법예고안(감독규정) 기준입니다.</div>'
+          +'</div>'
         +'</div>'
         +'<button class="sm-save" id="slHistSave">이미지로 저장</button>'
       +'</div>';
     document.body.appendChild(ov);
-    ov.addEventListener('click', function(ev){ if(ev.target===ov) closeHistModal(); });
-    document.getElementById('slHistX').addEventListener('click', closeHistModal);
+    history.pushState({ silsonModal:true }, '');
+    window.addEventListener('popstate', onHistPop);
+    ov.addEventListener('click', function(ev){ if(ev.target===ov) dismissHistModal(); });
+    document.getElementById('slHistX').addEventListener('click', dismissHistModal);
     document.getElementById('slHistSave').addEventListener('click', saveHist);
   }
 
