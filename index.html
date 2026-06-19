@@ -11,6 +11,8 @@
   <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJAAAACQCAYAAADnRuK4AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAARzSURBVHhe7Z0hTBRRFEYPMQaDwWAwGAwGg8FgMBgMBoPBYDAYDAaDwWAwGAwGg8FgMBgMBoPBYDAYDAaDwWAwGP4XzJm5M3Nm5szMmZkzM2dmzsycmTkzc2bmzMyZmTMzZ2bOzJyZOTNzZubMzJmZMzNnZs7MnJk5M3Nm5szMmZkz//zM/A+YM3Nm5szMmZkzM2dmzsycmTkzc2bmzMyZmTMzZ2bOzJyZOTNzZubMzJmZMzNnZs7MnJk5M3Nm5szMmZkz//zM/A==">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root{
       --hanwha:#ff7f00;
@@ -22,10 +24,11 @@
       --border:#e6e6e6;
     }
     *{box-sizing:border-box}
+    button, input, select, textarea{font-family:inherit;}
     body{
       margin:0;
       padding-top: 70px;
-      font-family: Arial, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      font-family: 'Pretendard', 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Noto Sans KR", sans-serif;
       background:var(--bg);
       color:var(--text);
     }
@@ -211,52 +214,81 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     /* ===== 실손 세대 비교 모듈 (scope: #silsonApp) ===== */
     #silsonApp{
       --hw:var(--hanwha); --hw-dk:var(--hanwha-dark); --hw-bg:#fff3e8;
-      --sl-txt:#222; --sl-txt2:#6b6b6b; --sl-txt3:#9a9a9a;
-      --sl-line:#e7e4df; --sl-line2:#d8d4ce; --sl-surf:#fff; --sl-surf2:#f7f5f2;
-      color:var(--sl-txt);
+      --sl-txt:#222; --sl-txt2:#5f5f5f; --sl-txt3:#9a9a9a;
+      --sl-line:#e7e4df; --sl-line2:#d4d0c9; --sl-surf:#fff; --sl-surf2:#f6f4f1;
+      color:var(--sl-txt); line-height:1.5;
     }
     #silsonApp button{width:auto; margin:0; font-family:inherit;}
-    #silsonApp .sl-tabs{display:flex; gap:6px; margin-bottom:14px;}
-    #silsonApp .sl-tab{flex:1; height:38px; border:1px solid var(--sl-line2); background:var(--sl-surf); border-radius:9px; font-size:13px; font-weight:600; color:var(--sl-txt2); cursor:pointer;}
+    #silsonApp .sl-tabs{display:flex; gap:6px; margin-bottom:16px;}
+    #silsonApp .sl-tab{flex:1; height:44px; border:1px solid var(--sl-line2); background:var(--sl-surf); border-radius:10px; font-size:15px; font-weight:600; color:var(--sl-txt2); cursor:pointer;}
     #silsonApp .sl-tab.on{background:var(--hw); border-color:var(--hw); color:#fff;}
-    #silsonApp .sl-pick-label{font-size:12px; color:var(--sl-txt2); margin:0 0 6px; font-weight:600;}
-    #silsonApp .sl-chiprow{display:flex; gap:5px; margin-bottom:10px;}
-    #silsonApp .sl-chip{flex:1; height:34px; border:1px solid var(--sl-line2); background:var(--sl-surf); border-radius:8px; font-size:13px; font-weight:600; color:var(--sl-txt2); cursor:pointer;}
-    #silsonApp .sl-chip.onA{background:var(--sl-txt); border-color:var(--sl-txt); color:#fff;}
-    #silsonApp .sl-chip.onB{background:var(--hw); border-color:var(--hw); color:#fff;}
-    #silsonApp .sl-cards{display:grid; grid-template-columns:1fr 22px 1fr; gap:5px; align-items:stretch; margin:12px 0;}
-    #silsonApp .sl-card{background:var(--sl-surf); border:1px solid var(--sl-line); border-radius:9px; padding:10px;}
-    #silsonApp .sl-card .gn{font-size:14px; font-weight:700;}
-    #silsonApp .sl-card .gs{font-size:11px; color:var(--sl-txt2); margin-top:2px; line-height:1.4;}
-    #silsonApp .sl-arrow{display:flex; align-items:center; justify-content:center; color:var(--hw); font-size:16px; font-weight:700;}
-    #silsonApp .sl-ins{background:var(--hw-bg); border-left:3px solid var(--hw); border-radius:0 8px 8px 0; padding:10px 12px; margin-bottom:12px;}
-    #silsonApp .sl-ins .t{font-size:12px; font-weight:700; color:var(--hw-dk); margin-bottom:5px;}
-    #silsonApp .sl-ins .d{font-size:12px; color:var(--sl-txt2); line-height:1.6;}
-    #silsonApp .sl-tbl{border:1px solid var(--sl-line); border-radius:9px; overflow:hidden;}
-    #silsonApp .sl-tr{display:grid; grid-template-columns:70px 1fr 1fr;}
+    #silsonApp .sl-pick-label{font-size:13.5px; color:var(--sl-txt2); margin:0 0 7px; font-weight:600;}
+    #silsonApp .sl-chiprow{display:flex; gap:6px; margin-bottom:12px;}
+    #silsonApp .sl-chip{flex:1; min-height:54px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:6px 2px; border:1px solid var(--sl-line2); background:var(--sl-surf); border-radius:10px; cursor:pointer;}
+    #silsonApp .sl-chip .cg{font-size:15px; font-weight:700; color:var(--sl-txt); line-height:1.1;}
+    #silsonApp .sl-chip .cy{font-size:11px; font-weight:500; color:var(--sl-txt2); line-height:1.1;}
+    #silsonApp .sl-chip.onA{background:var(--sl-txt); border-color:var(--sl-txt);}
+    #silsonApp .sl-chip.onA .cg, #silsonApp .sl-chip.onA .cy{color:#fff;}
+    #silsonApp .sl-chip.onB{background:var(--hw); border-color:var(--hw);}
+    #silsonApp .sl-chip.onB .cg, #silsonApp .sl-chip.onB .cy{color:#fff;}
+    #silsonApp .sl-chip.dis{opacity:.32; cursor:not-allowed;}
+    #silsonApp .sl-cards{display:grid; grid-template-columns:1fr 26px 1fr; gap:6px; align-items:stretch; margin:14px 0;}
+    #silsonApp .sl-card{background:var(--sl-surf); border:1px solid var(--sl-line); border-radius:10px; padding:12px;}
+    #silsonApp .sl-card .gn{font-size:17px; font-weight:700;}
+    #silsonApp .sl-card .gs{font-size:12.5px; color:var(--sl-txt2); margin-top:3px; line-height:1.4;}
+    #silsonApp .sl-arrow{display:flex; align-items:center; justify-content:center; color:var(--hw); font-size:18px; font-weight:700;}
+    #silsonApp .sl-histbtn{width:100%; height:46px; margin:0 0 14px; border:1.5px solid var(--hw); background:var(--hw-bg); color:var(--hw-dk); border-radius:10px; font-size:14.5px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;}
+    #silsonApp .sl-histbtn:active{transform:scale(.99);}
+    #silsonApp .sl-feat{display:grid; gap:10px; margin-bottom:16px;}
+    #silsonApp .sl-fcard{background:var(--sl-surf); border:1px solid var(--sl-line); border-radius:11px; padding:13px 14px;}
+    #silsonApp .sl-fcard .fh{font-size:15px; font-weight:700; margin-bottom:9px; padding-bottom:8px; border-bottom:1px solid var(--sl-line);}
+    #silsonApp .sl-fsec+.sl-fsec{margin-top:10px;}
+    #silsonApp .sl-fsec .fl{display:inline-block; font-size:12px; font-weight:700; padding:2px 9px; border-radius:6px; margin-bottom:6px;}
+    #silsonApp .sl-fsec .fl.pro{background:#eaf4ec; color:#1f7a3d;}
+    #silsonApp .sl-fsec .fl.con{background:var(--hw-bg); color:var(--hw-dk);}
+    #silsonApp .sl-fsec ul{margin:0; padding-left:18px;}
+    #silsonApp .sl-fsec li{font-size:13.5px; line-height:1.55; color:var(--sl-txt); margin:3px 0;}
+    #silsonApp .sl-tbl{border:1px solid var(--sl-line); border-radius:10px; overflow:hidden;}
+    #silsonApp .sl-tr{display:grid; grid-template-columns:78px 1fr 1fr;}
     #silsonApp .sl-tr+.sl-tr{border-top:1px solid var(--sl-line);}
     #silsonApp .sl-th{background:var(--sl-surf2); border-bottom:1px solid var(--sl-line);}
-    #silsonApp .sl-c{padding:9px 8px; font-size:11.5px; line-height:1.45; border-left:1px solid var(--sl-line);}
-    #silsonApp .sl-c.k{background:var(--sl-surf2); border-left:none; color:var(--sl-txt2); font-weight:600; display:flex; align-items:center; font-size:11px;}
-    #silsonApp .sl-th .sl-c{font-weight:700; font-size:12px; padding:8px;}
+    #silsonApp .sl-c{padding:10px 9px; font-size:13px; line-height:1.45; border-left:1px solid var(--sl-line);}
+    #silsonApp .sl-c.k{background:var(--sl-surf2); border-left:none; color:var(--sl-txt2); font-weight:600; display:flex; align-items:center; font-size:12.5px;}
+    #silsonApp .sl-th .sl-c{font-weight:700; font-size:13.5px; padding:9px;}
     #silsonApp .sl-th .a{color:var(--sl-txt);}
     #silsonApp .sl-th .b{color:var(--hw);}
     #silsonApp .sl-c.diff{border-left:2px solid var(--hw); font-weight:600;}
-    #silsonApp .sl-case{background:var(--sl-surf); border:1px solid var(--sl-line); border-radius:11px; padding:13px 14px; margin-bottom:12px;}
-    #silsonApp .sl-case .cap{display:inline-block; background:var(--hw); color:#fff; font-size:11px; font-weight:700; padding:2px 9px; border-radius:6px; margin-bottom:8px;}
-    #silsonApp .sl-case h3{font-size:14px; font-weight:700; margin:0 0 3px; line-height:1.35;}
-    #silsonApp .sl-case .cond{font-size:11px; color:var(--sl-txt2); margin:0 0 11px; line-height:1.5;}
-    #silsonApp .sl-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
-    #silsonApp .sl-side{border:1px solid var(--sl-line); border-radius:9px; padding:10px;}
+    #silsonApp .sl-case{background:var(--sl-surf); border:1px solid var(--sl-line); border-radius:12px; padding:14px 15px; margin-bottom:13px;}
+    #silsonApp .sl-case .cap{display:inline-block; background:var(--hw); color:#fff; font-size:12px; font-weight:700; padding:3px 10px; border-radius:7px; margin-bottom:9px;}
+    #silsonApp .sl-case h3{font-size:16.5px; font-weight:700; margin:0 0 4px; line-height:1.35;}
+    #silsonApp .sl-case .cond{font-size:12.5px; color:var(--sl-txt2); margin:0 0 12px; line-height:1.5;}
+    #silsonApp .sl-grid{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
+    #silsonApp .sl-side{border:1px solid var(--sl-line); border-radius:10px; padding:11px;}
     #silsonApp .sl-side.g5{border-color:var(--hw); background:var(--hw-bg);}
-    #silsonApp .sl-side .lab{font-size:11px; font-weight:700; margin-bottom:7px;}
+    #silsonApp .sl-side .lab{font-size:12.5px; font-weight:700; margin-bottom:8px;}
     #silsonApp .sl-side.g4 .lab{color:var(--sl-txt2);}
     #silsonApp .sl-side.g5 .lab{color:var(--hw-dk);}
-    #silsonApp .sl-kv{display:flex; justify-content:space-between; gap:6px; font-size:11.5px; padding:3px 0;}
+    #silsonApp .sl-kv{display:flex; justify-content:space-between; gap:6px; font-size:13px; padding:4px 0;}
     #silsonApp .sl-kv .vk{color:var(--sl-txt2);}
     #silsonApp .sl-kv .vv{font-weight:600; text-align:right;}
-    #silsonApp .sl-delta{margin-top:10px; font-size:12px; font-weight:700; color:var(--hw-dk); text-align:center; background:var(--sl-surf2); border-radius:7px; padding:7px;}
-    #silsonApp .sl-note{font-size:10px; color:var(--sl-txt3); line-height:1.5; margin-top:14px;}
+    #silsonApp .sl-delta{margin-top:11px; font-size:13.5px; font-weight:700; color:var(--hw-dk); text-align:center; background:var(--sl-surf2); border-radius:8px; padding:9px;}
+    #silsonApp .sl-note{font-size:11.5px; color:var(--sl-txt3); line-height:1.55; margin-top:16px;}
+    /* 변천사 모달 (body 직속, #silsonApp 스코프 밖) */
+    .silson-modal{position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.5); display:flex; align-items:flex-start; justify-content:center; padding:16px; overflow-y:auto;}
+    .silson-modal .sm-inner{background:#fff; border-radius:14px; width:100%; max-width:920px; margin:auto; padding:16px;}
+    .silson-modal .sm-bar{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+    .silson-modal .sm-bar h3{font-size:17px; font-weight:700; margin:0;}
+    .silson-modal .sm-x{width:36px; height:36px; border:none; background:#f1efea; border-radius:8px; font-size:17px; cursor:pointer; color:#333;}
+    .silson-modal .sm-cap{background:#fff; border:1px solid #e7e4df; border-radius:10px; padding:16px; overflow-x:auto;}
+    .silson-modal .sm-title{font-size:18px; font-weight:700; color:#ff7f00; margin-bottom:12px; text-align:center;}
+    .silson-modal table{border-collapse:collapse; width:100%; min-width:760px; font-size:13px;}
+    .silson-modal th, .silson-modal td{border:1px solid #e0ddd6; padding:9px 10px; text-align:center; line-height:1.4;}
+    .silson-modal thead th{background:#ff7f00; color:#fff; font-weight:700; font-size:13.5px;}
+    .silson-modal tbody th{background:#fff7ef; color:#c25e00; font-weight:700; white-space:nowrap;}
+    .silson-modal td{color:#333;}
+    .silson-modal .sm-foot{font-size:11.5px; color:#888; margin-top:10px; line-height:1.5;}
+    .silson-modal .sm-save{width:100%; height:48px; margin-top:14px; border:none; background:#ff7f00; color:#fff; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer;}
+    .silson-modal .sm-save:active{background:#e67100;}
     .container-wide{max-width:1200px}
     .results{margin-top:1rem}
     .result-card{
@@ -2885,30 +2917,35 @@ function goBackFromSilson() {
   navigateToScreen('menu');
 }
 
-/* ===== 실손 세대 비교 모듈 (데이터: 2026.1.15 금융위 입법예고안 기준) ===== */
+/* ===== 실손 세대 비교 모듈 (데이터: 실손 변천사 / 세대별 특징·구조적 한계 / 4·5세대 보장 비교) ===== */
 const SilsonCompare = (function(){
   const GENS = {
-    "1": { name:"1세대", sub:"구(舊)실손 · ~2009.07",
+    "1": { name:"1세대", sub:"구(舊)실손", year:"~'09",
       v:{ period:"2003~2008", bg:"100%", bn:"100%",
-          copay:"입원 없음 / 통원 없음~5천원", limit:"5천만원", renew:"3년·5년",
-          feat:"비급여 포함 거의 전액 보장", lim:"갱신 보험료 인상 상한 없음" }},
-    "2": { name:"2세대", sub:"표준화실손",
+          copay:"입원 없음 / 통원 없음~5천원", limit:"5천만원", renew:"3년·5년" },
+      pros:["비급여 포함 거의 모든 의료비 전액 보장","입원·통원 100%, 자기부담 없음 — 가장 넓은 보장"],
+      cons:["갱신 시 보험료 인상 상한이 없음","가입 기간이 길수록 월 보험료 부담이 급증"] },
+    "2": { name:"2세대", sub:"표준화실손", year:"'09~'17",
       v:{ period:"2009~2017.03", bg:"90%", bn:"80%",
-          copay:"입원 10% / 통원 1~2만원 공제", limit:"5천만원", renew:"3년·1년",
-          feat:"표준화로 보장구조 안정화", lim:"갱신 보험료 상승 지속" }},
-    "3": { name:"3세대", sub:"착한실손",
+          copay:"입원 10% / 통원 1~2만원 공제", limit:"5천만원", renew:"3년·1년" },
+      pros:["표준화 도입으로 보장 구조 안정화","비급여 80% 보장 유지로 실질 보장성 높음"],
+      cons:["의료비 증가에 따른 갱신 보험료 상승 지속","장기 유지 시 1세대와 유사한 보험료 부담 누적"] },
+    "3": { name:"3세대", sub:"착한실손", year:"'17~'21",
       v:{ period:"2017.04~2021.06", bg:"90%", bn:"비급여 80% / 3대비급여 70%",
-          copay:"급여 10% / 비급여 20% / 3대 30%", limit:"5천만원", renew:"1년",
-          feat:"급여·비급여 보장 최초 분리", lim:"한도 소진 후 자기부담 발생" }},
-    "4": { name:"4세대", sub:"신(新)실손 · 현행",
+          copay:"급여 10% / 비급여 20% / 3대 30%", limit:"5천만원", renew:"1년" },
+      pros:["급여·비급여 보장 구조 최초 분리","도수치료·MRI 등 고빈도 비급여에 연간 한도 도입"],
+      cons:["한도 소진 이후 자기부담 발생","이전 세대 대비 실질 보장 범위 축소 시작"] },
+    "4": { name:"4세대", sub:"신(新)실손", year:"'21~'26",
       v:{ period:"2021.07~2026.03", bg:"80%", bn:"70% (비급여 할인·할증)",
-          copay:"급여 20% / 비급여 30%", limit:"급여 5천만 / 비급여 5천만", renew:"1년",
-          feat:"급여·비급여 특약 완전 분리", lim:"이용량 많을수록 갱신 할증" }},
-    "5": { name:"5세대", sub:"입법예고안 · 2026.04~",
-      v:{ period:"2026.04~ (시행예정)", bg:"입원 80% / 통원 건보 연동",
+          copay:"급여 20% / 비급여 30%", limit:"급여 5천만 / 비급여 5천만", renew:"1년" },
+      pros:["급여·비급여 특약 완전 분리","의료 이용 억제를 통한 손해율 관리 목적 할증제도 도입"],
+      cons:["이용량이 많을수록 갱신 보험료 할증 심화","‘아파서 쓰면 더 오른다’는 역차별 구조 비판 지속"] },
+    "5": { name:"5세대", sub:"현행 실손", year:"'26~",
+      v:{ period:"2026.04~", bg:"입원 80% / 통원 건보 연동",
           bn:"중증 70% / 비중증 50%", copay:"급여 20% / 중증 30% / 비중증 50%",
-          limit:"중증 5천만 / 비중증 1천만 (입원 회당 300만)", renew:"1년",
-          feat:"비급여 중증·비중증 분리", lim:"실질 보장 최약 · 보험료 약 30%↓" }}
+          limit:"중증 5천만 / 비중증 1천만 (입원 회당 300만)", renew:"1년" },
+      pros:["비급여를 중증·비중증으로 분리 (중증: 산정특례 대상)","급여 통원 본인부담률을 건강보험과 연동"],
+      cons:["비중증 자기부담 50%, 연 보상한도 1,000만원","입원 1회당 300만원 한도 신설 — 다회 입원 시 한도 소진","보험료는 낮아지나 실질 보장 기능은 역대 가장 약한 구조"] }
   };
   const ITEMS = [
     {k:"period", label:"가입 시기"},
@@ -2916,9 +2953,11 @@ const SilsonCompare = (function(){
     {k:"bn",     label:"비급여 보장"},
     {k:"copay",  label:"자기부담금"},
     {k:"limit",  label:"연간 보상한도"},
-    {k:"renew",  label:"갱신 주기"},
-    {k:"feat",   label:"보장 구조 특징"},
-    {k:"lim",    label:"가입자 한계"}
+    {k:"renew",  label:"갱신 주기"}
+  ];
+  const HIST_COLS = [
+    ["period","가입 시기"], ["bg","급여 보장"], ["bn","비급여 보장"],
+    ["copay","자기부담금"], ["limit","연간 보상한도"], ["renew","갱신 주기"]
   ];
   const CASES = [
     { cap:"사례 1", title:"자궁근종 다빈치 로봇수술",
@@ -2939,50 +2978,72 @@ const SilsonCompare = (function(){
     { cap:"사례 4", title:"미등재 신의료기술 치료",
       cond:"난치성 관절질환 줄기세포 치료 · 비급여 900만원",
       g4:[["보상 여부","치료목적 증빙 시 보상"],["지급 보험금","약 630만원 (70%)"]],
-      g5:[["보상 여부","면책 예정 (보상 불가)"],["지급 보험금","0원"]],
+      g5:[["보상 여부","면책 (보상 불가)"],["지급 보험금","0원"]],
       delta:"5세대 전환 시 보상 약 630만원 → 0원" }
   ];
 
   let state = { tab:"compare", A:"4", B:"5" };
   let rootEl = null;
 
+  function chipHtml(g, side){
+    const G=GENS[g], A=Number(state.A), n=Number(g);
+    let dis=false, on='';
+    if(side==='A'){ if(n>=5) dis=true; if(g===state.A) on=' onA'; }
+    else { if(n<=A) dis=true; if(g===state.B) on=' onB'; }
+    return '<button class="sl-chip'+on+(dis?' dis':'')+'" data-side="'+side+'" data-g="'+g+'">'
+      +'<span class="cg">'+G.name+'</span><span class="cy">'+G.year+'</span></button>';
+  }
+
+  function pick(side, g){
+    if(side==='A'){
+      state.A=g;
+      if(Number(state.B)<=Number(g)) state.B=String(Number(g)+1);
+    } else {
+      state.B=g;
+    }
+    render();
+  }
+
+  function featCard(g){
+    const G=GENS[g];
+    const pros=G.pros.map(x=>'<li>'+x+'</li>').join('');
+    const cons=G.cons.map(x=>'<li>'+x+'</li>').join('');
+    return '<div class="sl-fcard">'
+      +'<div class="fh">'+G.name+' · '+G.sub+'</div>'
+      +'<div class="sl-fsec"><span class="fl pro">보장 구조 특징</span><ul>'+pros+'</ul></div>'
+      +'<div class="sl-fsec"><span class="fl con">구조적 한계</span><ul>'+cons+'</ul></div>'
+      +'</div>';
+  }
+
   function viewCompare(){
-    const gens = ["1","2","3","4","5"];
-    const chipsA = gens.map(g => '<button class="sl-chip'+(state.A===g?' onA':'')+'" data-side="A" data-g="'+g+'">'+g+'</button>').join("");
-    const chipsB = gens.map(g => '<button class="sl-chip'+(state.B===g?' onB':'')+'" data-side="B" data-g="'+g+'">'+g+'</button>').join("");
-    const A=GENS[state.A], B=GENS[state.B], same=(state.A===state.B);
-    const changed = ITEMS.filter(it => A.v[it.k]!==B.v[it.k]);
-    const ins = same
-      ? '<div class="d">같은 세대입니다. 다른 세대를 선택해 비교하세요.</div>'
-      : '<div class="t">'+A.name+' → '+B.name+' 전환 시 달라지는 항목</div>'
-        +'<div class="d">'+changed.map(c=>c.label).join(" · ")+'</div>';
-    const rows = ITEMS.map(it => {
+    const gens=["1","2","3","4","5"];
+    const chipsA=gens.map(g=>chipHtml(g,'A')).join('');
+    const chipsB=gens.map(g=>chipHtml(g,'B')).join('');
+    const A=GENS[state.A], B=GENS[state.B];
+    const rows=ITEMS.map(it=>{
       const va=A.v[it.k], vb=B.v[it.k], diff=(va!==vb);
-      return '<div class="sl-tr">'
-        +'<div class="sl-c k">'+it.label+'</div>'
+      return '<div class="sl-tr"><div class="sl-c k">'+it.label+'</div>'
         +'<div class="sl-c">'+va+'</div>'
-        +'<div class="sl-c'+(diff?' diff':'')+'">'+vb+'</div>'
-        +'</div>';
-    }).join("");
+        +'<div class="sl-c'+(diff?' diff':'')+'">'+vb+'</div></div>';
+    }).join('');
     return ''
       +'<p class="sl-pick-label">현재 가입 세대</p>'
       +'<div class="sl-chiprow">'+chipsA+'</div>'
       +'<p class="sl-pick-label">전환·비교 세대</p>'
       +'<div class="sl-chiprow">'+chipsB+'</div>'
       +'<div class="sl-cards">'
-        +'<div class="sl-card"><div class="gn">'+A.name+'</div><div class="gs">'+A.sub+'</div></div>'
+        +'<div class="sl-card"><div class="gn">'+A.name+'</div><div class="gs">'+A.sub+' · '+A.v.period+'</div></div>'
         +'<div class="sl-arrow">→</div>'
-        +'<div class="sl-card"><div class="gn">'+B.name+'</div><div class="gs">'+B.sub+'</div></div>'
+        +'<div class="sl-card"><div class="gn">'+B.name+'</div><div class="gs">'+B.sub+' · '+B.v.period+'</div></div>'
       +'</div>'
-      +'<div class="sl-ins">'+ins+'</div>'
+      +'<button class="sl-histbtn" id="slHistBtn">실손 변천사 한 눈에 보기</button>'
+      +'<div class="sl-feat">'+featCard(state.A)+featCard(state.B)+'</div>'
       +'<div class="sl-tbl">'
-        +'<div class="sl-tr sl-th">'
-          +'<div class="sl-c k">항목</div>'
-          +'<div class="sl-c a">'+A.name+'</div>'
-          +'<div class="sl-c b">'+B.name+'</div>'
-        +'</div>'+rows
+        +'<div class="sl-tr sl-th"><div class="sl-c k">항목</div>'
+          +'<div class="sl-c a">'+A.name+'</div><div class="sl-c b">'+B.name+'</div></div>'
+        +rows
       +'</div>'
-      +'<p class="sl-note">1~3세대 수치는 세대별 특징 설명을 위한 대표 예시이며, 5세대는 2026.1.15 금융위 입법예고안 기준으로 시행 전 변경될 수 있습니다.</p>';
+      +'<p class="sl-note">1~3세대 수치는 세대별 특징 설명을 위한 대표 예시이며, 5세대는 2026.1.15 금융위 입법예고안(감독규정) 기준입니다.</p>';
   }
 
   function viewCases(){
@@ -2994,14 +3055,14 @@ const SilsonCompare = (function(){
         +'<h3>'+c.title+'</h3>'
         +'<p class="cond">'+c.cond+'</p>'
         +'<div class="sl-grid">'
-          +'<div class="sl-side g4"><div class="lab">4세대 (현행)</div>'+g4+'</div>'
-          +'<div class="sl-side g5"><div class="lab">5세대 (예정)</div>'+g5+'</div>'
+          +'<div class="sl-side g4"><div class="lab">4세대</div>'+g4+'</div>'
+          +'<div class="sl-side g5"><div class="lab">5세대 (현행)</div>'+g5+'</div>'
         +'</div>'
         +'<div class="sl-delta">'+c.delta+'</div>'
         +'</div>';
     }).join("");
     return cards
-      +'<p class="sl-note">보장 구조의 이해를 돕기 위한 가정 예시입니다. 급여 본인부담률·면책 범위 등 세부 내용은 시행세칙 확정 과정에서 변경될 수 있습니다.</p>';
+      +'<p class="sl-note">보장 구조의 이해를 돕기 위한 가정 예시입니다. 실제 보상은 약관·산정특례 적용 여부에 따라 달라질 수 있습니다.</p>';
   }
 
   function render(){
@@ -3014,11 +3075,62 @@ const SilsonCompare = (function(){
       +'<div class="sl-body">'+(state.tab==="compare"?viewCompare():viewCases())+'</div>';
   }
 
+  function histTableHtml(){
+    const head='<tr><th>세대</th>'+HIST_COLS.map(c=>'<th>'+c[1]+'</th>').join('')+'</tr>';
+    const body=["1","2","3","4","5"].map(g=>{
+      const G=GENS[g];
+      return '<tr><th>'+G.name+'</th>'+HIST_COLS.map(c=>'<td>'+G.v[c[0]]+'</td>').join('')+'</tr>';
+    }).join('');
+    return '<thead>'+head+'</thead><tbody>'+body+'</tbody>';
+  }
+
+  function closeHistModal(){
+    const m=document.getElementById('silsonHistModal');
+    if(m) m.remove();
+  }
+
+  function saveHist(){
+    const cap=document.getElementById('slHistCap');
+    if(typeof html2canvas==='undefined'){
+      alert('이미지 저장 모듈을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+    html2canvas(cap, {scale:2, backgroundColor:'#ffffff'}).then(function(canvas){
+      const a=document.createElement('a');
+      a.download='실손_변천사_한눈에보기.png';
+      a.href=canvas.toDataURL('image/png');
+      a.click();
+    }).catch(function(){ alert('이미지 저장에 실패했습니다.'); });
+  }
+
+  function openHistModal(){
+    closeHistModal();
+    const ov=document.createElement('div');
+    ov.className='silson-modal';
+    ov.id='silsonHistModal';
+    ov.innerHTML=''
+      +'<div class="sm-inner">'
+        +'<div class="sm-bar"><h3>실손 변천사 한 눈에 보기</h3>'
+          +'<button class="sm-x" id="slHistX" aria-label="닫기">✕</button></div>'
+        +'<div class="sm-cap" id="slHistCap">'
+          +'<div class="sm-title">실손의료보험 세대별 변천사</div>'
+          +'<table>'+histTableHtml()+'</table>'
+          +'<div class="sm-foot">1~3세대 수치는 세대별 특징 설명을 위한 대표 예시이며, 5세대는 2026.1.15 금융위 입법예고안(감독규정) 기준입니다.</div>'
+        +'</div>'
+        +'<button class="sm-save" id="slHistSave">이미지로 저장</button>'
+      +'</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(ev){ if(ev.target===ov) closeHistModal(); });
+    document.getElementById('slHistX').addEventListener('click', closeHistModal);
+    document.getElementById('slHistSave').addEventListener('click', saveHist);
+  }
+
   function onClick(e){
-    const tab = e.target.closest('.sl-tab');
-    if(tab){ state.tab = tab.dataset.tab; render(); return; }
-    const chip = e.target.closest('.sl-chip');
-    if(chip){ state[chip.dataset.side] = chip.dataset.g; render(); return; }
+    const tab=e.target.closest('.sl-tab');
+    if(tab){ state.tab=tab.dataset.tab; render(); return; }
+    if(e.target.closest('#slHistBtn')){ openHistModal(); return; }
+    const chip=e.target.closest('.sl-chip');
+    if(chip && !chip.classList.contains('dis')){ pick(chip.dataset.side, chip.dataset.g); return; }
   }
 
   function mount(el){
