@@ -223,19 +223,19 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     #silsonApp .sl-tab{flex:1; height:44px; border:1px solid var(--sl-line2); background:var(--sl-surf); border-radius:10px; font-size:15px; font-weight:600; color:var(--sl-txt2); cursor:pointer;}
     #silsonApp .sl-tab.on{background:var(--hw); border-color:var(--hw); color:#fff;}
     #silsonApp .sl-pick-label{font-size:13.5px; color:var(--sl-txt2); margin:0 0 7px; font-weight:600;}
-    #silsonApp .sl-chiprow{display:flex; gap:6px; margin-bottom:12px;}
-    #silsonApp .sl-chip{flex:1; min-height:54px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:6px 2px; border:1px solid var(--sl-line2); background:var(--sl-surf); border-radius:10px; cursor:pointer;}
+    #silsonApp .sl-chiprow{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+    #silsonApp .sl-chip{flex:1 1 28%; min-width:96px; min-height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:6px 4px; border:1px solid var(--sl-line2); background:var(--sl-surf); border-radius:10px; cursor:pointer;}
     #silsonApp .sl-chip .cg{font-size:15px; font-weight:700; color:var(--sl-txt); line-height:1.1;}
-    #silsonApp .sl-chip .cy{font-size:11px; font-weight:500; color:var(--sl-txt2); line-height:1.1;}
+    #silsonApp .sl-chip .cy{font-size:11px; font-weight:500; color:var(--sl-txt2); line-height:1.15; text-align:center;}
     #silsonApp .sl-chip.onA{background:var(--sl-txt); border-color:var(--sl-txt);}
     #silsonApp .sl-chip.onA .cg, #silsonApp .sl-chip.onA .cy{color:#fff;}
     #silsonApp .sl-chip.onB{background:var(--hw); border-color:var(--hw);}
     #silsonApp .sl-chip.onB .cg, #silsonApp .sl-chip.onB .cy{color:#fff;}
-    #silsonApp .sl-chip.dis{opacity:.32; cursor:not-allowed;}
+    #silsonApp .sl-chip.dis{opacity:.3; cursor:not-allowed;}
     #silsonApp .sl-cards{display:grid; grid-template-columns:1fr 26px 1fr; gap:6px; align-items:stretch; margin:14px 0;}
     #silsonApp .sl-card{background:var(--sl-surf); border:1px solid var(--sl-line); border-radius:10px; padding:12px;}
-    #silsonApp .sl-card .gn{font-size:17px; font-weight:700;}
-    #silsonApp .sl-card .gs{font-size:12.5px; color:var(--sl-txt2); margin-top:3px; line-height:1.4;}
+    #silsonApp .sl-card .gn{font-size:16.5px; font-weight:700;}
+    #silsonApp .sl-card .gs{font-size:12px; color:var(--sl-txt2); margin-top:3px; line-height:1.4;}
     #silsonApp .sl-arrow{display:flex; align-items:center; justify-content:center; color:var(--hw); font-size:18px; font-weight:700;}
     #silsonApp .sl-histbtn{width:100%; height:46px; margin:0 0 14px; border:1.5px solid var(--hw); background:var(--hw-bg); color:var(--hw-dk); border-radius:10px; font-size:14.5px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;}
     #silsonApp .sl-histbtn:active{transform:scale(.99);}
@@ -249,15 +249,15 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     #silsonApp .sl-fsec ul{margin:0; padding-left:18px;}
     #silsonApp .sl-fsec li{font-size:13.5px; line-height:1.55; color:var(--sl-txt); margin:3px 0;}
     #silsonApp .sl-tbl{border:1px solid var(--sl-line); border-radius:10px; overflow:hidden;}
-    #silsonApp .sl-tr{display:grid; grid-template-columns:78px 1fr 1fr;}
+    #silsonApp .sl-tr{display:grid; grid-template-columns:96px 1fr 1fr;}
     #silsonApp .sl-tr+.sl-tr{border-top:1px solid var(--sl-line);}
     #silsonApp .sl-th{background:var(--sl-surf2); border-bottom:1px solid var(--sl-line);}
-    #silsonApp .sl-c{padding:10px 9px; font-size:13px; line-height:1.45; border-left:1px solid var(--sl-line);}
-    #silsonApp .sl-c.k{background:var(--sl-surf2); border-left:none; color:var(--sl-txt2); font-weight:600; display:flex; align-items:center; font-size:12.5px;}
+    #silsonApp .sl-c{padding:10px 9px; font-size:12.5px; line-height:1.5; border-left:1px solid var(--sl-line);}
+    #silsonApp .sl-c.k{background:var(--sl-surf2); border-left:none; color:var(--sl-txt2); font-weight:600; display:flex; align-items:center; font-size:12px;}
     #silsonApp .sl-th .sl-c{font-weight:700; font-size:13.5px; padding:9px;}
     #silsonApp .sl-th .a{color:var(--sl-txt);}
     #silsonApp .sl-th .b{color:var(--hw);}
-    #silsonApp .sl-c.diff{border-left:2px solid var(--hw); font-weight:600;}
+    #silsonApp .sl-c.diff{border-left:2px solid var(--hw);}
     #silsonApp .sl-case{background:var(--sl-surf); border:1px solid var(--sl-line); border-radius:12px; padding:14px 15px; margin-bottom:13px;}
     #silsonApp .sl-case .cap{display:inline-block; background:var(--hw); color:#fff; font-size:12px; font-weight:700; padding:3px 10px; border-radius:7px; margin-bottom:9px;}
     #silsonApp .sl-case h3{font-size:16.5px; font-weight:700; margin:0 0 4px; line-height:1.35;}
@@ -274,19 +274,24 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     #silsonApp .sl-delta{margin-top:11px; font-size:13.5px; font-weight:700; color:var(--hw-dk); text-align:center; background:var(--sl-surf2); border-radius:8px; padding:9px;}
     #silsonApp .sl-note{font-size:11.5px; color:var(--sl-txt3); line-height:1.55; margin-top:16px;}
     /* 변천사 모달 (body 직속, #silsonApp 스코프 밖) */
-    .silson-modal{position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.5); display:flex; align-items:flex-start; justify-content:center; padding:16px; overflow-y:auto;}
-    .silson-modal .sm-inner{background:#fff; border-radius:14px; width:100%; max-width:920px; margin:auto; padding:16px;}
-    .silson-modal .sm-bar{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+    .silson-modal{position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.5); display:flex; align-items:flex-start; justify-content:center; padding:14px; overflow-y:auto;}
+    .silson-modal .sm-inner{background:#fff; border-radius:14px; width:100%; max-width:1200px; margin:auto; padding:16px;}
+    .silson-modal .sm-bar{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
     .silson-modal .sm-bar h3{font-size:17px; font-weight:700; margin:0;}
     .silson-modal .sm-x{width:36px; height:36px; border:none; background:#f1efea; border-radius:8px; font-size:17px; cursor:pointer; color:#333;}
+    .silson-modal .sm-hint{font-size:11.5px; color:#999; margin:0 0 10px;}
     .silson-modal .sm-cap{background:#fff; border:1px solid #e7e4df; border-radius:10px; padding:16px; overflow-x:auto;}
     .silson-modal .sm-title{font-size:18px; font-weight:700; color:#ff7f00; margin-bottom:12px; text-align:center;}
-    .silson-modal table{border-collapse:collapse; width:100%; min-width:760px; font-size:13px;}
-    .silson-modal th, .silson-modal td{border:1px solid #e0ddd6; padding:9px 10px; text-align:center; line-height:1.4;}
-    .silson-modal thead th{background:#ff7f00; color:#fff; font-weight:700; font-size:13.5px;}
-    .silson-modal tbody th{background:#fff7ef; color:#c25e00; font-weight:700; white-space:nowrap;}
+    .silson-modal table{border-collapse:collapse; width:100%; min-width:1080px; font-size:12px;}
+    .silson-modal th, .silson-modal td{border:1px solid #e0ddd6; padding:8px 10px; line-height:1.5; vertical-align:top; text-align:left;}
+    .silson-modal thead th{background:#ff7f00; color:#fff; font-weight:700; text-align:center; vertical-align:middle;}
+    .silson-modal thead th .d{font-size:10.5px; font-weight:500; opacity:.92; display:block;}
+    .silson-modal thead th .n{font-size:14.5px; display:block; margin-top:1px;}
+    .silson-modal thead th .s{font-size:10.5px; font-weight:500; opacity:.92; display:block;}
+    .silson-modal thead th.corner{background:#c25e00;}
+    .silson-modal tbody th{background:#fff7ef; color:#c25e00; font-weight:700; white-space:nowrap; text-align:center; vertical-align:middle;}
     .silson-modal td{color:#333;}
-    .silson-modal .sm-foot{font-size:11.5px; color:#888; margin-top:10px; line-height:1.5;}
+    .silson-modal .sm-foot{font-size:11px; color:#888; margin-top:10px; line-height:1.5;}
     .silson-modal .sm-save{width:100%; height:48px; margin-top:14px; border:none; background:#ff7f00; color:#fff; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer;}
     .silson-modal .sm-save:active{background:#e67100;}
     .container-wide{max-width:1200px}
@@ -2917,48 +2922,100 @@ function goBackFromSilson() {
   navigateToScreen('menu');
 }
 
-/* ===== 실손 세대 비교 모듈 (데이터: 실손 변천사 / 세대별 특징·구조적 한계 / 4·5세대 보장 비교) ===== */
+/* ===== 실손 세대 비교 모듈 (데이터: 한권에 총정리 변경 History / 세대별 특징·한계 / 4·5세대 사례) ===== */
 const SilsonCompare = (function(){
   const GENS = {
-    "1": { name:"1세대", sub:"구(舊)실손", year:"'03~'08",
-      v:{ period:"2003~2008", bg:"100%", bn:"100%",
-          copay:"입원 없음 / 통원 없음~5천원", limit:"5천만원", renew:"3년·5년" },
+    "1": { name:"1세대", cg:"1세대", cy:"~'09", sub:"표준화 이전", period:"~2009.07",
+      feat:["입원 시 자기부담금 없음","해외치료비 보장"],
+      renew:["3년·5년 자동 갱신"],
+      struct:["상해의료비","상해·질병 입/통원"],
+      limit:["입원 최대 1억","통원 최대 50만/30회"],
+      copayG:["없음"],
+      copayN:["없음"],
+      copayCap:["없음"],
+      deduct:["5천/1만"],
       pros:["비급여 포함 거의 모든 의료비 전액 보장","입원·통원 100%, 자기부담 없음 — 가장 넓은 보장"],
       cons:["갱신 시 보험료 인상 상한이 없음","가입 기간이 길수록 월 보험료 부담이 급증"] },
-    "2": { name:"2세대", sub:"표준화실손", year:"'09~'17.3",
-      v:{ period:"2009~2017.03", bg:"90%", bn:"80%",
-          copay:"입원 10% / 통원 1~2만원 공제", limit:"5천만원", renew:"3년·1년" },
-      pros:["표준화 도입으로 보장 구조 안정화","비급여 80% 보장 유지로 실질 보장성 높음"],
-      cons:["의료비 증가에 따른 갱신 보험료 상승 지속","장기 유지 시 1세대와 유사한 보험료 부담 누적"] },
-    "3": { name:"3세대", sub:"착한실손", year:"'17.4~'21.6",
-      v:{ period:"2017.04~2021.06", bg:"90%", bn:"비급여 80% / 3대비급여 70%",
-          copay:"급여 10% / 비급여 20% / 3대 30%", limit:"5천만원", renew:"1년" },
+    "2a": { name:"2세대 1차", cg:"2세대", cy:"1차 '09~'12", sub:"표준화 실손", period:"2009.08~2012.12",
+      feat:["자기부담률 신설","손·생보 판매(표준약관 적용)","해외치료비 면책"],
+      renew:["3년 자동 갱신"],
+      struct:["상해/질병 입/통원","종합 입/통원"],
+      limit:["입원 최대 5천만","통원 최대 30만/180회(건)"],
+      copayG:["표준형 20%","선택형 10%"],
+      copayN:["표준형 20%","선택형 10%"],
+      copayCap:["200만"],
+      deduct:["병원급별 공제(회/건당)","외래: 의원 1만 / 병원 1.5만 / 상급·종합전문 2만","처방조제 0.8만"],
+      pros:["표준화 약관 도입으로 보장 구조 안정화","비급여 80% 보장 유지로 실질 보장성 높음"],
+      cons:["해외치료비 면책으로 전환","의료비 증가에 따른 갱신 보험료 상승 시작"] },
+    "2b": { name:"2세대 2차", cg:"2세대", cy:"2차 '13~'17", sub:"표준화 실손", period:"2013.01~2017.03",
+      feat:["실손 단독상품 판매","자동갱신 → 재가입으로 변경"],
+      renew:["1년 갱신","15년 만기 재가입"],
+      struct:["상해/질병 입/통원"],
+      limit:["입원 최대 5천만","통원 최대 30만/180회(건)"],
+      copayG:["표준형 20%","선택형 10%(~2015.08)","선택형II 20%(2015.09~)"],
+      copayN:["표준형 20%","선택형 10%(~2015.08)","선택형II 20%(2015.09~)"],
+      copayCap:["200만"],
+      deduct:["병원급별 공제(회/건당)","외래: 의원 1만 / 병원 1.5만 / 상급·종합전문 2만","처방조제 0.8만"],
+      pros:["실손 단독상품으로 판매","비급여 80% 보장 유지로 실질 보장성 높음"],
+      cons:["자동갱신 → 재가입(15년 만기)으로 변경","장기 유지 시 보험료 부담 누적"] },
+    "3": { name:"3세대", cg:"3세대", cy:"'17~'21", sub:"착한 실손", period:"2017.04~2021.06",
+      feat:["단독 실손만 가입 가능","3대 비급여를 특약으로 분리"],
+      renew:["1년 갱신","15년 만기 재가입"],
+      struct:["기본: 상해/질병 입/통원","특약(3대 비급여)"],
+      limit:["기본(급여+비급여, 3대 제외): 5천만","특약(3대): 도수 350만/50회, 주사 250만/50회, MRI 300만/제한없음","통원 최대 30만/180회(건)"],
+      copayG:["표준형 20%","선택형II 10%"],
+      copayN:["20% (3대 비급여 30%)"],
+      copayCap:["200만"],
+      deduct:["기본: 외래 1회당 병원급별 공제액·공제기준금액 중 큰 금액","처방조제: 1건당 8천원·공제기준 중 큰 금액","특약(3대): 입/통원 1회당 2만원·의료비 30% 중 큰 금액"],
       pros:["급여·비급여 보장 구조 최초 분리","도수치료·MRI 등 고빈도 비급여에 연간 한도 도입"],
       cons:["한도 소진 이후 자기부담 발생","이전 세대 대비 실질 보장 범위 축소 시작"] },
-    "4": { name:"4세대", sub:"신(新)실손", year:"'21.7~'26.4",
-      v:{ period:"2021.07~2026.04", bg:"80%", bn:"70% (비급여 할인·할증)",
-          copay:"급여 20% / 비급여 30%", limit:"급여 5천만 / 비급여 5천만", renew:"1년" },
+    "4": { name:"4세대", cg:"4세대", cy:"'21~'26", sub:"新실손", period:"2021.07~2026.04",
+      feat:["기본: 상해/질병 입·통원 급여","특약: 상해/질병 입·통원 비급여","특약: 3대 비급여","보험료 차등제 적용(2024년 이후)"],
+      renew:["1년 갱신","5년 만기 재가입"],
+      struct:["기본(급여): 상해/질병 입/통원","특약(비급여): 상해/질병 입/통원","특약(3대 비급여)"],
+      limit:["기본(급여): 5천만(입/통원 합산)","특약(비급여): 5천만(입/통원 합산)","특약(3대): 도수 350만/50회, 주사 250만/50회, MRI 300만/제한없음","통원 회당 20만(급여/비급여 구분, 처방조제비 포함)"],
+      copayG:["20%"],
+      copayN:["30%"],
+      copayCap:["급여 200만","비급여 무한"],
+      deduct:["기본: 1회당 의·병원 1만 / 종합·상급종합 2만·의료비 20% 중 큰 금액","특약(비급여): 1회당 3만·의료비 30% 중 큰 금액","특약(3대): 입/통원 1회당 3만·의료비 30% 중 큰 금액"],
       pros:["급여·비급여 특약 완전 분리","의료 이용 억제를 통한 손해율 관리 목적 할증제도 도입"],
       cons:["이용량이 많을수록 갱신 보험료 할증 심화","‘아파서 쓰면 더 오른다’는 역차별 구조 비판 지속"] },
-    "5": { name:"5세대", sub:"현행 실손", year:"'26.5~",
-      v:{ period:"2026.05~", bg:"입원 80% / 통원 건보 연동",
-          bn:"중증 70% / 비중증 50%", copay:"급여 20% / 중증 30% / 비중증 50%",
-          limit:"중증 5천만 / 비중증 1천만 (입원 회당 300만)", renew:"1년" },
+    "5": { name:"5세대", cg:"5세대", cy:"'26~", sub:"현행 실손", period:"2026.5~",
+      feat:["기본: 상해/질병 입·통원 급여","특약1: 상해/질병 중증 비급여","특약2: 상해/질병 비중증 비급여","건보 본인부담률 기준 적용"],
+      renew:["1년 갱신","5년 만기 재가입"],
+      struct:["기본(급여): 상해/질병 입/통원 급여","특약1: 상해/질병·3대 중증 비급여","특약2: 상해/질병·3대 비중증 비급여"],
+      limit:["기본(급여): 5천만(입/통원 합산)","특약1(중증 비급여): 5천만(입/통원 합산), 통원 회당 20만·연 100회","특약1 비급여: 근골격계·체외충격파 350만/50회, 주사료 250만/50회, 자기공명영상진단 300만","특약2(비중증 비급여): 1천만(입/통원 합산), 통원 일당 20만·연 100일","특약2 비급여: 자기공명영상진단 200만"],
+      copayG:["20%"],
+      copayN:["중증 30%","비중증 50%"],
+      copayCap:["급여 200만","중증 비급여 500만(3대비급여 제외)","비중증 비급여 무한"],
+      deduct:["기본: 병의원 1만 / 종합이상 2만 / 20% / 건보 본인부담률","특약1: 3만 / 30%","특약2: 5만 / 50%"],
       pros:["비급여를 중증·비중증으로 분리 (중증: 산정특례 대상)","급여 통원 본인부담률을 건강보험과 연동"],
-      cons:["비중증 자기부담 50%, 연 보상한도 1,000만원","입원 1회당 300만원 한도 신설 — 다회 입원 시 한도 소진","보험료는 낮아지나 실질 보장 기능은 역대 가장 약한 구조"] }
+      cons:["비중증 자기부담 50%, 연 보상한도 1,000만원으로 축소","비중증 비급여 보장이 대폭 약화","보험료는 낮아지나 실질 보장 기능은 역대 가장 약한 구조"] }
   };
+  const ORDER = ["1","2a","2b","3","4","5"];
+
+  // 인라인 비교(2세대 선택) 표 행
   const ITEMS = [
-    {k:"period", label:"가입 시기"},
-    {k:"bg",     label:"급여 보장"},
-    {k:"bn",     label:"비급여 보장"},
-    {k:"copay",  label:"자기부담금"},
-    {k:"limit",  label:"연간 보상한도"},
-    {k:"renew",  label:"갱신 주기"}
+    {k:"renew",    label:"만기·갱신주기"},
+    {k:"struct",   label:"상품구조"},
+    {k:"limit",    label:"최대보장금액"},
+    {k:"copayG",   label:"입원 자기부담(급여)"},
+    {k:"copayN",   label:"입원 자기부담(비급여)"},
+    {k:"copayCap", label:"입원 자기부담 한도"},
+    {k:"deduct",   label:"통원 공제금액"}
   ];
-  const HIST_COLS = [
-    ["period","가입 시기"], ["bg","급여 보장"], ["bn","비급여 보장"],
-    ["copay","자기부담금"], ["limit","연간 보상한도"], ["renew","갱신 주기"]
+  // 변천사 한 눈에 보기(전 세대) 표 행
+  const HIST_ROWS = [
+    {k:"feat",     label:"주요특징/변경사항"},
+    {k:"renew",    label:"만기·갱신주기"},
+    {k:"struct",   label:"상품구조"},
+    {k:"limit",    label:"최대보장금액"},
+    {k:"copayG",   label:"입원 자기부담(급여)"},
+    {k:"copayN",   label:"입원 자기부담(비급여)"},
+    {k:"copayCap", label:"입원 자기부담 한도"},
+    {k:"deduct",   label:"통원 공제금액"}
   ];
+
   const CASES = [
     { cap:"사례 1", title:"자궁근종 다빈치 로봇수술",
       cond:"40대 여성 · 비급여 수술비 1,000만원",
@@ -2985,19 +3042,26 @@ const SilsonCompare = (function(){
   let state = { tab:"compare", A:"4", B:"5" };
   let rootEl = null;
 
+  function idx(g){ return ORDER.indexOf(g); }
+
+  function cell(v){
+    if(Array.isArray(v)) return v.length===1 ? v[0] : v.map(x=>'• '+x).join('<br>');
+    return v;
+  }
+
   function chipHtml(g, side){
-    const G=GENS[g], A=Number(state.A), n=Number(g);
+    const G=GENS[g], ai=idx(state.A), n=idx(g);
     let dis=false, on='';
-    if(side==='A'){ if(n>=5) dis=true; if(g===state.A) on=' onA'; }
-    else { if(n<=A) dis=true; if(g===state.B) on=' onB'; }
+    if(side==='A'){ if(n>=ORDER.length-1) dis=true; if(g===state.A) on=' onA'; }
+    else { if(n<=ai) dis=true; if(g===state.B) on=' onB'; }
     return '<button class="sl-chip'+on+(dis?' dis':'')+'" data-side="'+side+'" data-g="'+g+'">'
-      +'<span class="cg">'+G.name+'</span><span class="cy">'+G.year+'</span></button>';
+      +'<span class="cg">'+G.cg+'</span><span class="cy">'+G.cy+'</span></button>';
   }
 
   function pick(side, g){
     if(side==='A'){
       state.A=g;
-      if(Number(state.B)<=Number(g)) state.B=String(Number(g)+1);
+      if(idx(state.B)<=idx(g)) state.B=ORDER[idx(g)+1];
     } else {
       state.B=g;
     }
@@ -3016,12 +3080,11 @@ const SilsonCompare = (function(){
   }
 
   function viewCompare(){
-    const gens=["1","2","3","4","5"];
-    const chipsA=gens.map(g=>chipHtml(g,'A')).join('');
-    const chipsB=gens.map(g=>chipHtml(g,'B')).join('');
+    const chipsA=ORDER.map(g=>chipHtml(g,'A')).join('');
+    const chipsB=ORDER.map(g=>chipHtml(g,'B')).join('');
     const A=GENS[state.A], B=GENS[state.B];
     const rows=ITEMS.map(it=>{
-      const va=A.v[it.k], vb=B.v[it.k], diff=(va!==vb);
+      const va=cell(A[it.k]), vb=cell(B[it.k]), diff=(va!==vb);
       return '<div class="sl-tr"><div class="sl-c k">'+it.label+'</div>'
         +'<div class="sl-c">'+va+'</div>'
         +'<div class="sl-c'+(diff?' diff':'')+'">'+vb+'</div></div>';
@@ -3032,9 +3095,9 @@ const SilsonCompare = (function(){
       +'<p class="sl-pick-label">전환·비교 세대</p>'
       +'<div class="sl-chiprow">'+chipsB+'</div>'
       +'<div class="sl-cards">'
-        +'<div class="sl-card"><div class="gn">'+A.name+'</div><div class="gs">'+A.sub+' · '+A.v.period+'</div></div>'
+        +'<div class="sl-card"><div class="gn">'+A.name+'</div><div class="gs">'+A.sub+' · '+A.period+'</div></div>'
         +'<div class="sl-arrow">→</div>'
-        +'<div class="sl-card"><div class="gn">'+B.name+'</div><div class="gs">'+B.sub+' · '+B.v.period+'</div></div>'
+        +'<div class="sl-card"><div class="gn">'+B.name+'</div><div class="gs">'+B.sub+' · '+B.period+'</div></div>'
       +'</div>'
       +'<button class="sl-histbtn" id="slHistBtn">실손 변천사 한 눈에 보기</button>'
       +'<div class="sl-feat">'+featCard(state.A)+featCard(state.B)+'</div>'
@@ -3043,7 +3106,7 @@ const SilsonCompare = (function(){
           +'<div class="sl-c a">'+A.name+'</div><div class="sl-c b">'+B.name+'</div></div>'
         +rows
       +'</div>'
-      +'<p class="sl-note">1~3세대 수치는 세대별 특징 설명을 위한 대표 예시이며, 5세대는 2026.1.15 금융위 입법예고안(감독규정) 기준입니다.</p>';
+      +'<p class="sl-note">1~4세대는 한화손해보험 사내 교육자료(2024) 기준, 5세대는 2026.1.15 금융위 입법예고안(감독규정) 기준입니다.</p>';
   }
 
   function viewCases(){
@@ -3076,10 +3139,16 @@ const SilsonCompare = (function(){
   }
 
   function histTableHtml(){
-    const head='<tr><th>세대</th>'+HIST_COLS.map(c=>'<th>'+c[1]+'</th>').join('')+'</tr>';
-    const body=["1","2","3","4","5"].map(g=>{
+    let head='<tr><th class="corner">구분</th>';
+    ORDER.forEach(g=>{
       const G=GENS[g];
-      return '<tr><th>'+G.name+'</th>'+HIST_COLS.map(c=>'<td>'+G.v[c[0]]+'</td>').join('')+'</tr>';
+      head+='<th><span class="d">'+G.period+'</span><span class="n">'+G.name+'</span><span class="s">'+G.sub+'</span></th>';
+    });
+    head+='</tr>';
+    const body=HIST_ROWS.map(it=>{
+      let r='<tr><th>'+it.label+'</th>';
+      ORDER.forEach(g=>{ r+='<td>'+cell(GENS[g][it.k])+'</td>'; });
+      return r+'</tr>';
     }).join('');
     return '<thead>'+head+'</thead><tbody>'+body+'</tbody>';
   }
@@ -3112,10 +3181,11 @@ const SilsonCompare = (function(){
       +'<div class="sm-inner">'
         +'<div class="sm-bar"><h3>실손 변천사 한 눈에 보기</h3>'
           +'<button class="sm-x" id="slHistX" aria-label="닫기">✕</button></div>'
+        +'<p class="sm-hint">표가 넓어요. 좌우로 밀어 보거나 아래 버튼으로 이미지 저장하세요.</p>'
         +'<div class="sm-cap" id="slHistCap">'
           +'<div class="sm-title">실손의료보험 세대별 변천사</div>'
           +'<table>'+histTableHtml()+'</table>'
-          +'<div class="sm-foot">1~3세대 수치는 세대별 특징 설명을 위한 대표 예시이며, 5세대는 2026.1.15 금융위 입법예고안(감독규정) 기준입니다.</div>'
+          +'<div class="sm-foot">1~4세대는 한화손해보험 사내 교육자료(2024) 기준, 5세대는 2026.1.15 금융위 입법예고안(감독규정) 기준입니다.</div>'
         +'</div>'
         +'<button class="sm-save" id="slHistSave">이미지로 저장</button>'
       +'</div>';
