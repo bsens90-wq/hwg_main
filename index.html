@@ -208,6 +208,55 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
     .hint{color:var(--muted); font-size:13px; margin-top:.25rem}
     .error{color:#d93025; font-size:14px; margin-top:.5rem}
     .container-narrow{max-width:760px}
+    /* ===== 실손 세대 비교 모듈 (scope: #silsonApp) ===== */
+    #silsonApp{
+      --hw:var(--hanwha); --hw-dk:var(--hanwha-dark); --hw-bg:#fff3e8;
+      --sl-txt:#222; --sl-txt2:#6b6b6b; --sl-txt3:#9a9a9a;
+      --sl-line:#e7e4df; --sl-line2:#d8d4ce; --sl-surf:#fff; --sl-surf2:#f7f5f2;
+      color:var(--sl-txt);
+    }
+    #silsonApp button{width:auto; margin:0; font-family:inherit;}
+    #silsonApp .sl-tabs{display:flex; gap:6px; margin-bottom:14px;}
+    #silsonApp .sl-tab{flex:1; height:38px; border:1px solid var(--sl-line2); background:var(--sl-surf); border-radius:9px; font-size:13px; font-weight:600; color:var(--sl-txt2); cursor:pointer;}
+    #silsonApp .sl-tab.on{background:var(--hw); border-color:var(--hw); color:#fff;}
+    #silsonApp .sl-pick-label{font-size:12px; color:var(--sl-txt2); margin:0 0 6px; font-weight:600;}
+    #silsonApp .sl-chiprow{display:flex; gap:5px; margin-bottom:10px;}
+    #silsonApp .sl-chip{flex:1; height:34px; border:1px solid var(--sl-line2); background:var(--sl-surf); border-radius:8px; font-size:13px; font-weight:600; color:var(--sl-txt2); cursor:pointer;}
+    #silsonApp .sl-chip.onA{background:var(--sl-txt); border-color:var(--sl-txt); color:#fff;}
+    #silsonApp .sl-chip.onB{background:var(--hw); border-color:var(--hw); color:#fff;}
+    #silsonApp .sl-cards{display:grid; grid-template-columns:1fr 22px 1fr; gap:5px; align-items:stretch; margin:12px 0;}
+    #silsonApp .sl-card{background:var(--sl-surf); border:1px solid var(--sl-line); border-radius:9px; padding:10px;}
+    #silsonApp .sl-card .gn{font-size:14px; font-weight:700;}
+    #silsonApp .sl-card .gs{font-size:11px; color:var(--sl-txt2); margin-top:2px; line-height:1.4;}
+    #silsonApp .sl-arrow{display:flex; align-items:center; justify-content:center; color:var(--hw); font-size:16px; font-weight:700;}
+    #silsonApp .sl-ins{background:var(--hw-bg); border-left:3px solid var(--hw); border-radius:0 8px 8px 0; padding:10px 12px; margin-bottom:12px;}
+    #silsonApp .sl-ins .t{font-size:12px; font-weight:700; color:var(--hw-dk); margin-bottom:5px;}
+    #silsonApp .sl-ins .d{font-size:12px; color:var(--sl-txt2); line-height:1.6;}
+    #silsonApp .sl-tbl{border:1px solid var(--sl-line); border-radius:9px; overflow:hidden;}
+    #silsonApp .sl-tr{display:grid; grid-template-columns:70px 1fr 1fr;}
+    #silsonApp .sl-tr+.sl-tr{border-top:1px solid var(--sl-line);}
+    #silsonApp .sl-th{background:var(--sl-surf2); border-bottom:1px solid var(--sl-line);}
+    #silsonApp .sl-c{padding:9px 8px; font-size:11.5px; line-height:1.45; border-left:1px solid var(--sl-line);}
+    #silsonApp .sl-c.k{background:var(--sl-surf2); border-left:none; color:var(--sl-txt2); font-weight:600; display:flex; align-items:center; font-size:11px;}
+    #silsonApp .sl-th .sl-c{font-weight:700; font-size:12px; padding:8px;}
+    #silsonApp .sl-th .a{color:var(--sl-txt);}
+    #silsonApp .sl-th .b{color:var(--hw);}
+    #silsonApp .sl-c.diff{border-left:2px solid var(--hw); font-weight:600;}
+    #silsonApp .sl-case{background:var(--sl-surf); border:1px solid var(--sl-line); border-radius:11px; padding:13px 14px; margin-bottom:12px;}
+    #silsonApp .sl-case .cap{display:inline-block; background:var(--hw); color:#fff; font-size:11px; font-weight:700; padding:2px 9px; border-radius:6px; margin-bottom:8px;}
+    #silsonApp .sl-case h3{font-size:14px; font-weight:700; margin:0 0 3px; line-height:1.35;}
+    #silsonApp .sl-case .cond{font-size:11px; color:var(--sl-txt2); margin:0 0 11px; line-height:1.5;}
+    #silsonApp .sl-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+    #silsonApp .sl-side{border:1px solid var(--sl-line); border-radius:9px; padding:10px;}
+    #silsonApp .sl-side.g5{border-color:var(--hw); background:var(--hw-bg);}
+    #silsonApp .sl-side .lab{font-size:11px; font-weight:700; margin-bottom:7px;}
+    #silsonApp .sl-side.g4 .lab{color:var(--sl-txt2);}
+    #silsonApp .sl-side.g5 .lab{color:var(--hw-dk);}
+    #silsonApp .sl-kv{display:flex; justify-content:space-between; gap:6px; font-size:11.5px; padding:3px 0;}
+    #silsonApp .sl-kv .vk{color:var(--sl-txt2);}
+    #silsonApp .sl-kv .vv{font-weight:600; text-align:right;}
+    #silsonApp .sl-delta{margin-top:10px; font-size:12px; font-weight:700; color:var(--hw-dk); text-align:center; background:var(--sl-surf2); border-radius:7px; padding:7px;}
+    #silsonApp .sl-note{font-size:10px; color:var(--sl-txt3); line-height:1.5; margin-top:14px;}
     .container-wide{max-width:1200px}
     .results{margin-top:1rem}
     .result-card{
@@ -1292,6 +1341,11 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
         <span style="font-size:18px; display:block; margin-bottom:4px;">콜센터, 보험금 청구 팩스</span>
       </button>
 
+      <button id="silsonMenuBtn" style="margin-bottom:1rem;">
+        <span style="font-size:18px; display:block; margin-bottom:4px;">실손 세대 비교</span>
+        <span style="font-size:14px; opacity:0.8;">(1~5세대 비교 · 4·5세대 사례)</span>
+      </button>
+
       <button id="limitMenuBtn" style="margin-bottom:1rem;">
         <span style="font-size:18px; display:block; margin-bottom:4px;">상품별/플랜별 인수한도_1013</span>
       </button>
@@ -1373,6 +1427,15 @@ button.user-menu:hover{background:var(--hanwha-dark) !important;}
       </div>
       
       <div class="meta" style="margin-top:1rem;">Copyright 2025 하세봉 all rights reserved.</div>
+    </div>
+  </section>
+
+  <!-- 실손 세대 비교 화면 -->
+  <section id="silsonScreen" class="screen" style="display:none;">
+    <div class="app-title">실손 세대 비교</div>
+    <div class="card container-narrow">
+      <div id="silsonApp"></div>
+      <button id="silsonBackBtn" class="secondary" style="margin-top:12px;">뒤로가기</button>
     </div>
   </section>
 
@@ -2341,7 +2404,7 @@ async function checkAutoLogin() {
     }
   } else {
     const hash = window.location.hash.substring(1);
-    if (hash && ['menu', 'guide', 'search', 'contact', 'limit', 'video'].includes(hash)) {
+    if (hash && ['menu', 'guide', 'search', 'contact', 'silson', 'limit', 'video'].includes(hash)) {
       window.location.hash = '';
     }
     navigateToScreen('login', false);
@@ -2450,6 +2513,7 @@ function hideAllScreens() {
   document.getElementById("guideScreen").style.display = "none";
   document.getElementById("searchScreen").style.display = "none";
   document.getElementById("contactScreen").style.display = "none";
+  document.getElementById("silsonScreen").style.display = "none";
   document.getElementById("limitScreen").style.display = "none";
   document.getElementById("logScreen").style.display = "none";
   document.getElementById("userManageScreen").style.display = "none";
@@ -2533,6 +2597,10 @@ case 'menu':
       document.getElementById("contactScreen").style.display = "flex";
       showInsuranceContactsInContactScreen();
       break;
+    case 'silson':
+      document.getElementById("silsonScreen").style.display = "flex";
+      SilsonCompare.mount('#silsonApp');
+      break;
     case 'limit':
       document.getElementById("limitScreen").style.display = "flex";
       initializeLimitScreen();
@@ -2577,6 +2645,7 @@ const MENU_CONFIG_ITEMS = [
   { key: 'surgery',    id: 'surgeryMenuBtn',    label: '수술비 검색하기' },
   { key: 'analysis',   id: 'analysisMenuBtn',   label: '나만의 보장분석 만들기' },
   { key: 'contact',    id: 'contactMenuBtn',    label: '콜센터, 보험금 청구 팩스' },
+  { key: 'silson',     id: 'silsonMenuBtn',     label: '실손 세대 비교' },
   { key: 'naverCheck', id: 'naverCheckMenuBtn', label: '내 사업 3분 셀프체크' },
   { key: 'treasure',   id: 'treasureMenuBtn',   label: '아침 보물찾기' }
 ];
@@ -2804,6 +2873,165 @@ async function showVideoScreen() {
   LogManager.logUserAction(currentUser, 'menu_click', '영상다시보기');
   navigateToScreen('video');
 }
+
+async function showSilsonScreen() {
+  if (!(await checkUserStatus())) return;
+
+  LogManager.logUserAction(currentUser, 'menu_click', '실손세대비교');
+  navigateToScreen('silson');
+}
+
+function goBackFromSilson() {
+  navigateToScreen('menu');
+}
+
+/* ===== 실손 세대 비교 모듈 (데이터: 2026.1.15 금융위 입법예고안 기준) ===== */
+const SilsonCompare = (function(){
+  const GENS = {
+    "1": { name:"1세대", sub:"구(舊)실손 · ~2009.07",
+      v:{ period:"2003~2008", bg:"100%", bn:"100%",
+          copay:"입원 없음 / 통원 없음~5천원", limit:"5천만원", renew:"3년·5년",
+          feat:"비급여 포함 거의 전액 보장", lim:"갱신 보험료 인상 상한 없음" }},
+    "2": { name:"2세대", sub:"표준화실손",
+      v:{ period:"2009~2017.03", bg:"90%", bn:"80%",
+          copay:"입원 10% / 통원 1~2만원 공제", limit:"5천만원", renew:"3년·1년",
+          feat:"표준화로 보장구조 안정화", lim:"갱신 보험료 상승 지속" }},
+    "3": { name:"3세대", sub:"착한실손",
+      v:{ period:"2017.04~2021.06", bg:"90%", bn:"비급여 80% / 3대비급여 70%",
+          copay:"급여 10% / 비급여 20% / 3대 30%", limit:"5천만원", renew:"1년",
+          feat:"급여·비급여 보장 최초 분리", lim:"한도 소진 후 자기부담 발생" }},
+    "4": { name:"4세대", sub:"신(新)실손 · 현행",
+      v:{ period:"2021.07~2026.03", bg:"80%", bn:"70% (비급여 할인·할증)",
+          copay:"급여 20% / 비급여 30%", limit:"급여 5천만 / 비급여 5천만", renew:"1년",
+          feat:"급여·비급여 특약 완전 분리", lim:"이용량 많을수록 갱신 할증" }},
+    "5": { name:"5세대", sub:"입법예고안 · 2026.04~",
+      v:{ period:"2026.04~ (시행예정)", bg:"입원 80% / 통원 건보 연동",
+          bn:"중증 70% / 비중증 50%", copay:"급여 20% / 중증 30% / 비중증 50%",
+          limit:"중증 5천만 / 비중증 1천만 (입원 회당 300만)", renew:"1년",
+          feat:"비급여 중증·비중증 분리", lim:"실질 보장 최약 · 보험료 약 30%↓" }}
+  };
+  const ITEMS = [
+    {k:"period", label:"가입 시기"},
+    {k:"bg",     label:"급여 보장"},
+    {k:"bn",     label:"비급여 보장"},
+    {k:"copay",  label:"자기부담금"},
+    {k:"limit",  label:"연간 보상한도"},
+    {k:"renew",  label:"갱신 주기"},
+    {k:"feat",   label:"보장 구조 특징"},
+    {k:"lim",    label:"가입자 한계"}
+  ];
+  const CASES = [
+    { cap:"사례 1", title:"자궁근종 다빈치 로봇수술",
+      cond:"40대 여성 · 비급여 수술비 1,000만원",
+      g4:[["자기부담률","30%"],["지급 보험금","700만원"],["본인 부담","300만원"]],
+      g5:[["자기부담률","50%"],["지급 보험금","300만원 (회당 한도)"],["본인 부담","700만원"]],
+      delta:"5세대 전환 시 본인부담 +400만원" },
+    { cap:"사례 2", title:"담낭절제 로봇수술 + 상급종합 1인실",
+      cond:"50대 남성 · 로봇수술 700 + 1인실 175 + 주사제 25 = 비급여 900만원",
+      g4:[["자기부담률","30%"],["지급 보험금","630만원"],["본인 부담","270만원"]],
+      g5:[["자기부담률","50%"],["지급 보험금","300만원 (회당 한도)"],["본인 부담","600만원"]],
+      delta:"5세대 전환 시 본인부담 +330만원" },
+    { cap:"사례 3", title:"야간 비응급 응급실 이용",
+      cond:"급성장염 · 급여 15만 + 비급여 8만 (총 23만원)",
+      g4:[["급여 본인부담","3만원"],["비급여 본인부담","3만원"],["총 본인부담","6만원"]],
+      g5:[["급여 본인부담","13.5만원 (건보 연동)"],["비급여 본인부담","5만원"],["총 본인부담","18.5만원"]],
+      delta:"본인부담 약 3.1배 (6만 → 18.5만원)" },
+    { cap:"사례 4", title:"미등재 신의료기술 치료",
+      cond:"난치성 관절질환 줄기세포 치료 · 비급여 900만원",
+      g4:[["보상 여부","치료목적 증빙 시 보상"],["지급 보험금","약 630만원 (70%)"]],
+      g5:[["보상 여부","면책 예정 (보상 불가)"],["지급 보험금","0원"]],
+      delta:"5세대 전환 시 보상 약 630만원 → 0원" }
+  ];
+
+  let state = { tab:"compare", A:"4", B:"5" };
+  let rootEl = null;
+
+  function viewCompare(){
+    const gens = ["1","2","3","4","5"];
+    const chipsA = gens.map(g => '<button class="sl-chip'+(state.A===g?' onA':'')+'" data-side="A" data-g="'+g+'">'+g+'</button>').join("");
+    const chipsB = gens.map(g => '<button class="sl-chip'+(state.B===g?' onB':'')+'" data-side="B" data-g="'+g+'">'+g+'</button>').join("");
+    const A=GENS[state.A], B=GENS[state.B], same=(state.A===state.B);
+    const changed = ITEMS.filter(it => A.v[it.k]!==B.v[it.k]);
+    const ins = same
+      ? '<div class="d">같은 세대입니다. 다른 세대를 선택해 비교하세요.</div>'
+      : '<div class="t">'+A.name+' → '+B.name+' 전환 시 달라지는 항목</div>'
+        +'<div class="d">'+changed.map(c=>c.label).join(" · ")+'</div>';
+    const rows = ITEMS.map(it => {
+      const va=A.v[it.k], vb=B.v[it.k], diff=(va!==vb);
+      return '<div class="sl-tr">'
+        +'<div class="sl-c k">'+it.label+'</div>'
+        +'<div class="sl-c">'+va+'</div>'
+        +'<div class="sl-c'+(diff?' diff':'')+'">'+vb+'</div>'
+        +'</div>';
+    }).join("");
+    return ''
+      +'<p class="sl-pick-label">현재 가입 세대</p>'
+      +'<div class="sl-chiprow">'+chipsA+'</div>'
+      +'<p class="sl-pick-label">전환·비교 세대</p>'
+      +'<div class="sl-chiprow">'+chipsB+'</div>'
+      +'<div class="sl-cards">'
+        +'<div class="sl-card"><div class="gn">'+A.name+'</div><div class="gs">'+A.sub+'</div></div>'
+        +'<div class="sl-arrow">→</div>'
+        +'<div class="sl-card"><div class="gn">'+B.name+'</div><div class="gs">'+B.sub+'</div></div>'
+      +'</div>'
+      +'<div class="sl-ins">'+ins+'</div>'
+      +'<div class="sl-tbl">'
+        +'<div class="sl-tr sl-th">'
+          +'<div class="sl-c k">항목</div>'
+          +'<div class="sl-c a">'+A.name+'</div>'
+          +'<div class="sl-c b">'+B.name+'</div>'
+        +'</div>'+rows
+      +'</div>'
+      +'<p class="sl-note">1~3세대 수치는 세대별 특징 설명을 위한 대표 예시이며, 5세대는 2026.1.15 금융위 입법예고안 기준으로 시행 전 변경될 수 있습니다.</p>';
+  }
+
+  function viewCases(){
+    const cards = CASES.map(c => {
+      const g4 = c.g4.map(r=>'<div class="sl-kv"><span class="vk">'+r[0]+'</span><span class="vv">'+r[1]+'</span></div>').join("");
+      const g5 = c.g5.map(r=>'<div class="sl-kv"><span class="vk">'+r[0]+'</span><span class="vv">'+r[1]+'</span></div>').join("");
+      return '<div class="sl-case">'
+        +'<span class="cap">'+c.cap+'</span>'
+        +'<h3>'+c.title+'</h3>'
+        +'<p class="cond">'+c.cond+'</p>'
+        +'<div class="sl-grid">'
+          +'<div class="sl-side g4"><div class="lab">4세대 (현행)</div>'+g4+'</div>'
+          +'<div class="sl-side g5"><div class="lab">5세대 (예정)</div>'+g5+'</div>'
+        +'</div>'
+        +'<div class="sl-delta">'+c.delta+'</div>'
+        +'</div>';
+    }).join("");
+    return cards
+      +'<p class="sl-note">보장 구조의 이해를 돕기 위한 가정 예시입니다. 급여 본인부담률·면책 범위 등 세부 내용은 시행세칙 확정 과정에서 변경될 수 있습니다.</p>';
+  }
+
+  function render(){
+    if(!rootEl) return;
+    rootEl.innerHTML = ''
+      +'<div class="sl-tabs">'
+        +'<button class="sl-tab'+(state.tab==="compare"?" on":"")+'" data-tab="compare">세대 비교</button>'
+        +'<button class="sl-tab'+(state.tab==="cases"?" on":"")+'" data-tab="cases">4·5세대 사례</button>'
+      +'</div>'
+      +'<div class="sl-body">'+(state.tab==="compare"?viewCompare():viewCases())+'</div>';
+  }
+
+  function onClick(e){
+    const tab = e.target.closest('.sl-tab');
+    if(tab){ state.tab = tab.dataset.tab; render(); return; }
+    const chip = e.target.closest('.sl-chip');
+    if(chip){ state[chip.dataset.side] = chip.dataset.g; render(); return; }
+  }
+
+  function mount(el){
+    rootEl = (typeof el === "string") ? document.querySelector(el) : el;
+    if(!rootEl){ console.warn("SilsonCompare: 컨테이너를 찾을 수 없습니다."); return; }
+    rootEl.removeEventListener('click', onClick);
+    rootEl.addEventListener('click', onClick);
+    render();
+  }
+
+  return { mount: mount, GENS: GENS, CASES: CASES };
+})();
+
 
 function showLogScreen() {
   LogManager.logUserAction(currentUser, 'menu_click', '로그조회');
@@ -5574,6 +5802,8 @@ document.getElementById('couponBoxModal').addEventListener('click', function(e) 
   document.getElementById('diseaseMenuBtn').addEventListener('click', showDiseaseScreen);
   document.getElementById('contactMenuBtn').addEventListener('click', showContactScreen);
   document.getElementById('limitMenuBtn').addEventListener('click', showLimitScreen);
+  document.getElementById('silsonMenuBtn').addEventListener('click', showSilsonScreen);
+  document.getElementById('silsonBackBtn').addEventListener('click', goBackFromSilson);
   document.getElementById('videoMenuBtn').addEventListener('click', showVideoScreen);
   document.getElementById('logMenuBtn').addEventListener('click', showLogScreen);
 document.getElementById('userManageBtn').addEventListener('click', showUserManageScreen);
